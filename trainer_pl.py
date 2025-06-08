@@ -264,14 +264,23 @@ class ActionMseLossForDiffusion(pl.Callback):
 def train(cfg: AppConfig):
 
     # 1. Define a unique name and directory for this specific run
-    model_name = 'my_model'  # Or get from cfg
-    current_time = datetime.now().strftime('%b%d_%H-%M-%S')
-    run_name = f"{current_time}_{model_name}"
-    output_dir = f"data/outputs/{run_name}"
+    MODEL_NAME = "default"
+    output_dir = f"data/outputs/"
+    
+    now = datetime.now()
+    date_str = now.strftime("%Y.%m.%d") # 年-月-日
+    time_str = now.strftime("%H.%M.%S") # 时-分-秒
+    run_name=f"{time_str}_{MODEL_NAME}" 
+    save_path=os.path.join(date_str,run_name)
+    
 
+
+    this_run_dir = os.path.join(output_dir, save_path)
+    os.makedirs(os.path.join(this_run_dir,'wandb'), exist_ok=True)  # Ensure the output directory exists
+    
     # 2. Configure ModelCheckpoint to save in that specific directory
     checkpoint_callback = ModelCheckpoint(
-        dirpath=output_dir,  # <-- Tell it exactly where to save
+        dirpath=this_run_dir,  # <-- Tell it exactly where to save
         filename='checkpoint_{epoch:03d}',  # Filename can be simpler now
         every_n_epochs=cfg.training.checkpoint_every,
         save_top_k=-1,
@@ -282,11 +291,11 @@ def train(cfg: AppConfig):
 
     # 3. Configure WandbLogger to use the same directory
     wandb_logger = WandbLogger(
-        save_dir=output_dir,  # <-- Use save_dir to point to the same path
+        save_dir=this_run_dir,  # <-- Use save_dir to point to the same path
         config=OmegaConf.to_container(cfg, resolve=True),
         **cfg.logging,
     )
-
+    
     trainer = pl.Trainer(callbacks=[checkpoint_callback,
                                     # RolloutCallback(cfg),
                                     ActionMseLossForDiffusion(cfg),

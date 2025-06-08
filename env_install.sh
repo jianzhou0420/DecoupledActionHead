@@ -44,4 +44,6 @@ echo "mimicgen installed from:"
 python -c "import mimicgen; print(mimicgen.__file__)"
 cd ../..
 
+pip install -e .
+
 echo "--- ✅ All packages installed successfully! ---"

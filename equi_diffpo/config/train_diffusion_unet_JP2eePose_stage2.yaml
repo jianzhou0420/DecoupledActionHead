@@ -19,7 +19,7 @@ past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
-ckpt_path: /media/jian/ssd4t/DP/first/data/outputs/Jun06_22-09-56_my_model/checkpoint_epoch=033.ckpt
+ckpt_path: /media/jian/ssd4t/DP/first/data/outputs/Jun06_22-09-56_my_model/checkpoint_epoch=049.ckpt
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
 

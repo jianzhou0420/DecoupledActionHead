@@ -239,8 +239,8 @@ class ActionMseLossForDiffusion(pl.Callback):
         """
         This hook is called after every validation epoch.
         """
-        # if pl_module.global_step <= 0:
-        #     return
+        if pl_module.global_step <= 0:
+            return
         train_sampling_batch = pl_module.train_sampling_batch
 
         batch = dict_apply(train_sampling_batch, lambda x: x.to(pl_module.device, non_blocking=True))

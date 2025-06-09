@@ -386,9 +386,11 @@ class DatasetConvertor:
 
 
 if __name__ == '__main__':
+    task_name = 'coffee_d2'
     convertor = DatasetConvertor()
-    convertor.traj_eePose('data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
-    # convertor.traj_JP('data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
-    # convertor.traj_JP_eeloss('data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
-    # convertor.pure_lowdim_JP('data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
-    # convertor.JP2eePose_debug('data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
+    # convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    # convertor.traj_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    # convertor.traj_JP_eeloss(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    # convertor.pure_lowdim_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    # convertor.JP2eePose_debug(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    convertor.JP2eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')

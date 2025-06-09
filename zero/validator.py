@@ -231,5 +231,5 @@ class Validator:
 
 if __name__ == '__main__':
     validator = Validator()
-    test = validator.validate_dataset("data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5")
+    test = validator.validate_dataset("data/robomimic/datasets/coffee_d2/coffee_d2_abs.hdf5")
     test.close()

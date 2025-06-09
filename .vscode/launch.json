@@ -98,15 +98,15 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl debug",
+            "name": "Train pl_JP2ee_stage1",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl.py",
+            "program": "${workspaceFolder}/trainer_pl_stage1.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=train_diffusion_unet",
                 "task_name=stack_d1",
-                "n_demo=10",
+                "n_demo=1000",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",
@@ -119,36 +119,15 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl_stage1 debug",
+            "name": "Train pl_JP2ee_stage1 data_debug",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_stage1.py",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=train_diffusion_unet",
-                "task_name=stack_d1",
-                "n_demo=10",
-                "task.env_runner.n_envs=2",
-                "task.env_runner.n_train=1",
-                "task.env_runner.n_test=1",
-                "logging.project=ProjectFirst_Debug",
-                "logging.name=Train_DP_Unet",
-                "logging.mode=online",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
-            ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
-        },
-        {
-            "name": "Train pl_JP2ee debug",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl.py",
-            "console": "integratedTerminal",
-            "args": [
                 "--config-name=train_diffusion_unet_JP2eePose",
                 "task_name=stack_d1",
-                "n_demo=10",
+                "n_demo=1000",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",
@@ -162,7 +141,7 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl_JP2ee stage2 debug",
+            "name": "Train pl_JP2ee_stage2",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_stage2.py",
@@ -170,7 +149,7 @@
             "args": [
                 "--config-name=train_diffusion_unet_JP2eePose_stage2",
                 "task_name=stack_d1",
-                "n_demo=10",
+                "n_demo=1000",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",

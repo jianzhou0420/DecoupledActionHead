@@ -14,3 +14,5 @@ python train.py --config-name=train_diffusion_unet_JP task_name=stack_d1 n_demo=
 
 # debug args
 logging.mode=offline task.env_runner.n_train=1 task.env_runner.n_test=1 task.env_runner.n_envs=2
+
+python equi_diffpo/scripts/robomimic_dataset_conversion.py -i data/robomimic/datasets/coffee_d2/coffee_d2.hdf5 -o data/robomimic/datasets/coffee_d2/coffee_d2_abs.hdf5 -n 12

@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - task: mimicgen_abs_JP2eePose
+  - task: mimicgen_abs_JP2eePose_stage1
 
 name: diff_c
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
@@ -8,7 +8,7 @@ _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffu
 shape_meta: ${task.shape_meta}
 exp_name: "default"
 
-task_name: stack_d1
+task_name: null
 n_demo: 200
 horizon: 16
 n_obs_steps: 16

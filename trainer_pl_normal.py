@@ -217,8 +217,8 @@ class RolloutCallback(pl.Callback):
         """
         This hook is called after every validation epoch.
         """
-
-        # Ensure we only run this every N epochs
+        if pl_module.global_step <= 0:
+            return
         if (trainer.current_epoch) + 1 % self.rollout_every_n_epochs != 0:
             return
         runner_log = self.env_runner.run(pl_module.policy_ema)
@@ -266,18 +266,16 @@ def train(cfg: AppConfig):
     # 1. Define a unique name and directory for this specific run
     MODEL_NAME = "default"
     output_dir = f"data/outputs/"
-    
-    now = datetime.now()
-    date_str = now.strftime("%Y.%m.%d") # 年-月-日
-    time_str = now.strftime("%H.%M.%S") # 时-分-秒
-    run_name=f"{time_str}_{MODEL_NAME}" 
-    save_path=os.path.join(date_str,run_name)
-    
 
+    now = datetime.now()
+    date_str = now.strftime("%Y.%m.%d")  # 年-月-日
+    time_str = now.strftime("%H.%M.%S")  # 时-分-秒
+    run_name = f"{time_str}_{MODEL_NAME}"
+    save_path = os.path.join(date_str, run_name)
 
     this_run_dir = os.path.join(output_dir, save_path)
-    os.makedirs(os.path.join(this_run_dir,'wandb'), exist_ok=True)  # Ensure the output directory exists
-    
+    os.makedirs(os.path.join(this_run_dir, 'wandb'), exist_ok=True)  # Ensure the output directory exists
+
     # 2. Configure ModelCheckpoint to save in that specific directory
     checkpoint_callback = ModelCheckpoint(
         dirpath=this_run_dir,  # <-- Tell it exactly where to save
@@ -295,7 +293,7 @@ def train(cfg: AppConfig):
         config=OmegaConf.to_container(cfg, resolve=True),
         **cfg.logging,
     )
-    
+
     trainer = pl.Trainer(callbacks=[checkpoint_callback,
                                     # RolloutCallback(cfg),
                                     ActionMseLossForDiffusion(cfg),

@@ -222,4 +222,3 @@ def validate_JP_x0loss(path='data/robomimic/datasets/stack_d1/stack_d1_abs_JP_x0
 if __name__ == '__main__':
     # show_eePose_action_with_obs('/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_voxel_abs_test.hdf5')
     validate_JP_actions('/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5')
-    pass

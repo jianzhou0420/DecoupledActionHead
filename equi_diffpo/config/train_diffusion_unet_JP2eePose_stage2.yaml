@@ -6,9 +6,8 @@ name: diff_c
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
-exp_name: "default"
 
-task_name: stack_d1
+task_name: null
 n_demo: 200
 horizon: 16
 n_obs_steps: 2
@@ -19,7 +18,11 @@ past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
-ckpt_path: /media/jian/ssd4t/DP/first/data/outputs/Jun06_22-09-56_my_model/checkpoint_epoch=049.ckpt
+
+ckpt_path: null
+run_name: pretrain_JPee_stage2_${task_name}_${n_demo}
+run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
+
 
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
@@ -91,7 +94,7 @@ training:
   resume: False
   # optimization
   lr_scheduler: cosine
-  lr_warmup_steps: 0
+  lr_warmup_steps: 500
   num_epochs: ${eval:'50000 / ${n_demo}'}
   gradient_accumulate_every: 1
   # EMA destroys performance when used with BatchNorm
@@ -99,8 +102,8 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: 1
-  checkpoint_every: 1
+  rollout_every: ${eval:'50000 / ${n_demo} /50'}
+  checkpoint_every: ${eval:'50000 / ${n_demo} /50'}
   val_every: 1
   sample_every: 5
   # steps per epoch
@@ -113,8 +116,8 @@ logging:
   project: pretrain_from_JPee_pair
   resume: False
   mode: online
-  name: pretrain_JPee_stage2
-  tags: ["${name}", "${task_name}", "${exp_name}"]
+  name: ${run_name}
+  tags: ["${name}", "${task_name}","stage1"]
   id: null
   group: null
 
@@ -135,7 +138,7 @@ hydra:
   job:
     override_dirname: ${name}
   run:
-    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+    dir: ${run_dir}
   sweep:
-    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+    dir: ${run_dir}
     subdir: ${hydra.job.num}

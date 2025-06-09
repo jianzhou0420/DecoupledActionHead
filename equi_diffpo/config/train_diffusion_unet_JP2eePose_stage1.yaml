@@ -6,7 +6,6 @@ name: diff_c
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
-exp_name: "default"
 
 task_name: null
 n_demo: 200
@@ -19,6 +18,9 @@ past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_JP2eePose.hdf5
+run_name: pretrain_JPee_stage1_${task_name}_${n_demo}
+run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
+
 
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
@@ -112,29 +114,20 @@ logging:
   project: pretrain_from_JPee_pair
   resume: False
   mode: online
-  name: pretrain_JPee_stage1_${task_name}_${n_demo}
-  tags: ["${name}", "${task_name}", "${exp_name}"]
+  name: ${run_name}
+  tags: ["${name}", "${task_name}","stage1"]
   id: null
   group: null
 
-checkpoint:
-  topk:
-    monitor_key: test_mean_score
-    mode: max
-    k: 5
-    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
-  save_last_ckpt: True
-  save_last_snapshot: False
-
-multi_run:
-  run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
-  wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
+# multi_run:
+#   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+#   wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
 
 hydra:
   job:
     override_dirname: ${name}
   run:
-    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+    dir: ${run_dir}
   sweep:
-    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+    dir: ${run_dir}
     subdir: ${hydra.job.num}

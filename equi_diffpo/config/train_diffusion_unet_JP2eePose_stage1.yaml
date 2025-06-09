@@ -112,7 +112,7 @@ logging:
   project: pretrain_from_JPee_pair
   resume: False
   mode: online
-  name: pretrain_JPee_stage1
+  name: pretrain_JPee_stage1_${task_name}_${n_demo}
   tags: ["${name}", "${task_name}", "${exp_name}"]
   id: null
   group: null

@@ -1,4 +1,4 @@
 from zero.z_utils.h5_utils import HDF5Inspector
 
 
-HDF5Inspector.inspect_hdf5('/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_abs.hdf5')
+HDF5Inspector.inspect_hdf5('/media/jian/ssd4t/DP/first/data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5')

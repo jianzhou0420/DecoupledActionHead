@@ -16,6 +16,8 @@ from codebase.z_utils.Rotation import PosQuat2HT, HT2PosAxis, PosEuler2HT, inv, 
 from termcolor import cprint
 import json
 from tqdm import tqdm
+import os
+from natsort import natsorted
 
 
 class HDF5Inspector:
@@ -317,6 +319,48 @@ class DatasetConvertor:
                     del demo_data['obs'][obs_key]
                 demo_data['obs'].create_dataset('JPOpen', data=arr_JPOpen)
 
+    def put_together_ABC(self, A_path: str, B_path: str, C_path: str):
+
+        A_name = os.path.basename(A_path).split('_abs')[0]
+        B_name = os.path.basename(B_path).split('_abs')[0]
+        C_name = os.path.basename(C_path).split('_abs')[0]
+
+        ABC_path = os.path.join("/media/jian/ssd4t/DP/first/data/robomimic/datasets/ABC", f"{A_name}_{B_name}_{C_name}_abs_JP2eePose.hdf5")
+        # get all the demo keys from A, B, C
+        with h5py.File(A_path, 'r') as f_A, h5py.File(B_path, 'r') as f_B, h5py.File(C_path, 'r') as f_C, h5py.File(ABC_path, 'w') as f_ABC:
+            keys_A = natsorted(list(f_A['data'].keys()))
+            keys_B = natsorted(list(f_B['data'].keys()))
+            keys_C = natsorted(list(f_C['data'].keys()))
+            f_ABC.create_group('data')
+            demo_list = [keys_A, keys_B, keys_C]
+            print(len(demo_list))
+
+            available_choices = np.arange(len(keys_A) + len(keys_B) + len(keys_C))
+            new_order = np.random.permutation(available_choices)
+            print(f"New order of keys: {new_order}")
+            print(f"Total number of demos: {len(new_order)}")
+            x = new_order // 1000
+            y = new_order % 1000
+
+            for i in tqdm(range(len(new_order))):
+                this_x = x[i]
+                this_y = y[i]
+                this_demo = demo_list[this_x][this_y]
+
+                # copy the group from A, B, C to ABC
+                if this_x == 0:
+                    src_file = f_A
+                elif this_x == 1:
+                    src_file = f_B
+                else:
+                    src_file = f_C
+                src_group = src_file['data'][this_demo]
+                demo_name = f"demo_{i}"
+
+                dst_group = f_ABC['data']
+                src_file.copy(src_group, dst_group, name=demo_name)
+
+        pass
     ################
     # private method
     ################
@@ -386,11 +430,20 @@ class DatasetConvertor:
 
 
 if __name__ == '__main__':
-    task_name = 'coffee_d2'
+    A = "stack_d1"
+    B = "coffee_d2"
+    C = "three_piece_assembly_d2"
+
     convertor = DatasetConvertor()
     # convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.traj_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.traj_JP_eeloss(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.pure_lowdim_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.JP2eePose_debug(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    convertor.JP2eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    # convertor.JP2eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    convertor.put_together_ABC(
+        f'data/robomimic/datasets/{A}/{A}_abs_JP2eePose.hdf5',
+        f'data/robomimic/datasets/{B}/{B}_abs_JP2eePose.hdf5',
+        f'data/robomimic/datasets/{C}/{C}_abs_JP2eePose.hdf5'
+
+    )

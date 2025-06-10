@@ -357,26 +357,20 @@ class ActionMseLossForDiffusion(pl.Callback):
 def train(cfg: AppConfig):
 
     # 1. Define a unique name and directory for this specific run
-    MODEL_NAME = "default"
-    output_dir = f"data/outputs/"
+    this_run_dir = cfg.run_dir
+    run_name = cfg.run_name
 
-    now = datetime.now()
-    date_str = now.strftime("%Y.%m.%d")  # 年-月-日
-    time_str = now.strftime("%H.%M.%S")  # 时-分-秒
-    run_name = f"{time_str}_{MODEL_NAME}"
-    save_path = os.path.join(date_str, run_name)
-
-    this_run_dir = os.path.join(output_dir, save_path)
     os.makedirs(os.path.join(this_run_dir, 'wandb'), exist_ok=True)  # Ensure the output directory exists
 
+    ckpt_path = os.path.join(this_run_dir, 'checkpoints')
     # 2. Configure ModelCheckpoint to save in that specific directory
     checkpoint_callback = ModelCheckpoint(
-        dirpath=this_run_dir,  # <-- Tell it exactly where to save
-        filename='checkpoint_{epoch:03d}',  # Filename can be simpler now
-        every_n_epochs=cfg.training.checkpoint_every,
+        dirpath=ckpt_path,
+        filename=f'{run_name}' + '_{epoch:03d}',
+        # every_n_epochs=cfg.training.checkpoint_every,
+        every_n_epochs=1,
         save_top_k=-1,
-        save_last=False,
-        save_on_train_epoch_end=True,
+        save_last=True,
         save_weights_only=True,
     )
 

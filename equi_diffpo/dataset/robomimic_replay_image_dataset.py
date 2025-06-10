@@ -209,6 +209,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
     def __len__(self):
         return len(self.sampler)
 
+    # region getitem
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         threadpool_limits(1)
         data = self.sampler.sample_sequence(idx)

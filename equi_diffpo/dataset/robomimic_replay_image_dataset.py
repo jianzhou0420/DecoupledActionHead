@@ -120,13 +120,13 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         train_mask = ~val_mask
 
         # debug
-        cprint('Debugging validation mask', 'yellow')
-        val_list = []
-        for i in range(len(val_mask)):
-            print(f'Episode {i} - train: {train_mask[i]}, val: {val_mask[i]}')
-            if val_mask[i]:
-                val_list.append(i)
-        print(f'Validation episodes: {val_list}')
+        # cprint('Debugging validation mask', 'yellow')
+        # val_list = []
+        # for i in range(len(val_mask)):
+        #     print(f'Episode {i} - train: {train_mask[i]}, val: {val_mask[i]}')
+        #     if val_mask[i]:
+        #         val_list.append(i)
+        # print(f'Validation episodes: {val_list}')
         # /debug
 
         sampler = SequenceSampler(

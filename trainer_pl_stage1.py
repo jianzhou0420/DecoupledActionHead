@@ -220,8 +220,8 @@ class RolloutCallback(pl.Callback):
         """
         if pl_module.global_step <= 0:
             return
-        if (trainer.current_epoch) + 1 % self.rollout_every_n_epochs != 0:
-            return
+        # if (trainer.current_epoch) + 1 % self.rollout_every_n_epochs != 0:
+        #     return
         runner_log = self.env_runner.run(pl_module.policy_ema)
         trainer.logger.experiment.log(runner_log, step=trainer.global_step)
 

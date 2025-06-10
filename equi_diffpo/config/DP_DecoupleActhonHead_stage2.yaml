@@ -24,7 +24,7 @@ ckpt_epoch: null
 
 ckpt_path: /hpcfs/users/a1946536/git_all/first/data/outputs/Archive/2025.06.08_00.00.00_pretrain_JPee_stage1_stack_d1_1000/checkpoint_epoch=${ckpt_epoch}.ckpt
 
-run_name: pretrain_JPee_stage2_${task_name}_${n_demo}
+run_name: DecoupleActhonHead_stage2_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -117,22 +117,22 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: pretrain_from_JPee_pair
+  project: DecoupleActhonHead
   resume: False
-  mode: offline
+  mode: online
   name: ${run_name}
-  tags: ["${name}", "${task_name}","stage1"]
+  tags: ["${name}", "${task_name}","stage2"]
   id: null
   group: null
 
-checkpoint:
-  topk:
-    monitor_key: test_mean_score
-    mode: max
-    k: 5
-    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
-  save_last_ckpt: True
-  save_last_snapshot: False
+# checkpoint:
+#   topk:
+#     monitor_key: test_mean_score
+#     mode: max
+#     k: 5
+#     format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+#   save_last_ckpt: True
+#   save_last_snapshot: False
 
 multi_run:
   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}

@@ -16,3 +16,6 @@ python trainer_pl_normal.py --config-name=train_diffusion_unet task_name=stack_d
 logging.mode=offline task.env_runner.n_train=1 task.env_runner.n_test=1 task.env_runner.n_envs=2
 
 python equi_diffpo/scripts/robomimic_dataset_conversion.py -i data/robomimic/datasets/coffee_d2/coffee_d2.hdf5 -o data/robomimic/datasets/coffee_d2/coffee_d2_abs.hdf5 -n 12
+
+不要用train_diffusion_unet, 这只是一个模板
+用train_

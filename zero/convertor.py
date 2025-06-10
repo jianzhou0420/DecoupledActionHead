@@ -433,17 +433,17 @@ if __name__ == '__main__':
     A = "stack_d1"
     B = "coffee_d2"
     C = "three_piece_assembly_d2"
-
+    task_name = C
     convertor = DatasetConvertor()
-    # convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
+    convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.traj_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.traj_JP_eeloss(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.pure_lowdim_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.JP2eePose_debug(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.JP2eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    convertor.put_together_ABC(
-        f'data/robomimic/datasets/{A}/{A}_abs_JP2eePose.hdf5',
-        f'data/robomimic/datasets/{B}/{B}_abs_JP2eePose.hdf5',
-        f'data/robomimic/datasets/{C}/{C}_abs_JP2eePose.hdf5'
+    # convertor.put_together_ABC(
+    #     f'data/robomimic/datasets/{A}/{A}_abs_JP2eePose.hdf5',
+    #     f'data/robomimic/datasets/{B}/{B}_abs_JP2eePose.hdf5',
+    #     f'data/robomimic/datasets/{C}/{C}_abs_JP2eePose.hdf5'
 
-    )
+    # )

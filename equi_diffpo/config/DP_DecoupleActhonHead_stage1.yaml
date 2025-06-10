@@ -115,7 +115,7 @@ training:
 logging:
   project: pretrain_from_JPee_pair
   resume: False
-  mode: offline
+  mode: online
   name: ${run_name}
   tags: ["${name}", "${task_name}","stage1"]
   id: null

@@ -116,7 +116,7 @@ training:
 logging:
   project: DecoupleActhonHead
   resume: False
-  mode: oneline
+  mode: online
   name: ${run_name}
   tags: ["${name}", "${task_name}","normal"]
   id: null

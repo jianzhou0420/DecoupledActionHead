@@ -290,10 +290,11 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
     def set_normalizer(self, normalizer: LinearNormalizer):
         self.normalizer.load_state_dict(normalizer.state_dict())
 
-    def forward(self, obs, action) -> torch.Tensor:
+    def compute_loss(self, batch):
         # normalize input
-        nobs = self.normalizer.normalize(obs)
-        nactions = self.normalizer['action'].normalize(action)
+        assert 'valid_mask' not in batch
+        nobs = self.normalizer.normalize(batch['obs'])
+        nactions = self.normalizer['action'].normalize(batch['action'])
         if self.rot_aug:
             nobs, nactions = self.rot_randomizer(nobs, nactions)
         batch_size = nactions.shape[0]

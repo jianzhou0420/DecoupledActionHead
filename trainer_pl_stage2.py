@@ -310,10 +310,12 @@ class RolloutCallback(pl.Callback):
         # Ensure we only run this every N epochs
         # if (trainer.current_epoch) % self.rollout_every_n_epochs != 0:
         #     return
+        if pl_module.global_step <= 0:
+            return
         runner_log = self.env_runner.run(pl_module.policy_ema)
         trainer.logger.experiment.log(runner_log, step=trainer.global_step)
-        cprint(f"Rollout completed at epoch {trainer.current_epoch}, step {trainer.global_step}.", "green", attrs=['bold'])
-        cprint(f"Rollout log: {runner_log}", "blue", attrs=['bold'])
+        # cprint(f"Rollout completed at epoch {trainer.current_epoch}, step {trainer.global_step}.", "green", attrs=['bold'])
+        # cprint(f"Rollout log: {runner_log}", "blue", attrs=['bold'])
 
 # region ActionMseLossForDiffusion
 

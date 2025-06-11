@@ -433,7 +433,8 @@ if __name__ == '__main__':
     A = "stack_d1"
     B = "coffee_d2"
     C = "three_piece_assembly_d2"
-    task_name = C
+    D = "stack_three_d1"
+    task_name = D
     convertor = DatasetConvertor()
     convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
     # convertor.traj_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')

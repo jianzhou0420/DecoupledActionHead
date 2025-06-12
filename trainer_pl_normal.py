@@ -41,7 +41,7 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from hydra.core.hydra_config import HydraConfig
-from config_hint import AppConfig
+from equi_diffpo.config.config_hint import AppConfig
 
 from equi_diffpo.workspace.base_workspace import BaseWorkspace
 import pathlib

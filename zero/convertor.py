@@ -1,3 +1,5 @@
+import sys
+import argparse
 import torch
 
 """
@@ -90,8 +92,8 @@ class DatasetConvertor:
     def traj_eePose(self, original_path: str):
         traj_eePose_path = original_path.replace('.hdf5', '_traj_eePose.hdf5')
 
-        cprint(f"Converting\n{original_path}\nto{traj_eePose_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, traj_eePose_path)
+        cprint(f"Converting\n{original_path}\nto{traj_eePose_path}\n", 'blue')
 
         with h5py.File(traj_eePose_path, 'r+') as f:
             data = f['data']
@@ -125,8 +127,10 @@ class DatasetConvertor:
         '''
 
         traj_JP_path = original_path.replace('.hdf5', '_traj_JP.hdf5')
-        cprint(f"Converting\n{original_path}\nto{traj_JP_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, traj_JP_path)
+
+        cprint(f"Converting\n{original_path}\nto{traj_JP_path}\n", 'blue')
+
         self._controller_type_to_JP(traj_JP_path)
 
         # change_controller_type(JP_h5py_file)
@@ -153,8 +157,8 @@ class DatasetConvertor:
         4. add x0loss group with eePose
         '''
         traj_JP_eeloss_path = original_path.replace('.hdf5', '_traj_JP_eeloss.hdf5')
-        cprint(f"Converting\n{original_path}\nto{traj_JP_eeloss_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, traj_JP_eeloss_path)
+        cprint(f"Converting\n{original_path}\nto{traj_JP_eeloss_path}\n", 'blue')
         self._controller_type_to_JP(traj_JP_eeloss_path)
 
         # change_controller_type(JP_h5py_file)
@@ -192,8 +196,9 @@ class DatasetConvertor:
 
     def pure_lowdim_eePose(self, original_path: str):
         pure_lowdim_path = original_path.replace('.hdf5', '_pure_lowdim_traj_eePose.hdf5')
-        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
+        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
+
         self._controller_type_to_JP(pure_lowdim_path)
         # change_controller_type(JP_h5py_file)
         with h5py.File(pure_lowdim_path, 'r+') as f:
@@ -236,8 +241,8 @@ class DatasetConvertor:
 
     def pure_lowdim_JP(self, original_path: str):
         pure_lowdim_path = original_path.replace('.hdf5', '_pure_lowdim_traj_JP.hdf5')
-        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
+        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
 
         # change_controller_type(JP_h5py_file)
         with h5py.File(pure_lowdim_path, 'r+') as f:
@@ -269,8 +274,8 @@ class DatasetConvertor:
 
     def JP2eePose(self, original_path: str):
         JP2eePose_path = original_path.replace('.hdf5', '_JP2eePose.hdf5')
-        cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, JP2eePose_path)
+        cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         with h5py.File(JP2eePose_path, 'r+') as f:
             data = f['data']
             for i, key in enumerate(data.keys()):
@@ -378,10 +383,16 @@ class DatasetConvertor:
 
     @staticmethod
     def _copy2new_h5py_file(src_path, dst_path):
+        # 2. 在尝试写入前，检查目标文件是否存在
+        if os.path.exists(dst_path):
+            # 如果文件已存在，立即引发 FileExistsError 错误
+            raise FileExistsError(f"目标文件已存在，无法覆盖: {dst_path}")
+
+        # 如果文件不存在，则执行原始的复制逻辑
         with h5py.File(src_path, 'r') as src, h5py.File(dst_path, 'w') as dst:
             for name in src:
                 src.copy(name, dst, name)
-        cprint(f"Copied {src_path} to {dst_path}", 'green')
+        cprint(f"成功将 {src_path} 复制到 {dst_path}", 'green')
 
     def _controller_type_to_JP(self, path: str):
         with h5py.File(path, 'r+') as f:
@@ -429,22 +440,120 @@ class DatasetConvertor:
             cprint(env_args, 'blue')
 
 
-if __name__ == '__main__':
-    A = "stack_d1"
-    B = "coffee_d2"
-    C = "three_piece_assembly_d2"
-    D = "stack_three_d1"
-    task_name = D
-    convertor = DatasetConvertor()
-    convertor.traj_eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.traj_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.traj_JP_eeloss(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.pure_lowdim_JP(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.JP2eePose_debug(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.JP2eePose(f'data/robomimic/datasets/{task_name}/{task_name}_abs.hdf5')
-    # convertor.put_together_ABC(
-    #     f'data/robomimic/datasets/{A}/{A}_abs_JP2eePose.hdf5',
-    #     f'data/robomimic/datasets/{B}/{B}_abs_JP2eePose.hdf5',
-    #     f'data/robomimic/datasets/{C}/{C}_abs_JP2eePose.hdf5'
+# class DatasetConvertor:
+#     def traj_eePose(self, filepath):
+#         print(f"🚀 调用方法 'traj_eePose' 处理: {filepath}")
 
-    # )
+#     def traj_JP(self, filepath):
+#         print(f"🚀 调用方法 'traj_JP' 处理: {filepath}")
+
+#     def traj_JP_eeloss(self, filepath):
+#         print(f"🚀 调用方法 'traj_JP_eeloss' 处理: {filepath}")
+
+#     def pure_lowdim_JP(self, filepath):
+#         print(f"🚀 调用方法 'pure_lowdim_JP' 处理: {filepath}")
+
+#     def JP2eePose_debug(self, filepath):
+#         print(f"🚀 调用方法 'JP2eePose_debug' 处理: {filepath}")
+
+#     def JP2eePose(self, filepath):
+#         print(f"🚀 调用方法 'JP2eePose' 处理: {filepath}")
+
+# ----------------------------------------------------
+
+def main():
+    # 1. 定义任务和转换方法
+    tasks = {
+        "A": "stack_d1",
+        "B": "coffee_d2",
+        "C": "three_piece_assembly_d2",
+        "D": "stack_three_d1",
+        "E": "square_d2",
+        "F": "threading_d2",
+        "G": "hammer_cleanup_d1",
+        "H": "mug_cleanup_d1",
+        "I": "kitchen_d1",
+        "J": "nut_assembly_d0",
+        "K": "pick_place_d0",
+        "L": "coffee_preparation_d1"
+    }
+    valid_conversion_methods = [
+        'traj_eePose', 'traj_JP', 'traj_JP_eeloss', 'pure_lowdim_JP',
+        'JP2eePose_debug', 'JP2eePose'
+    ]
+
+    # 2. 设置 argparse 解析器
+    parser = argparse.ArgumentParser(
+        description="数据集转换工具：对一个或多个任务执行一个或多个转换操作，并生成总结报告。",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('-t', '--task', type=str, required=True, metavar='ALIASES', help="指定任务别名组合字符串 (例如: 'ADL')。")
+    parser.add_argument('-c', '--convert_type', type=str, required=True, nargs='+', choices=valid_conversion_methods, metavar='METHOD', help="指定一个或多个转换方法名，用空格隔开。")
+    args = parser.parse_args()
+
+    # 3. 初始化计数器
+    task_aliases = args.task.upper()
+    methods_to_run = args.convert_type
+    total_operations = len(task_aliases) * len(methods_to_run)
+    success_count = 0
+    skipped_count = 0
+    error_count = 0
+    unknown_task_count = 0
+
+    print(f"✅ 计划执行: {len(methods_to_run)} 种转换操作")
+    print(f"✅ 应用于: {len(task_aliases)} 个任务")
+    print(f"✅ 总操作数: {total_operations}\n")
+
+    convertor = DatasetConvertor()
+
+    # 4. 执行嵌套循环并更新计数器
+    for alias in task_aliases:
+        if alias not in tasks:
+            cprint(f"⚠️  警告: 未知的任务别名 '{alias}'，将跳过其所有转换。\n", 'red')
+            unknown_task_count += 1
+            error_count += len(methods_to_run)  # 该任务的所有操作都计为错误
+            continue
+
+        task_name = tasks[alias]
+        # 准备演示用的源文件
+        src_dir = f'data/robomimic/datasets/{task_name}'
+        os.makedirs(src_dir, exist_ok=True)
+        file_path = os.path.join(src_dir, f'{task_name}_abs.hdf5')
+        if not os.path.exists(file_path):
+            with h5py.File(file_path, 'w') as f:
+                f.create_dataset('source_data', data=np.arange(5))
+
+        print(f"--- [处理任务: {alias} ({task_name})] ---")
+
+        for method_name in methods_to_run:
+            try:
+                method_to_call = getattr(convertor, method_name)
+                cprint(f"  -> 正在执行: '{method_name}'...", 'cyan')
+                method_to_call(file_path)
+                cprint(f"  ✅ 成功完成: '{method_name}'", 'green')
+                success_count += 1
+            except FileExistsError:
+                cprint(f"  -> 已存在，跳过: '{method_name}'", 'yellow')
+                skipped_count += 1
+            except Exception as e:
+                cprint(f"  ❌ 执行 '{method_name}' 时发生未知错误: {e}", 'red')
+                error_count += 1
+
+        print(f"--- [任务 {alias} 处理完毕] ---\n")
+
+    # 5. 打印最终的总结报告
+    print("=" * 50)
+    print("📊 处理完成，生成总结报告：")
+    print("=" * 50)
+    cprint(f"  - 成功转换: {success_count}", 'green')
+    cprint(f"  - 已存在而跳过: {skipped_count}", 'yellow')
+    cprint(f"  - 发生错误 (包括未知任务): {error_count}", 'red')
+    print("----------------------------------------")
+    print(f"  - 总计划操作数: {total_operations}")
+    if unknown_task_count > 0:
+        cprint(f"  - 其中包含 {unknown_task_count} 个未知任务别名。", 'magenta')
+    print("=" * 50)
+
+
+if __name__ == '__main__':
+    main()

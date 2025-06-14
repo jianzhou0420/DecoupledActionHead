@@ -90,7 +90,7 @@ class DatasetConvertor:
     PosEuler_offset_JP2eePose = np.array([0., 0., 0., 0., 0., - 180.])
 
     def traj_eePose(self, original_path: str):
-        traj_eePose_path = original_path.replace('.hdf5', '_traj_eePose.hdf5')
+        traj_eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_eePose.hdf5')
 
         self._copy2new_h5py_file(original_path, traj_eePose_path)
         cprint(f"Converting\n{original_path}\nto{traj_eePose_path}\n", 'blue')
@@ -126,7 +126,7 @@ class DatasetConvertor:
         3. convert actions from PosAxisOpen to JP
         '''
 
-        traj_JP_path = original_path.replace('.hdf5', '_traj_JP.hdf5')
+        traj_JP_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_JP.hdf5')
         self._copy2new_h5py_file(original_path, traj_JP_path)
 
         cprint(f"Converting\n{original_path}\nto{traj_JP_path}\n", 'blue')
@@ -156,7 +156,7 @@ class DatasetConvertor:
         3. convert actions from PosAxisOpen to JP
         4. add x0loss group with eePose
         '''
-        traj_JP_eeloss_path = original_path.replace('.hdf5', '_traj_JP_eeloss.hdf5')
+        traj_JP_eeloss_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_JP_eeloss.hdf5')
         self._copy2new_h5py_file(original_path, traj_JP_eeloss_path)
         cprint(f"Converting\n{original_path}\nto{traj_JP_eeloss_path}\n", 'blue')
         self._controller_type_to_JP(traj_JP_eeloss_path)
@@ -195,7 +195,7 @@ class DatasetConvertor:
         cprint(f"Convertion has been done\n You should find{traj_JP_eeloss_path}", 'green')
 
     def pure_lowdim_eePose(self, original_path: str):
-        pure_lowdim_path = original_path.replace('.hdf5', '_pure_lowdim_traj_eePose.hdf5')
+        pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_eePose.hdf5')
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
         cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
 
@@ -240,7 +240,7 @@ class DatasetConvertor:
                 obs_group.create_dataset('states', data=states, dtype='f8')
 
     def pure_lowdim_JP(self, original_path: str):
-        pure_lowdim_path = original_path.replace('.hdf5', '_pure_lowdim_traj_JP.hdf5')
+        pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_JP.hdf5')
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
         cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
 
@@ -273,7 +273,7 @@ class DatasetConvertor:
                 obs_group.create_dataset('states', data=states, dtype='f8')
 
     def JP2eePose(self, original_path: str):
-        JP2eePose_path = original_path.replace('.hdf5', '_JP2eePose.hdf5')
+        JP2eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_JP2eePose.hdf5')
         self._copy2new_h5py_file(original_path, JP2eePose_path)
         cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         with h5py.File(JP2eePose_path, 'r+') as f:
@@ -304,7 +304,7 @@ class DatasetConvertor:
         HDF5Inspector.inspect_hdf5(JP2eePose_path)
 
     def JP2eePose_debug(self, original_path: str):
-        JP2eePose_path = original_path.replace('.hdf5', '_JP2eePose_degbug.hdf5')
+        JP2eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_JP2eePose_degbug.hdf5')
         cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, JP2eePose_path)
         with h5py.File(JP2eePose_path, 'r+') as f:
@@ -516,12 +516,11 @@ def main():
 
         task_name = tasks[alias]
         # 准备演示用的源文件
-        src_dir = f'data/robomimic/datasets/{task_name}'
+        src_dir = f'data/robomimic/datasets_abs/{task_name}'
         os.makedirs(src_dir, exist_ok=True)
         file_path = os.path.join(src_dir, f'{task_name}_abs.hdf5')
         if not os.path.exists(file_path):
-            with h5py.File(file_path, 'w') as f:
-                f.create_dataset('source_data', data=np.arange(5))
+            raise FileNotFoundError(f"源文件不存在: {file_path}")
 
         print(f"--- [处理任务: {alias} ({task_name})] ---")
 

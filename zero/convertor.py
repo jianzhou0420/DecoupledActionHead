@@ -91,6 +91,7 @@ class DatasetConvertor:
 
     def traj_eePose(self, original_path: str):
         traj_eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_eePose.hdf5')
+        os.makedirs(os.path.dirname(traj_eePose_path), exist_ok=True)
 
         self._copy2new_h5py_file(original_path, traj_eePose_path)
         cprint(f"Converting\n{original_path}\nto{traj_eePose_path}\n", 'blue')
@@ -127,6 +128,7 @@ class DatasetConvertor:
         '''
 
         traj_JP_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_JP.hdf5')
+        os.makedirs(os.path.dirname(traj_JP_path), exist_ok=True)
         self._copy2new_h5py_file(original_path, traj_JP_path)
 
         cprint(f"Converting\n{original_path}\nto{traj_JP_path}\n", 'blue')
@@ -157,6 +159,7 @@ class DatasetConvertor:
         4. add x0loss group with eePose
         '''
         traj_JP_eeloss_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_traj_JP_eeloss.hdf5')
+        os.makedirs(os.path.dirname(traj_JP_eeloss_path), exist_ok=True)
         self._copy2new_h5py_file(original_path, traj_JP_eeloss_path)
         cprint(f"Converting\n{original_path}\nto{traj_JP_eeloss_path}\n", 'blue')
         self._controller_type_to_JP(traj_JP_eeloss_path)
@@ -196,6 +199,7 @@ class DatasetConvertor:
 
     def pure_lowdim_eePose(self, original_path: str):
         pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_eePose.hdf5')
+        os.makedirs(os.path.dirname(pure_lowdim_path), exist_ok=True)
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
         cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
 
@@ -241,6 +245,7 @@ class DatasetConvertor:
 
     def pure_lowdim_JP(self, original_path: str):
         pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_JP.hdf5')
+        os.makedirs(os.path.dirname(pure_lowdim_path), exist_ok=True)
         self._copy2new_h5py_file(original_path, pure_lowdim_path)
         cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
 
@@ -274,6 +279,7 @@ class DatasetConvertor:
 
     def JP2eePose(self, original_path: str):
         JP2eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_JP2eePose.hdf5')
+        os.makedirs(os.path.dirname(JP2eePose_path), exist_ok=True)
         self._copy2new_h5py_file(original_path, JP2eePose_path)
         cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         with h5py.File(JP2eePose_path, 'r+') as f:
@@ -305,6 +311,7 @@ class DatasetConvertor:
 
     def JP2eePose_debug(self, original_path: str):
         JP2eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_JP2eePose_degbug.hdf5')
+        os.makedirs(os.path.dirname(JP2eePose_path), exist_ok=True)
         cprint(f"Converting\n{original_path}\nto{JP2eePose_path}\n", 'blue')
         self._copy2new_h5py_file(original_path, JP2eePose_path)
         with h5py.File(JP2eePose_path, 'r+') as f:

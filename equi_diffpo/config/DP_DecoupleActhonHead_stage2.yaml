@@ -117,7 +117,7 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActhonHead
+  project: DecoupleActhonHead_ABC-D
   resume: False
   mode: online
   name: ${run_name}

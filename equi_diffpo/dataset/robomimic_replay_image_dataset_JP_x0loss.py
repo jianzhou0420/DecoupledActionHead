@@ -468,7 +468,7 @@ if __name__ == "__main__":
     test_dataset: RobomimicReplayImageDataset_JP_x0loss = RobomimicReplayImageDataset_JP_x0loss(
         n_demo=10,
         shape_meta=shape_meta,
-        dataset_path="/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP_x0loss.hdf5",
+        dataset_path="./first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP_x0loss.hdf5",
         horizon=16,
         pad_before=1,
         pad_after=1,

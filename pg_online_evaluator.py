@@ -54,7 +54,7 @@ def check_and_make(path):
 
 def direct_test():
     options = {}
-    eval_config = get_config('/media/jian/ssd4t/DP/first/zero/config/online_eval.yaml')
+    eval_config = get_config('./first/zero/config/online_eval.yaml')
     print(eval_config)
 
     with open("mimicgen_env.json", "r") as f:

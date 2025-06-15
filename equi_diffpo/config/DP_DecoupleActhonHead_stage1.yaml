@@ -17,7 +17,7 @@ dataset_obs_steps: ${n_obs_steps}
 past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
-dataset_path: /media/jian/ssd4t/DP/first/data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
+dataset_path: ./first/data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
 
 
 run_name: DecoupleActhonHead_stage1_${task_name}_${n_demo}

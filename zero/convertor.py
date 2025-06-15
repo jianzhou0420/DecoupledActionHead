@@ -337,7 +337,7 @@ class DatasetConvertor:
         B_name = os.path.basename(B_path).split('_abs')[0]
         C_name = os.path.basename(C_path).split('_abs')[0]
 
-        ABC_path = os.path.join("/media/jian/ssd4t/DP/first/data/robomimic/datasets/ABC", f"{A_name}_{B_name}_{C_name}_abs_JP2eePose.hdf5")
+        ABC_path = os.path.join("./first/data/robomimic/datasets/ABC", f"{A_name}_{B_name}_{C_name}_abs_JP2eePose.hdf5")
         # get all the demo keys from A, B, C
         with h5py.File(A_path, 'r') as f_A, h5py.File(B_path, 'r') as f_B, h5py.File(C_path, 'r') as f_C, h5py.File(ABC_path, 'w') as f_ABC:
             keys_A = natsorted(list(f_A['data'].keys()))

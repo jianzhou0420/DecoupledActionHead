@@ -134,8 +134,8 @@ def print_friendly_report(results, ckpt_path1, ckpt_path2):
 if __name__ == '__main__':
     # --- IMPORTANT ---
     # Replace with the actual paths to your checkpoint files
-    stage1_epoch50_ckpt_path = "/media/jian/ssd4t/DP/first/data/outputs/Jun06_22-09-56_my_model/checkpoint_epoch=049.ckpt"
-    stage2_epoch50_ckpt_path = "/media/jian/ssd4t/DP/first/data/outputs/2025.06.08/21.00.23_default/checkpoint_epoch=049.ckpt"
+    stage1_epoch50_ckpt_path = "./first/data/outputs/Jun06_22-09-56_my_model/checkpoint_epoch=049.ckpt"
+    stage2_epoch50_ckpt_path = "./first/data/outputs/2025.06.08/21.00.23_default/checkpoint_epoch=049.ckpt"
 
     try:
         comparison_results = compare_checkpoints(stage1_epoch50_ckpt_path, stage2_epoch50_ckpt_path)

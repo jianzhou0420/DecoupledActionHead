@@ -141,7 +141,7 @@ def show_eePose_action_with_obs(path):
         print('eePose', eePose[:10])
 
 
-def validate_JP_actions(path='/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5'):
+def validate_JP_actions(path='./first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5'):
     T_base_mimicgen = torch.tensor([[1., 0, 0, -0.561],
                                     [0, 1., 0., 0],
                                     [0, 0., 1., 0.925],
@@ -220,5 +220,5 @@ def validate_JP_x0loss(path='data/robomimic/datasets/stack_d1/stack_d1_abs_JP_x0
 
 
 if __name__ == '__main__':
-    # show_eePose_action_with_obs('/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_voxel_abs_test.hdf5')
-    validate_JP_actions('/media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5')
+    # show_eePose_action_with_obs('./first/data/robomimic/datasets/stack_d1/stack_d1_voxel_abs_test.hdf5')
+    validate_JP_actions('./first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5')

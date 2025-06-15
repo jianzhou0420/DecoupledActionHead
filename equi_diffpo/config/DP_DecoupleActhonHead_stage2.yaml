@@ -22,7 +22,7 @@ dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.
 
 ckpt_epoch: null
 
-ckpt_path: /media/jian/ssd4t/DP/first/data/outputs/Archive/19.12.37_DecoupleActhonHead_stage1_ABC_1000/checkpoints/DecoupleActhonHead_stage1_None_1000_epoch=033.ckpt
+ckpt_path: ./first/data/outputs/Archive/19.12.37_DecoupleActhonHead_stage1_ABC_1000/checkpoints/DecoupleActhonHead_stage1_None_1000_epoch=033.ckpt
 
 run_name: DecoupleActhonHead_stage2_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}

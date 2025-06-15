@@ -309,7 +309,7 @@ def set_alpha(node, alpha=0.1):
         node (ET.Element): Specific node element within XML tree
         alpha (float): Value to set alpha value of rgba tuple
     """
-    for child_node in node.findall(".//*[@rgba]"):
+    for child_node in node.findall("./*[@rgba]"):
         rgba_orig = string_to_array(child_node.get("rgba"))
         child_node.set("rgba", array_to_string(list(rgba_orig[0:3]) + [alpha]))
 

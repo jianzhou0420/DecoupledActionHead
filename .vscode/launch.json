@@ -67,7 +67,7 @@
                 "logging.mode=online",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
-                "task.dataset.dataset_path=./first/data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5"
+                "task.dataset.dataset_path=.//data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5"
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },

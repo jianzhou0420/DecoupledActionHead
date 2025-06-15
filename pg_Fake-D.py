@@ -2,9 +2,9 @@ import numpy as np
 import h5py
 
 import os
-
+import torch
 from natsort import natsorted
-
+from codebase.z_utils.Rotation_torch import matrix_to_rotation_6d, euler2mat
 
 dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets"
 all_datasets = natsorted(os.listdir(dataset_dir))
@@ -23,9 +23,11 @@ for dataset in all_datasets:
         print(f"Number of demonstrations: {len(demo_names)}")
         length_counter = 0
         for demo_name in demo_names:
-            print(f"Processing demonstration: {demo_name}")
             actions_all.extend(data[demo_name]['actions'][:])
 
 print(f"Total number of actions across all demonstrations: {len(actions_all)}")
 actions_all = np.array(actions_all)
+actions_all = torch.from_numpy(actions_all)
+rot_all = actions_all[:, 3:6]
+rot_all = euler2mat(rot_all, 'XYZ')
 print(f"Shape of actions_all: {actions_all.shape}")

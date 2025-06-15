@@ -49,6 +49,7 @@ from omegaconf import OmegaConf
 import hydra
 import sys
 from termcolor import cprint
+import mimicgen
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
 sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)

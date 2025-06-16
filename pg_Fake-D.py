@@ -1,3 +1,4 @@
+import zarr
 from equi_diffpo.model.common.rotation_transformer import RotationTransformer
 import pickle
 import numpy as np
@@ -40,55 +41,12 @@ for dataset in all_datasets:
         for demo_name in demo_names:
             this_actions_all.append(data[demo_name]['actions'][:])
 
-    actions_all.append(np.concatenate(this_actions_all, axis=0))
-
-for i, dataset in enumerate(all_datasets):
-    this_actions = actions_all[i]
-    this_xyz = this_actions[:, 0:3]
-
-    mean = np.mean(this_xyz, axis=0)
-    std = np.std(this_xyz, axis=0)
-
-    statistic_dict[dataset] = {
-        'mean': mean,
-        'std': std,
-        'num_actions': this_actions.shape[0]
-    }
-
-all_action = np.concatenate(actions_all, axis=0)
-mean_all = np.mean(all_action, axis=0)
-std_all = np.std(all_action, axis=0)
-statistic_dict['all'] = {
-    'mean': mean_all,
-    'std': std_all,
-    'num_actions': all_action.shape[0]
-}
-rotation_transformer = RotationTransformer(
-    from_rep='axis_angle', to_rep='rotation_6d')
-
-all_action = _convert_actions(all_action, True, rotation_transformer)
-
-# Print the final dictionary in a nice, readable format
-print("Position statistics for all datasets:")
-print("========================================")
-print(f"{'Dataset':<20} | {'Mean Position (3D)':<30} | {'Std Deviation (3D)':<30} | {'Num Actions':<15}")
-print(f"{'-'*20}-+-{'-'*30}-+-{'-'*30}-+-{'-'*15}")
-for dataset, stats in statistic_dict.items():
-    # Format mean and std lists to 5 decimal places for better readability
-    formatted_mean = [f"{x:.5f}" for x in stats['mean']]
-    formatted_std = [f"{x:.5f}" for x in stats['std']]
-    print(f"{dataset:<20} | {str(formatted_mean):<30} | {str(formatted_std):<30} | {stats['num_actions']:<15}")
+    actions_all.append(this_actions_all)
 
 
-# JP的normalizer是无所谓的，stage1里面用就stage1里面用
-# eePose的normalizer其实是xyz的normalizer（rot本身就是-1，1；详见dataset的class怎么写的）
-# 所以，真正重要的normalizer就是action的xyz的normalizer。
+root = zarr.group(zarr.MemoryStore)
+root.require_group('data', overwrite=True)
 
-stat = array_to_stats(all_action)
+pass
 
-this_normalizer = robomimic_abs_action_only_normalizer_from_stat(stat)
-
-with open('normalizer.pkl', 'wb') as f:
-    pickle.dump(this_normalizer, f)
-
-print(this_normalizer)
+# 到这里，获得all_action，包含所有数据集的动作数据

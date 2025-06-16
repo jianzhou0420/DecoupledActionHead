@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import h5py
 
@@ -6,7 +7,14 @@ import torch
 from natsort import natsorted
 from codebase.z_utils.Rotation_torch import matrix_to_rotation_6d, euler2mat
 from equi_diffpo.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
-
+from equi_diffpo.common.normalize_util import (
+    robomimic_abs_action_only_normalizer_from_stat,
+    robomimic_abs_action_only_dual_arm_normalizer_from_stat,
+    get_range_normalizer_from_stat,
+    get_image_range_normalizer,
+    get_identity_normalizer_from_stat,
+    array_to_stats
+)
 dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets"
 all_datasets = natsorted(os.listdir(dataset_dir))
 
@@ -67,18 +75,12 @@ for dataset, stats in statistic_dict.items():
 # JP的normalizer是无所谓的，stage1里面用就stage1里面用
 # eePose的normalizer其实是xyz的normalizer（rot本身就是-1，1；详见dataset的class怎么写的）
 # 所以，真正重要的normalizer就是action的xyz的normalizer。
-SingleFieldLinearNormalizer.create_manual(
-    scale=scale,
-    offset=offset,
-    input_stats_dict=stat
-)
 
+stat = array_to_stats(all_action)
 
-final_action_normalizer = LinearNormalizer(
-    mean=statistic_dict['all']['mean'],
-    std=statistic_dict['all']['std'],
-    dim=3
-)
+this_normalizer = robomimic_abs_action_only_normalizer_from_stat(stat)
 
-print("Final action normalizer:")
-print(f"Mean: {final_action_normalizer.mean}, Std: {final_action_normalizer.std}")
+with open('normalizer.pkl', 'wb') as f:
+    pickle.dump(this_normalizer, f)
+
+print(this_normalizer)

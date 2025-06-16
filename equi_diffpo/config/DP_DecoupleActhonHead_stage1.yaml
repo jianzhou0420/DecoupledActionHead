@@ -16,7 +16,7 @@ n_latency_steps: -15
 dataset_obs_steps: ${n_obs_steps}
 past_action_visible: False
 obs_as_global_cond: True
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
+dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: ./data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
 
 

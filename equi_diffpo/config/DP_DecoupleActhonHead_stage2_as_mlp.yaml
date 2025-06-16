@@ -16,7 +16,7 @@ n_latency_steps: 0
 dataset_obs_steps: ${n_obs_steps}
 past_action_visible: False
 obs_as_global_cond: True
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
+dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
 

@@ -78,7 +78,7 @@
             "program": "${workspaceFolder}/trainer_pl_stage2.py",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=DP_DecoupleActhonHead_stage2",
+                "--config-name=DP_DecoupleActionHead_stage2",
                 "task_name=stack_d1",
                 "n_demo=1000",
                 "task.env_runner.n_envs=2",

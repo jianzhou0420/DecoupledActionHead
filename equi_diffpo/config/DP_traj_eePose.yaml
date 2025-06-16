@@ -21,7 +21,7 @@ dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImage
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
 
-run_name: DecoupleActhonHead_normal_${task_name}_${n_demo}
+run_name: DecoupleActionHead_normal_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -114,7 +114,7 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActhonHead
+  project: DecoupleActionHead
   resume: False
   mode: online
   name: ${run_name}

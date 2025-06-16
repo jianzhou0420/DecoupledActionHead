@@ -1,5 +1,4 @@
 # Template
-dataset="coffee_d2"
 A="stack_d1",
 B= "coffee_d2",
 C= "three_piece_assembly_d2",

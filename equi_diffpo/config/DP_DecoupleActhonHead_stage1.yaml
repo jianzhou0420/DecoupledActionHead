@@ -113,7 +113,7 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: pretrain_from_JPee_pair
+  project: DecoupleActionHead_Stage1
   resume: False
   mode: online
   name: ${run_name}

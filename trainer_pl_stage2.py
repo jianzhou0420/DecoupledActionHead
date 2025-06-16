@@ -215,9 +215,9 @@ class Trainer_all(pl.LightningModule):
             cfg.training.lr_scheduler,
             optimizer=optimizer,
             num_warmup_steps=cfg.training.lr_warmup_steps,
-            num_training_steps=(
-                num_training_steps * cfg.training.num_epochs)
-            // cfg.training.gradient_accumulate_every,
+            num_training_steps=int((
+                num_training_steps)
+                // cfg.training.gradient_accumulate_every),
             # pytorch assumes stepping LRScheduler every epoch
             # however huggingface diffusers steps it every batch
             last_epoch=self.global_step - 1

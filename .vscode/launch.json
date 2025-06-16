@@ -78,9 +78,9 @@
             "program": "${workspaceFolder}/trainer_pl_stage2.py",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=DP_JP2eePose_stage2",
+                "--config-name=DP_DecoupleActhonHead_stage2",
                 "task_name=stack_d1",
-                "n_demo=10",
+                "n_demo=1000",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",

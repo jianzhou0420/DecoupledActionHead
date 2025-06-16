@@ -39,7 +39,7 @@
             "program": "${workspaceFolder}/trainer_pl_stage1.py",
             "console": "integratedTerminal",
             "args": [
-                "--config-name=DP_JP2eePose_stage1",
+                "--config-name=DP_DecoupleActionHead_stage1",
                 "task_name=stack_d1",
                 "n_demo=10",
                 // "task.env_runner.n_envs=2",

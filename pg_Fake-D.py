@@ -1,3 +1,4 @@
+from equi_diffpo.model.common.rotation_transformer import RotationTransformer
 import pickle
 import numpy as np
 import h5py
@@ -15,10 +16,13 @@ from equi_diffpo.common.normalize_util import (
     get_identity_normalizer_from_stat,
     array_to_stats
 )
+
+from equi_diffpo.dataset.robomimic_replay_image_dataset import _convert_actions
 dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets"
 all_datasets = natsorted(os.listdir(dataset_dir))
 
-
+if 'ABC' in all_datasets:
+    all_datasets.remove('ABC')  # Remove ABC dataset if it exists
 statistic_dict = {}
 
 actions_all = []
@@ -51,7 +55,7 @@ for i, dataset in enumerate(all_datasets):
         'num_actions': this_actions.shape[0]
     }
 
-all_action = np.concatenate(actions_all, axis=0)[:, 0:3]
+all_action = np.concatenate(actions_all, axis=0)
 mean_all = np.mean(all_action, axis=0)
 std_all = np.std(all_action, axis=0)
 statistic_dict['all'] = {
@@ -59,6 +63,10 @@ statistic_dict['all'] = {
     'std': std_all,
     'num_actions': all_action.shape[0]
 }
+rotation_transformer = RotationTransformer(
+    from_rep='axis_angle', to_rep='rotation_6d')
+
+all_action = _convert_actions(all_action, True, rotation_transformer)
 
 # Print the final dictionary in a nice, readable format
 print("Position statistics for all datasets:")

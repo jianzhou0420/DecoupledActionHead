@@ -23,7 +23,6 @@ dist/
 *.egg-info/
 
 # debug outpus
-*.pkl
 
 *.mp4
 *.class

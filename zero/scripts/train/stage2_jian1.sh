@@ -1,5 +1,6 @@
 #!/bin/bash
-
+git stash
+git pull
 # ---
 # Check for provided task names
 # ---

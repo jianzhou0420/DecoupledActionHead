@@ -80,6 +80,7 @@
             "args": [
                 "--config-name=DP_DecoupleActionHead_stage2",
                 "task_name=stack_d1",
+                "task_alphabet=A",
                 "n_demo=1000",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
@@ -99,7 +100,8 @@
             "args": [
                 "--config-name=DP_DecoupleActionHead_stage2_ABC_D",
                 "task_name=stack_d1",
-                "n_demo=1000",
+                "task_alphabet=A",
+                "n_demo=1",
                 "task.env_runner.n_envs=2",
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",
@@ -107,6 +109,7 @@
                 "logging.project='debug'",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },

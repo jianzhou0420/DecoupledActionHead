@@ -7,6 +7,7 @@
 # except:
 #     pass
 
+import wandb
 import pathlib
 import gym  # Or your custom environment library
 import time
@@ -303,14 +304,14 @@ class RolloutCallback(pl.Callback):
         self.rollout_every_n_epochs = cfg.training.rollout_every
         self.env_runner = env_runner
 
-    def on_validation_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
+    def on_train_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
         """
         This hook is called after every validation epoch.
         """
 
         # Ensure we only run this every N epochs
-        # if (trainer.current_epoch) % self.rollout_every_n_epochs != 0:
-        #     return
+        if (trainer.current_epoch) + 1 % self.rollout_every_n_epochs != 0:
+            return
         if pl_module.global_step <= 0:
             return
         runner_log = self.env_runner.run(pl_module.policy_ema)
@@ -331,7 +332,7 @@ class ActionMseLossForDiffusion(pl.Callback):
         super().__init__()
         self.cfg = cfg
 
-    def on_validation_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
+    def on_train_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
         """
         This hook is called after every validation epoch.
         """
@@ -375,6 +376,7 @@ def train(cfg: AppConfig):
         save_top_k=-1,
         save_last=True,
         save_weights_only=True,
+        save_on_train_epoch_end=True
     )
 
     # 3. Configure WandbLogger to use the same directory
@@ -394,11 +396,21 @@ def train(cfg: AppConfig):
                          logger=[wandb_logger],
                          use_distributed_sampler=False,
                          check_val_every_n_epoch=cfg.training.val_every,
-
                          )
     trainer_model = Trainer_all(cfg)
     data_module = MyDataModule(cfg)
     trainer.fit(trainer_model, datamodule=data_module)
+
+    # 5. Upload all checkpoints as a single wandb artifact
+    artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
+
+    # Add all .ckpt files from the checkpoint directory
+    for filename in os.listdir(ckpt_path):
+        if filename.endswith(".ckpt"):
+            artifact.add_file(os.path.join(ckpt_path, filename))
+
+    # Log artifact
+    wandb_logger.experiment.log_artifact(artifact)
 
 
 @hydra.main(
@@ -409,21 +421,6 @@ def train(cfg: AppConfig):
 def main(cfg: OmegaConf):
     # resolve immediately so all the ${now:} resolvers
     # will use the same time.
-    task_name2alphabet = {
-        "stack_d1": "A",
-        "square_d2": "B",
-        "coffee_d2": "C",
-        "threading_d2": "D",
-        "stack_three_d1": "E",
-        "hammer_cleanup_d1": "F",
-        "three_piece_assembly_d2": "G",
-        "mug_cleanup_d1": "H",
-        "nut_assembly_d0": "I",
-        "kitchen_d1": "J",
-        "pick_place_d0": "K",
-        "coffee_preparation_d1": "L"
-    }
-    cfg.task_alphabet = task_name2alphabet[cfg.task_name]
 
     OmegaConf.resolve(cfg)
     train(cfg)

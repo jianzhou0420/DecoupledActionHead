@@ -156,6 +156,8 @@ class Trainer_all(pl.LightningModule):
         elif task_type == 'stage1' or task_type == 'normal':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
+        else:
+            raise ValueError(f"Unsupported task type: {task_type}, check config.name")
 
         if cfg.training.use_ema:
             ema_handler: EMAModel = hydra.utils.instantiate(
@@ -395,7 +397,7 @@ def train(cfg: AppConfig):
                                     ActionMseLossForDiffusion(cfg),
                                     ],
                          max_epochs=int(cfg.training.num_epochs),
-                         devices=[0],
+                         devices='auto',
                          strategy='auto',
                          logger=[wandb_logger],
                          use_distributed_sampler=False,

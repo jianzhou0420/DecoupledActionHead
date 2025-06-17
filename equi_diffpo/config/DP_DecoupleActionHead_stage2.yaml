@@ -2,7 +2,7 @@ defaults:
   - _self_
   - task: mimicgen_abs_JP2eePose_stage2
 
-name: name: stage2
+name: stage2
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
@@ -19,7 +19,8 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
-task_alphabet: nullckpt_epoch: null
+task_alphabet: null
+ckpt_epoch: null
 
 ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
 run_name: stage2_${task_alphabet}_${task_name}_${n_demo}

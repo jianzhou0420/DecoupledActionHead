@@ -93,7 +93,7 @@ optimizer:
   weight_decay: 1.0e-6
 
 training:
-  device: "cuda:0"
+  # device: "cuda:0"
   seed: 0
   debug: False
   resume: False

@@ -2,7 +2,7 @@ defaults:
   - _self_
   - task: mimicgen_abs_JP2eePose_stage1
 
-name: diff_c
+name: stage1
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}

@@ -19,12 +19,10 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
-
-ckpt_epoch: null
+task_alphabet: nullckpt_epoch: null
 
 ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
-
-run_name: DecoupleActionHead_stage2_${task_name}_${n_demo}
+run_name: stage2_${task_alphabet}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -106,37 +104,26 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: 1
-  checkpoint_every: 1
-  val_every: 1
+  rollout_every: 5
+  checkpoint_every: 10
+  val_every: 10000
   sample_every: 5
-  # steps per epoch
-  max_train_steps: null
-  max_val_steps: null
   # misc
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActionHead_ABC-D
+  project: DecoupleActionHead_stage2
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["${name}", "${task_name}","stage2"]
+  tags: ["stage2","${task_alphabet}", "${task_name}"]
   id: null
   group: null
 
-# checkpoint:
-#   topk:
-#     monitor_key: test_mean_score
-#     mode: max
-#     k: 5
-#     format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
-#   save_last_ckpt: True
-#   save_last_snapshot: False
 
-multi_run:
-  run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
-  wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
+# multi_run:
+#   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+#   wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
 
 hydra:
   job:

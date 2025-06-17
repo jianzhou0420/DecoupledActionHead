@@ -260,8 +260,6 @@ class ActionMseLossForDiffusion(pl.Callback):
 
 # ---------------------------------------------------------------
 # region Main
-
-
 def train(cfg: AppConfig):
 
     # 1. Define a unique name and directory for this specific run
@@ -272,11 +270,11 @@ def train(cfg: AppConfig):
 
     ckpt_path = os.path.join(this_run_dir, 'checkpoints')
     # 2. Configure ModelCheckpoint to save in that specific directory
+
     checkpoint_callback = ModelCheckpoint(
         dirpath=ckpt_path,
         filename=f'{run_name}' + '_{epoch:03d}',
-        # every_n_epochs=cfg.training.checkpoint_every,
-        every_n_epochs=1,
+        every_n_epochs=cfg.training.checkpoint_every,
         save_top_k=-1,
         save_last=True,
         save_weights_only=True,
@@ -294,7 +292,7 @@ def train(cfg: AppConfig):
                                     ActionMseLossForDiffusion(cfg),
                                     ],
                          max_epochs=int(cfg.training.num_epochs),
-                         devices='auto',
+                         devices=[0],
                          strategy='auto',
                          logger=[wandb_logger],
                          use_distributed_sampler=False,
@@ -314,6 +312,22 @@ def train(cfg: AppConfig):
 def main(cfg: OmegaConf):
     # resolve immediately so all the ${now:} resolvers
     # will use the same time.
+    task_name2alphabet = {
+        "stack_d1": "A",
+        "square_d2": "B",
+        "coffee_d2": "C",
+        "threading_d2": "D",
+        "stack_three_d1": "E",
+        "hammer_cleanup_d1": "F",
+        "three_piece_assembly_d2": "G",
+        "mug_cleanup_d1": "H",
+        "nut_assembly_d0": "I",
+        "kitchen_d1": "J",
+        "pick_place_d0": "K",
+        "coffee_preparation_d1": "L"
+    }
+    cfg.task_alphabet = task_name2alphabet[cfg.task_name]
+
     OmegaConf.resolve(cfg)
     train(cfg)
 
@@ -321,24 +335,58 @@ def main(cfg: OmegaConf):
 # endregion
 # ---------------------------------------------------------------
 if __name__ == '__main__':
-    max_steps = {
-        'stack_d1': 400,
-        'stack_three_d1': 400,
-        'square_d2': 400,
-        'threading_d2': 400,
-        'coffee_d2': 400,
-        'three_piece_assembly_d2': 500,
-        'hammer_cleanup_d1': 500,
-        'mug_cleanup_d1': 500,
-        'kitchen_d1': 800,
-        'nut_assembly_d0': 500,
-        'pick_place_d0': 1000,
-        'coffee_preparation_d1': 800,
-        'tool_hang': 700,
-        'can': 400,
-        'lift': 400,
-        'square': 400,
+    tasks_meta = {
+        "A": {
+            "name": "stack_d1",
+            "average_steps": 108,
+        },
+        "B": {
+            "name": "square_d2",
+            "average_steps": 153,
+        },
+        "C": {
+            "name": "coffee_d2",
+            "average_steps": 224,
+        },
+        "D": {
+            "name": "threading_d2",
+            "average_steps": 227,
+        },
+        "E": {
+            "name": "stack_three_d1",
+            "average_steps": 255,
+        },
+        "F": {
+            "name": "hammer_cleanup_d1",
+            "average_steps": 286,
+        },
+        "G": {
+            "name": "three_piece_assembly_d2",
+            "average_steps": 335,
+        },
+        "H": {
+            "name": "mug_cleanup_d1",
+            "average_steps": 338,
+        },
+        "I": {
+            "name": "nut_assembly_d0",
+            "average_steps": 358,
+        },
+        "J": {
+            "name": "kitchen_d1",
+            "average_steps": 619,
+        },
+        "K": {
+            "name": "pick_place_d0",
+            "average_steps": 677,
+        },
+        "L": {
+            "name": "coffee_preparation_d1",
+            "average_steps": 687,
+        },
     }
+    max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}
+    print(f"max_steps: {max_steps}")
 
     def get_ws_x_center(task_name):
         if task_name.startswith('kitchen_') or task_name.startswith('hammer_cleanup_'):

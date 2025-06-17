@@ -33,7 +33,7 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl_JP2ee_stage1",
+            "name": "Train pl_stage1",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_stage1.py",
@@ -52,7 +52,7 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl_JP2ee_stage1 data_debug",
+            "name": "Train pl_stage1 data_debug",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_stage1.py",
@@ -72,7 +72,7 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
-            "name": "Train pl_JP2ee_stage2",
+            "name": "Train pl_stage2",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_stage2.py",
@@ -85,6 +85,26 @@
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",
                 "logging.mode=offline",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        {
+            "name": "Train pl_stage2 ABC_D",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_stage2.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_stage2_ABC_D",
+                "task_name=stack_d1",
+                "n_demo=1000",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "logging.mode=online",
+                "logging.project='debug'",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
             ],

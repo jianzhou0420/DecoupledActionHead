@@ -397,7 +397,7 @@ def train(cfg: AppConfig):
                                     ActionMseLossForDiffusion(cfg),
                                     ],
                          max_epochs=int(cfg.training.num_epochs),
-                         devices='auto',
+                         devices=[0],
                          strategy='auto',
                          logger=[wandb_logger],
                          use_distributed_sampler=False,

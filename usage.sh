@@ -22,8 +22,8 @@ python equi_diffpo/scripts/robomimic_dataset_conversion.py -i data/robomimic/dat
 # train
 
 python trainer_pl_normal.py --config-name=train_diffusion_unet task_name=stack_d1 n_demo=1000
-python trainer_pl_stage1.py --config-name=DP_DecoupleActionHead_stage1 n_demo=1000 dataset_path=./data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
-python trainer_pl_stage2.py --config-name=DP_DecoupleActionHead_stage2 n_demo=1000 task_name=stack_d1
+python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage1 n_demo=1000 dataset_path=./data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
+python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage2 n_demo=1000 task_name=stack_d1
 
 # debug args
 logging.mode=offline task.env_runner.n_train=1 task.env_runner.n_test=1 task.env_runner.n_envs=2

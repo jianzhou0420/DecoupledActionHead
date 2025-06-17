@@ -36,7 +36,7 @@
             "name": "Train pl_stage1",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_stage1.py",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=DP_DecoupleActionHead_stage1",
@@ -55,7 +55,7 @@
             "name": "Train pl_stage1 data_debug",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_stage1.py",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=DP_JP2eePose",
@@ -75,7 +75,7 @@
             "name": "Train pl_stage2",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_stage2.py",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=DP_DecoupleActionHead_stage2",
@@ -95,7 +95,7 @@
             "name": "Train pl_stage2 ABC_D",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_stage2.py",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=DP_DecoupleActionHead_stage2_ABC_D",

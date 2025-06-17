@@ -562,10 +562,10 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    converter = DatasetConvertor()
-    converter.put_together_ABC(
-        A_path='data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5',
-        B_path='data/robomimic/datasets/coffee_d2/coffee_d2_abs_JP2eePose.hdf5',
-        C_path='data/robomimic/datasets/three_piece_assembly_d2/three_piece_assembly_d2_abs_JP2eePose.hdf5'
-    )
+    main()
+    # converter = DatasetConvertor()
+    # converter.put_together_ABC(
+    #     A_path='data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5',
+    #     B_path='data/robomimic/datasets/coffee_d2/coffee_d2_abs_JP2eePose.hdf5',
+    #     C_path='data/robomimic/datasets/three_piece_assembly_d2/three_piece_assembly_d2_abs_JP2eePose.hdf5'
+    # )

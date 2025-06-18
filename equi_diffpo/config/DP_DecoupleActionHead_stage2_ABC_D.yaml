@@ -80,7 +80,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 1
+  num_workers: 0
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -107,7 +107,7 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: 5
+  rollout_every: 1
   checkpoint_every: 10
   val_every: 10000
   sample_every: 5

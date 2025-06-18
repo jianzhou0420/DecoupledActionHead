@@ -164,8 +164,8 @@ class Trainer_all(pl.LightningModule):
                 cfg.ema,
                 model=policy_ema,)
 
-        self.policy = policy
-        self.policy_ema = policy_ema
+        self.policy = policy.to(self.device)
+        self.policy_ema = policy_ema.to(self.device)
         self.ema_handler = ema_handler
         self.train_sampling_batch = None
 

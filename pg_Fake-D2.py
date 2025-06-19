@@ -207,6 +207,7 @@ def draw_with_respect_to_task(actions_all):
         bbox = temp_pcd_for_bbox.get_axis_aligned_bounding_box()
         bbox.color = (1, 0, 0)  # 全局边界框为红色
         geometries_to_draw.append(bbox)
+        print("bbox is:", bbox)
 
         print(f"要绘制的点云组总数: {len(actions_all)}")
         print("使用 Open3D 可视化不同颜色的点云（按组着色）和全局边界框...")
@@ -220,7 +221,80 @@ def draw_with_respect_to_task(actions_all):
         print("没有点云可绘制。")
 
 
+def draw_two_action_groups(group1_actions_all, group1_color, group2_actions_all, group2_color):
+    """
+    绘制两个点云组，每个组使用指定颜色，并在同一窗口中显示。
+    :param group1_actions_all: 第一个 action 组 (actions_all 格式)。
+    :param group1_color: 第一个 action 组的颜色 (R, G, B) 元组，值在 0-1 之间。
+    :param group2_actions_all: 第二个 action 组 (actions_all 格式)。
+    :param group2_color: 第二个 action 组的颜色 (R, G, B) 元组，值在 0-1 之间。
+    """
+    geometries_to_draw = []
+    all_points_for_bbox = []
+
+    # Helper function to process each group
+    def process_group(actions_all_list, color):
+        if not actions_all_list:
+            print("Warning: An action group is empty and will not be drawn.")
+            return None, None
+
+        # Flatten the current group's actions
+        flattened_actions = np.concatenate([np.concatenate(actions) for actions in actions_all_list], axis=0)
+        print(f"Flattened shape for a group: {flattened_actions.shape}")
+
+        if flattened_actions.shape[1] < 3:
+            print("Action dimensions are less than 3, cannot plot in 3D. Skipping group.")
+            return None, None
+
+        points = flattened_actions[:, :3]
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+        pcd.colors = o3d.utility.Vector3dVector(np.tile(color, (len(points), 1)))
+
+        return pcd, points
+
+    # Process Group 1
+    pcd1, points1 = process_group(group1_actions_all, group1_color)
+    if pcd1:
+        geometries_to_draw.append(pcd1)
+        all_points_for_bbox.append(points1)
+
+    # Process Group 2
+    pcd2, points2 = process_group(group2_actions_all, group2_color)
+    if pcd2:
+        geometries_to_draw.append(pcd2)
+        all_points_for_bbox.append(points2)
+
+    # Create a combined bounding box if there are any points
+    if all_points_for_bbox:
+        combined_points = np.concatenate(all_points_for_bbox, axis=0)
+        temp_pcd_for_bbox = o3d.geometry.PointCloud()
+        temp_pcd_for_bbox.points = o3d.utility.Vector3dVector(combined_points)
+
+        bbox = temp_pcd_for_bbox.get_axis_aligned_bounding_box()
+        bbox.color = (0, 0, 0)  # Black color for the combined bounding box
+        print("Combined Bounding Box:", bbox)
+        geometries_to_draw.append(bbox)
+    else:
+        print("No valid points found in either group to draw a bounding box.")
+
+    if geometries_to_draw:
+        print("Visualizing two action groups with specified colors and a combined bounding box...")
+        o3d.visualization.draw_geometries(geometries_to_draw,
+                                          window_name="Two Action Groups with Specified Colors",
+                                          width=1024, height=768,
+                                          left=50, top=50,
+                                          mesh_show_back_face=False)
+        print("Open3D visualization closed.")
+    else:
+        print("No geometries to draw.")
+
+
 actions_all = get_actions_all()
 
-actions_all = actions_all[:4]  # 仅绘制前三个任务的动作数据
-draw_with_respect_to_task(actions_all)
+# actions_all = actions_all[:4]  # 仅绘制前三个任务的动作数据
+# draw_with_respect_to_task(actions_all[0:1])
+draw_with_default_color(actions_all[0:1])  # 绘制第一个任务的动作数据，使用默认颜色
+group_1 = [actions_all[0], actions_all[2], actions_all[6]]  # 合并第一个、第三个和第四个任务的动作数据
+group_2 = actions_all[3:4]  # 仅使用第四个任务的动作数据
+# draw_two_action_groups(group_1, (0, 0, 1), actions_all[4:5], (0, 1, 0))  # 绘制第一个和第二个任务的动作数据，分别使用红色和绿色

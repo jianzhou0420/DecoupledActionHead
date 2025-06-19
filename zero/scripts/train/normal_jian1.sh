@@ -1,6 +1,5 @@
 #!/bin/bash
-git stash
-git pull
+
 # ---
 # Check for provided task names
 # ---
@@ -48,7 +47,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     fi
 
     echo "Running trainer.py for task: '$LETTER' (Descriptive Name: $DESCRIPTIVE_TASK_NAME)"
-    python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage2_noamrl n_demo=1000 task_name="$DESCRIPTIVE_TASK_NAME" task.env_runner.n_envs=28 task_alphabet=$LETTER
+    python trainer_pl_all.py --config-name=DP_DecoupleActionHead_normal n_demo=1000 task_name="$DESCRIPTIVE_TASK_NAME" task.env_runner.n_envs=28 task_alphabet=$LETTER
     echo "Finished trainer.py for task: '$LETTER'"
     echo "---"
 done

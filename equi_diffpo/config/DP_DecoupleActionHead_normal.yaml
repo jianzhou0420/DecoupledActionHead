@@ -25,7 +25,7 @@ task_alphabet: null
 ckpt_epoch: null
 ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
 
-run_name: normal_${task_alphabet}_${task_name}_${n_demo}
+run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 

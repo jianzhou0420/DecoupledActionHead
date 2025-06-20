@@ -20,7 +20,7 @@ dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.Robomimic
 dataset_path: ./data/robomimic/datasets/ABC/stack_d1_coffee_d2_three_piece_assembly_d2_abs_JP2eePose.hdf5
 
 task_alphabet: null
-run_name: stage1_${task_alphabet}_${task_name}_${n_demo}
+run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 

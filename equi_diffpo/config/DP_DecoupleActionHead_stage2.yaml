@@ -3,6 +3,7 @@ defaults:
   - task: mimicgen_abs_JP2eePose_stage2
 
 name: stage2
+
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
@@ -23,7 +24,7 @@ task_alphabet: null
 ckpt_epoch: null
 
 ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
-run_name: stage2_${task_alphabet}_${task_name}_${n_demo}
+run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -57,9 +58,6 @@ policy:
   obs_encoder_group_norm: True
   eval_fixed_crop: True
   rot_aug: False
-
-  # scheduler.step params
-  # predict_epsilon: True
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
@@ -120,11 +118,6 @@ logging:
   tags: ["stage2","${task_alphabet}", "${task_name}"]
   id: null
   group: null
-
-
-# multi_run:
-#   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
-#   wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
 
 hydra:
   job:

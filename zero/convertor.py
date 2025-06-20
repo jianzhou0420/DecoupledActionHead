@@ -197,15 +197,14 @@ class DatasetConvertor:
 
         cprint(f"Convertion has been done\n You should find{traj_JP_eeloss_path}", 'green')
 
-    def pure_lowdim_eePose(self, original_path: str):
-        pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_eePose.hdf5')
-        os.makedirs(os.path.dirname(pure_lowdim_path), exist_ok=True)
-        self._copy2new_h5py_file(original_path, pure_lowdim_path)
-        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
+    def states_eePose(self, original_path: str):
+        states_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_states_traj_eePose.hdf5')
+        os.makedirs(os.path.dirname(states_path), exist_ok=True)
+        self._copy2new_h5py_file(original_path, states_path)
+        cprint(f"Converting\n{original_path}\nto{states_path}\n", 'blue')
 
-        self._controller_type_to_JP(pure_lowdim_path)
         # change_controller_type(JP_h5py_file)
-        with h5py.File(pure_lowdim_path, 'r+') as f:
+        with h5py.File(states_path, 'r+') as f:
             data = f['data']
             for i, key in enumerate(data.keys()):
                 # 1. get a numpy copy of the dataset
@@ -243,14 +242,14 @@ class DatasetConvertor:
 
                 obs_group.create_dataset('states', data=states, dtype='f8')
 
-    def pure_lowdim_JP(self, original_path: str):
-        pure_lowdim_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_pure_lowdim_traj_JP.hdf5')
-        os.makedirs(os.path.dirname(pure_lowdim_path), exist_ok=True)
-        self._copy2new_h5py_file(original_path, pure_lowdim_path)
-        cprint(f"Converting\n{original_path}\nto{pure_lowdim_path}\n", 'blue')
+    def states_JP(self, original_path: str):
+        states_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_states_traj_JP.hdf5')
+        os.makedirs(os.path.dirname(states_path), exist_ok=True)
+        self._copy2new_h5py_file(original_path, states_path)
+        cprint(f"Converting\n{original_path}\nto{states_path}\n", 'blue')
 
         # change_controller_type(JP_h5py_file)
-        with h5py.File(pure_lowdim_path, 'r+') as f:
+        with h5py.File(states_path, 'r+') as f:
             data = f['data']
             for i, key in enumerate(data.keys()):
                 # 1. get a numpy copy of the dataset
@@ -447,45 +446,26 @@ class DatasetConvertor:
             cprint(env_args, 'blue')
 
 
-# class DatasetConvertor:
-#     def traj_eePose(self, filepath):
-#         print(f"🚀 调用方法 'traj_eePose' 处理: {filepath}")
-
-#     def traj_JP(self, filepath):
-#         print(f"🚀 调用方法 'traj_JP' 处理: {filepath}")
-
-#     def traj_JP_eeloss(self, filepath):
-#         print(f"🚀 调用方法 'traj_JP_eeloss' 处理: {filepath}")
-
-#     def pure_lowdim_JP(self, filepath):
-#         print(f"🚀 调用方法 'pure_lowdim_JP' 处理: {filepath}")
-
-#     def JP2eePose_debug(self, filepath):
-#         print(f"🚀 调用方法 'JP2eePose_debug' 处理: {filepath}")
-
-#     def JP2eePose(self, filepath):
-#         print(f"🚀 调用方法 'JP2eePose' 处理: {filepath}")
-
-# ----------------------------------------------------
-
 def main():
     # 1. 定义任务和转换方法
     tasks = {
         "A": "stack_d1",
-        "B": "coffee_d2",
-        "C": "three_piece_assembly_d2",
-        "D": "stack_three_d1",
-        "E": "square_d2",
-        "F": "threading_d2",
-        "G": "hammer_cleanup_d1",
+        "B": "square_d2",
+        "C": "coffee_d2",
+        "D": "threading_d2",
+        "E": "stack_three_d1",
+        "F": "hammer_cleanup_d1",
+        "G": "three_piece_assembly_d2",
         "H": "mug_cleanup_d1",
-        "I": "kitchen_d1",
-        "J": "nut_assembly_d0",
+        "I": "nut_assembly_d0",
+        "J": "kitchen_d1",
         "K": "pick_place_d0",
-        "L": "coffee_preparation_d1"
+        "L": "coffee_preparation_d1",
     }
+
     valid_conversion_methods = [
-        'traj_eePose', 'traj_JP', 'traj_JP_eeloss', 'pure_lowdim_JP',
+        'traj_eePose', 'traj_JP', 'traj_JP_eeloss',
+        'states_JP', 'states_eePose',
         'JP2eePose_debug', 'JP2eePose'
     ]
 

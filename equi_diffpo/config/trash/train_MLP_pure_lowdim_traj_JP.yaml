@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - task: mimicgen_abs_pure_lowdim_traj_JP
+  - task: mimicgen_abs_states_traj_JP
 
 name: diff_c
 _target_: equi_diffpo.workspace.train_tmp_for_MLP.Train_General
@@ -18,10 +18,10 @@ dataset_obs_steps: ${n_obs_steps}
 past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_states_JP.RobomimicReplayImageDataset
-dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_pure_lowdim_traj_JP.hdf5
+dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_states_traj_JP.hdf5
 
 policy:
-  _target_: equi_diffpo.policy.MLP_pure_lowdim_policy.MLPPolicy
+  _target_: equi_diffpo.policy.MLP_states_policy.MLPPolicy
 
   shape_meta: ${shape_meta}
   
@@ -112,7 +112,7 @@ logging:
   project: diffusion_policy_${task_name}
   resume: True
   mode: online
-  name: DP_pure_lowdim_traj_JP
+  name: DP_states_traj_JP
   tags: ["${name}", "${task_name}", "${exp_name}"]
   id: null
   group: null

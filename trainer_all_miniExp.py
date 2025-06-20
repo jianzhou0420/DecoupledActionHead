@@ -1,23 +1,39 @@
+# helper package
+# try:
+#     import warnings
+#     warnings.filterwarnings("ignore", message="Gimbal lock detected. Setting third angle to zero")
+#     warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.cuda.amp.custom_bwd.*")
+#     warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.cuda.amp.custom_fwd.*")
+# except:
+#     pass
+
 import wandb
 import pathlib
+import gym  # Or your custom environment library
+import time
+from datetime import datetime
 import os
 import os
 from typing import Type, Dict, Any
 import copy
 
 # framework package
+import argparse
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.loggers import TensorBoardLogger, CSVLogger, WandbLogger
 import pytorch_lightning as pl
+from torch.utils.data import Dataset
 # equidiff package
 from equi_diffpo.workspace.base_workspace import BaseWorkspace
 from equi_diffpo.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
 from equi_diffpo.dataset.base_dataset import BaseImageDataset
 from equi_diffpo.env_runner.base_image_runner import BaseImageRunner
-
+from equi_diffpo.common.checkpoint_util import TopKCheckpointManager
+from equi_diffpo.common.json_logger import JsonLogger
 from equi_diffpo.common.pytorch_util import dict_apply, optimizer_to
 from equi_diffpo.model.diffusion.ema_model import EMAModel
 from equi_diffpo.model.common.lr_scheduler import get_scheduler
@@ -28,6 +44,7 @@ from omegaconf import DictConfig, OmegaConf
 from hydra.core.hydra_config import HydraConfig
 from equi_diffpo.config.config_hint import AppConfig
 
+from equi_diffpo.workspace.base_workspace import BaseWorkspace
 import pathlib
 from omegaconf import OmegaConf
 import hydra
@@ -177,13 +194,18 @@ class Trainer_all(pl.LightningModule):
             self.train_sampling_batch = batch
 
         loss = self.policy.compute_loss(batch)
+        total_loss = loss['loss']
+        mse_loss = loss['mseloss']
+        kld_loss = loss['kldloss']
         self.logger.experiment.log({
-            'train/train_loss': loss.item(),
+            'train/total_loss': total_loss.item(),
+            'train/mse_loss': mse_loss.item(),
+            'train/kld_loss': kld_loss.item(),
             'train/lr': self.optimizers().param_groups[0]['lr'],
             'trainer/global_step': self.global_step,
             'trainer/epoch': self.current_epoch,
         }, step=self.global_step)
-        return loss
+        return total_loss
 
     def on_train_batch_end(self, outputs, batch, batch_idx):
         """
@@ -194,8 +216,13 @@ class Trainer_all(pl.LightningModule):
 
     def validation_step(self, batch):
         loss = self.policy_ema.compute_loss(batch)
+        total_loss = loss['loss']
+        mse_loss = loss['mseloss']
+        kld_loss = loss['kldloss']
         self.logger.experiment.log({
-            'train/val_loss': loss.item(),
+            'train/val_loss': total_loss.item(),
+            'train/val_mse_loss': mse_loss.item(),
+            'train/val_kld_loss': kld_loss.item(),
         }, step=self.global_step)
         return loss
 
@@ -378,16 +405,13 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
-    # which callbacks to use
-    callback_list = []
-    if cfg.training.ckpt_callback:
-        callback_list.append(checkpoint_callback)
-    if cfg.training.rollout_callback:
-        callback_list.append(RolloutCallback(cfg))
-    if cfg.training.action_mse_loss_callback:
-        callback_list.append(ActionMseLossForDiffusion(cfg))
+    callback_list = [
+        # checkpoint_callback,
+        # RolloutCallback(cfg),
+        # ActionMseLossForDiffusion(cfg),
+    ],
 
-    trainer = pl.Trainer(callbacks=callback_list,
+    trainer = pl.Trainer(callbacks=[],
                          max_epochs=int(cfg.training.num_epochs),
                          devices=[0],
                          strategy='auto',

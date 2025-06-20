@@ -2,33 +2,77 @@
 因为不要大规模实验调参，这里就用固定的参数
 '''
 
+import einops
 from equi_diffpo.policy.base_image_policy import BaseImagePolicy
 import torch
 
+from typing import Dict, List
+from equi_diffpo.model.common.normalizer import LinearNormalizer
+from miniExp.model.optimized_vae import VAE1D
 
-class PolicyVAE(BaseImagePolicy):
+
+class VAEPolicy(BaseImagePolicy):
     """
     A VAE policy that can be used for training and inference.
     This policy is designed to work with the DiffusionUnetHybridImagePolicy.
     """
 
-    def __init__(self, cfg):
-        super().__init__(cfg)
-        self.vae.eval()  # Set to eval mode by default
+    def __init__(self):
+        super().__init__()
+        BATCH_SIZE = 4
+        INPUT_CHANNELS = 7
+        OUTPUT_CHANNELS = 10
+        SEQUENCE_LENGTH = 16
+        LATENT_DIM = 7
+        model = VAE1D(
+            in_channels=INPUT_CHANNELS,
+            out_channels=OUTPUT_CHANNELS,
+            latent_dim=LATENT_DIM,
+            sequence_length=SEQUENCE_LENGTH,
+            hidden_dims=[512, 1024, 2048]  # 可以根据需要调整
+        )
 
-    def predict_action(self, obs_dict):
+        self.model = model  # Set to eval mode by default
+        self.normalizer = LinearNormalizer()
+
+    def predict_action(self, obs_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """
-        obs_dict:
-            str: B,To,*
-        return: B,Ta,Da
+        obs_dict: must include "obs" key
+        result: must include "action" key
         """
-        # Assuming obs_dict contains the necessary input for the VAE
-        with torch.no_grad():
-            actions = self.forward(obs_dict['obs'])
-        return {'actions': actions}
+        assert 'past_action' not in obs_dict  # not implemented yet
+        # normalize input
+        nobs = self.normalizer.normalize(obs_dict)
+        value = next(iter(nobs.values()))
+        B, To = value.shape[:2]
+        T = self.horizon
+        Da = self.action_dim
+        Do = self.obs_feature_dim
+        To = self.n_obs_steps
+
+        # build input
+        device = self.device
+        dtype = self.dtype
+
+        vae_out, _, mu, log_var = self.model(nobs['obs'].to(device=device, dtype=dtype))
+        # TODO
 
     def compute_loss(self, batch):
-        """
-        Compute the loss for the VAE policy.
-        """
-        return self.vae.compute_loss(batch)
+        # normalize input
+        assert 'valid_mask' not in batch
+        nobs = self.normalizer.normalize(batch['obs'])
+        nactions = self.normalizer['action'].normalize(batch['action'])
+        # if self.rot_aug:
+        #     nobs, nactions = self.rot_randomizer(nobs, nactions)
+        batch_size = nactions.shape[0]
+        horizon = nactions.shape[1]
+        nobs = nobs['JPOpen'][:, :, :7]
+
+        nobs = einops.rearrange(nobs, 'b h t -> b t h')
+        nactions = einops.rearrange(nactions, 'b h t -> b t h')
+        vae_out, _, mu, log_var = self.model(nobs)
+        loss = self.model.loss_function(vae_out, nobs, mu, log_var, nactions)
+        return loss
+
+    def set_normalizer(self, normalizer: LinearNormalizer):
+        self.normalizer.load_state_dict(normalizer.state_dict())

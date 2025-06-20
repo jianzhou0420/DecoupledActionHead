@@ -395,8 +395,10 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
+    callback_list = []
+
     trainer = pl.Trainer(callbacks=[checkpoint_callback,
-                                    RolloutCallback(cfg),
+                                    # RolloutCallback(cfg),
                                     ActionMseLossForDiffusion(cfg),
                                     ],
                          max_epochs=int(cfg.training.num_epochs),

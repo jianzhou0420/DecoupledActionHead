@@ -29,6 +29,7 @@
                 "logging.mode=offline",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
@@ -47,7 +48,8 @@
                 // "task.env_runner.n_test=1",
                 "logging.mode=online",
                 "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1"
+                "val_dataloader.num_workers=1",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
@@ -67,7 +69,8 @@
                 "logging.mode=online",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
-                "task.dataset.dataset_path=./data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5"
+                "task.dataset.dataset_path=./data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
@@ -106,6 +109,28 @@
                 "task.env_runner.n_train=1",
                 "task.env_runner.n_test=1",
                 "logging.mode=online",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        {
+            "name": "Train vae_stage1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_all_miniExp.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=train_vae",
+                "task_name=stack_d1",
+                // "task_alphabet=A",
+                "n_demo=1",
+                // "task.env_runner.n_envs=2",
+                // "task.env_runner.n_train=1",
+                // "task.env_runner.n_test=1",
+                "logging.mode=offline",
                 "logging.project='debug'",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",

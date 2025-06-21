@@ -56,7 +56,7 @@ class VAEPolicy(BaseImagePolicy):
     #     vae_out, _, mu, log_var = self.model(nobs['obs'].to(device=device, dtype=dtype))
         # TODO
 
-    def compute_loss(self, batch):
+    def compute_loss(self, batch, **kwargs):
         # normalize input
         assert 'valid_mask' not in batch
         nobs = self.normalizer.normalize(batch['obs'])

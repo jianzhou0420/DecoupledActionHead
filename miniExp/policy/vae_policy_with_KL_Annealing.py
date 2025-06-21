@@ -8,7 +8,7 @@ import torch
 
 from typing import Dict, List
 from equi_diffpo.model.common.normalizer import LinearNormalizer
-from miniExp.model.optimized_vae import VAE1D
+from miniExp.model.optimized_vae_with_KL_Annealing import VAE1D
 
 
 class VAEPolicy(BaseImagePolicy):

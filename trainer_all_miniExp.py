@@ -193,8 +193,8 @@ class Trainer_all(pl.LightningModule):
         if self.train_sampling_batch is None:
             self.train_sampling_batch = batch
 
-        loss = self.policy.compute_loss(batch)
         if self.cfg.policy_name == 'vae':
+            loss = self.policy.compute_loss(batch, current_epoch=self.current_epoch)
             total_loss = loss['loss']
             mse_loss = loss['mseloss']
             kld_loss = loss['kldloss']
@@ -207,6 +207,7 @@ class Trainer_all(pl.LightningModule):
                 'trainer/epoch': self.current_epoch,
             }, step=self.global_step)
         elif self.cfg.policy_name == 'ae':
+            loss = self.policy.compute_loss(batch)
             total_loss = loss
             self.logger.experiment.log({
                 'train/mse_loss': loss.item(),

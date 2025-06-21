@@ -227,8 +227,9 @@ class Trainer_all(pl.LightningModule):
         self.ema_handler.step(self.policy)
 
     def validation_step(self, batch):
-        loss = self.policy_ema.compute_loss(batch)
         if self.cfg.policy_name == 'vae':
+            loss = self.policy_ema.compute_loss(batch, current_epoch=self.current_epoch)
+
             total_loss = loss['loss']
             mse_loss = loss['mseloss']
             kld_loss = loss['kldloss']
@@ -240,6 +241,8 @@ class Trainer_all(pl.LightningModule):
                 'trainer/epoch': self.current_epoch,
             }, step=self.global_step)
         elif self.cfg.policy_name == 'ae':
+            loss = self.policy_ema.compute_loss(batch)
+
             self.logger.experiment.log({
                 'val/mse_loss': loss.item(),
                 'trainer/global_step': self.global_step,

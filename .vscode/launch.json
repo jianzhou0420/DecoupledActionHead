@@ -139,6 +139,27 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         {
+            "name": "Train vae_annealing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_all_miniExp.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=train_vae_KL_Annealing",
+                // "task_alphabet=A",
+                "n_demo=1",
+                // "task.env_runner.n_envs=2",
+                // "task.env_runner.n_train=1",
+                // "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        {
             "name": "OnlineEval",
             "type": "debugpy",
             "request": "launch",

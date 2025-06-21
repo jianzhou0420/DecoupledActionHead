@@ -1,13 +1,15 @@
+import einops
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import List, Optional
 
 
+# ---------------------------------------
+# region: 0. Blocks
+
+
 class Downsample1d(nn.Module):
-    """
-    一维下采样模块，使用步长为2的卷积将序列长度减半。
-    """
 
     def __init__(self, dim):
         super().__init__()
@@ -18,9 +20,6 @@ class Downsample1d(nn.Module):
 
 
 class Upsample1d(nn.Module):
-    """
-    一维上采样模块，使用步长为2的转置卷积将序列长度加倍。
-    """
 
     def __init__(self, dim):
         super().__init__()
@@ -31,9 +30,6 @@ class Upsample1d(nn.Module):
 
 
 class Conv1dBlock(nn.Module):
-    '''
-    一个基础的一维卷积块，结构为: Conv1d -> GroupNorm -> Mish 激活函数。
-    '''
 
     def __init__(self, inp_channels, out_channels, kernel_size, n_groups=8):
         super().__init__()
@@ -50,11 +46,12 @@ class Conv1dBlock(nn.Module):
     def forward(self, x):
         return self.block(x)
 
-# Block1D is no longer used in the refactored VAE, but kept for reference
-# Block1D 在重构后的 VAE 中不再使用，但保留以供参考
-
 
 class Block1D(nn.Module):
+    """
+    Diffusion Policy 的基础block，去掉FILM的，global_conditioning
+    """
+
     def __init__(self, in_channels, out_channels, kernel_size=3, n_groups=8):
         super().__init__()
         self.blocks = nn.ModuleList([
@@ -66,20 +63,14 @@ class Block1D(nn.Module):
         out = self.blocks[0](x)
         out = self.blocks[1](out)
         return out
+# endregion
 
 
-# ======================================================================
-# Refactored VAE Implementation
-# 重构后的 VAE 实现
-# ======================================================================
+# ---------------------------------------
+# region: 1. VAE1D
+
 
 class VAE1D(nn.Module):
-    """
-    一个可配置的一维卷积变分自编码器。
-
-    通过 `hidden_dims` 参数，可以灵活地定义编码器和解码器的层数与维度。
-    """
-
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
@@ -94,19 +85,14 @@ class VAE1D(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
 
-        # ----------- 编码器 (Encoder) -----------
+        # ----------- Encoder -----------
         modules = []
-        if hidden_dims is None:
-            # 默认的隐藏层维度
-            hidden_dims = [32, 64, 128]
 
-        # 初始卷积层
         modules.append(
             Block1D(in_channels, hidden_dims[0], kernel_size=3, n_groups=n_groups)
         )
         in_channels = hidden_dims[0]
 
-        # 动态构建编码器层
         for h_dim in hidden_dims[1:]:
             modules.append(
                 Block1D(in_channels, h_dim, kernel_size=3, n_groups=n_groups)
@@ -118,7 +104,6 @@ class VAE1D(nn.Module):
 
         self.encoder = nn.Sequential(*modules)
 
-        # 动态计算展平后的维度
         # 每一次 Downsample1d 都会使序列长度减半
         self.final_seq_len = sequence_length // (2 ** (len(hidden_dims) - 1))
         self.flattened_dim = hidden_dims[-1] * self.final_seq_len
@@ -126,14 +111,13 @@ class VAE1D(nn.Module):
         self.fc_mu = nn.Linear(self.flattened_dim, latent_dim)
         self.fc_log_var = nn.Linear(self.flattened_dim, latent_dim)
 
-        # ----------- 解码器 (Decoder) -----------
+        # ----------- Decoder -----------
         modules = []
 
         self.decoder_input = nn.Linear(latent_dim, self.flattened_dim)
 
         hidden_dims.reverse()
 
-        # 动态构建解码器层
         for i in range(len(hidden_dims) - 1):
             modules.append(
                 Upsample1d(hidden_dims[i])
@@ -147,13 +131,11 @@ class VAE1D(nn.Module):
         # 最终输出层
         self.final_conv = nn.Conv1d(hidden_dims[-1], self.out_channels, kernel_size=3, padding=1)
 
-        print("Configurable VAE1D Model Initialized.")
         print(f"Hidden Dims:  {hidden_dims[::-1]}")
         print(f"Latent dim:   {latent_dim}")
         print(f"Flattened dim: {self.flattened_dim}")
 
     def encode(self, x: torch.Tensor) -> List[torch.Tensor]:
-        """编码器前向传播，返回均值和对数方差"""
         result = self.encoder(x)
         result = torch.flatten(result, start_dim=1)
         mu = self.fc_mu(result)
@@ -166,7 +148,6 @@ class VAE1D(nn.Module):
         return mu + eps * std
 
     def decode(self, z: torch.Tensor) -> torch.Tensor:
-        """解码器前向传播，从潜在向量重构输出"""
         result = self.decoder_input(z)
         result = result.view(result.size(0), -1, self.final_seq_len)
         result = self.decoder(result)
@@ -174,14 +155,13 @@ class VAE1D(nn.Module):
         return result
 
     def forward(self, x: torch.Tensor, **kwargs) -> List[torch.Tensor]:
-        """完整的 VAE 前向传播"""
+
         mu, log_var = self.encode(x)
         z = self.reparameterize(mu, log_var)
         reconstruction = self.decode(z)
         return [reconstruction, x, mu, log_var]
 
     def loss_function(self, *args, **kwargs) -> dict:
-        """计算 VAE 损失"""
         vae_out = args[0]
         original_input = args[1]
         mu = args[2]
@@ -191,22 +171,17 @@ class VAE1D(nn.Module):
         # kld_weight 用于平衡重构损失和KL散度
         kld_weight = kwargs.get('kld_weight', 1.0)
 
-        # 重构损失 (MSE)W
-        # 注意：目标的形状需要与重构输出匹配
-        # 这里我们假设目标是多通道的，如果不是，需要调整
+        # recon_loss in Standard VAE, here we use mse of output and target
         mse_loss = F.mse_loss(vae_out, target)
 
-        # KL 散度损失
+        # KL Divergence loss
         kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp(), dim=1), dim=0)
 
         loss = mse_loss + kld_weight * kld_loss
         return {'loss': loss, 'mseloss': mse_loss.detach(), 'kldloss': kld_loss.detach()}
+# endregion
 
 
-# ======================================================================
-# Example Usage
-# 使用示例
-# ======================================================================
 if __name__ == '__main__':
     # 设置设备
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

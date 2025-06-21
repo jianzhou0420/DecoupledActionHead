@@ -170,6 +170,7 @@ class VAE1D(nn.Module):
 
         # kld_weight 用于平衡重构损失和KL散度
         kld_weight = kwargs.get('kld_weight', 1.0)
+        kld_weight = 0
 
         # recon_loss in Standard VAE, here we use mse of output and target
         mse_loss = F.mse_loss(vae_out, target)

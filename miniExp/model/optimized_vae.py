@@ -135,6 +135,9 @@ class VAE1D(nn.Module):
         print(f"Latent dim:   {latent_dim}")
         print(f"Flattened dim: {self.flattened_dim}")
 
+        # KL散度的权重
+        self.kl_weight = 1.0e-6
+
     def encode(self, x: torch.Tensor) -> List[torch.Tensor]:
         result = self.encoder(x)
         result = torch.flatten(result, start_dim=1)
@@ -169,8 +172,7 @@ class VAE1D(nn.Module):
         target = args[4]
 
         # kld_weight 用于平衡重构损失和KL散度
-        kld_weight = kwargs.get('kld_weight', 1.0)
-        kld_weight = 0
+        kld_weight = self.kl_weight
 
         # recon_loss in Standard VAE, here we use mse of output and target
         mse_loss = F.mse_loss(vae_out, target)

@@ -137,6 +137,7 @@ class VAE1D(nn.Module):
         # KL Annealing parameters
         self.kl_annealing_start_epoch = 0
         self.kl_annealing_end_epoch = 5
+        self.kl_weight = 0.05
 
     def encode(self, x: torch.Tensor) -> List[torch.Tensor]:
         result = self.encoder(x)
@@ -186,7 +187,7 @@ class VAE1D(nn.Module):
             duration = self.kl_annealing_end_epoch - self.kl_annealing_start_epoch
             # 确保分母不为0
             if duration > 0:
-                kld_weight = (current_epoch - self.kl_annealing_start_epoch) / duration
+                kld_weight = self.kl_weight * (current_epoch - self.kl_annealing_start_epoch) / duration
             else:  # 如果开始和结束在同一个epoch，则直接为1
                 kld_weight = 1.0
 

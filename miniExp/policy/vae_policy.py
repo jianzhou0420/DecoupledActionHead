@@ -19,14 +19,13 @@ class VAEPolicy(BaseImagePolicy):
 
     def __init__(self):
         super().__init__()
-        BATCH_SIZE = 4
-        INPUT_CHANNELS = 8
-        OUTPUT_CHANNELS = 10
+        IN_DIMS = 8
+        OUT_DIMS = 10
         SEQUENCE_LENGTH = 16
         LATENT_DIM = 16 * 8
         model = VAE1D(
-            in_channels=INPUT_CHANNELS,
-            out_channels=OUTPUT_CHANNELS,
+            in_dim=IN_DIMS,
+            out_dim=OUT_DIMS,
             latent_dim=LATENT_DIM,
             sequence_length=SEQUENCE_LENGTH,
             hidden_dims=[512, 1024, 2048]  # 可以根据需要调整

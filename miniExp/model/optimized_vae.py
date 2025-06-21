@@ -72,8 +72,8 @@ class Block1D(nn.Module):
 
 class VAE1D(nn.Module):
     def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
+                 in_dim: int,
+                 out_dim: int,
                  latent_dim: int,
                  sequence_length: int,
                  hidden_dims: Optional[List[int]] = None,
@@ -82,25 +82,25 @@ class VAE1D(nn.Module):
         super().__init__()
 
         self.latent_dim = latent_dim
-        self.in_channels = in_channels
-        self.out_channels = out_channels
+        self.in_dim = in_dim
+        self.out_dim = out_dim
 
         # ----------- Encoder -----------
         modules = []
 
         modules.append(
-            Block1D(in_channels, hidden_dims[0], kernel_size=3, n_groups=n_groups)
+            Block1D(in_dim, hidden_dims[0], kernel_size=3, n_groups=n_groups)
         )
-        in_channels = hidden_dims[0]
+        in_dim = hidden_dims[0]
 
         for h_dim in hidden_dims[1:]:
             modules.append(
-                Block1D(in_channels, h_dim, kernel_size=3, n_groups=n_groups)
+                Block1D(in_dim, h_dim, kernel_size=3, n_groups=n_groups)
             )
             modules.append(
                 Downsample1d(h_dim)
             )
-            in_channels = h_dim
+            in_dim = h_dim
 
         self.encoder = nn.Sequential(*modules)
 
@@ -129,7 +129,7 @@ class VAE1D(nn.Module):
         self.decoder = nn.Sequential(*modules)
 
         # 最终输出层
-        self.final_conv = nn.Conv1d(hidden_dims[-1], self.out_channels, kernel_size=3, padding=1)
+        self.final_conv = nn.Conv1d(hidden_dims[-1], self.out_dim, kernel_size=3, padding=1)
 
         print(f"Hidden Dims:  {hidden_dims[::-1]}")
         print(f"Latent dim:   {latent_dim}")
@@ -189,18 +189,18 @@ if __name__ == '__main__':
 
     # 定义模型超参数
     BATCH_SIZE = 4
-    INPUT_CHANNELS = 7
-    OUTPUT_CHANNELS = 10
+    INPUT_DIMS = 7
+    OUT_DIMS = 10
     SEQUENCE_LENGTH = 16
     LATENT_DIM = 32
 
     # 创建一个虚拟的输入张量
-    dummy_input = torch.randn(BATCH_SIZE, INPUT_CHANNELS, SEQUENCE_LENGTH).to(device)
+    dummy_input = torch.randn(BATCH_SIZE, INPUT_DIMS, SEQUENCE_LENGTH).to(device)
 
     # 实例化 VAE 模型 (使用默认的 hidden_dims: [32, 64, 128])
     model = VAE1D(
-        in_channels=INPUT_CHANNELS,
-        out_channels=OUTPUT_CHANNELS,
+        in_dim=INPUT_DIMS,
+        out_dim=OUT_DIMS,
         latent_dim=LATENT_DIM,
         sequence_length=SEQUENCE_LENGTH,
         hidden_dims=[512, 1024, 2048]  # 可以根据需要调整
@@ -219,8 +219,8 @@ if __name__ == '__main__':
     print(f"Log Var shape:               {results[3].shape}")
 
     # 验证形状是否符合预期
-    assert dummy_input.shape == (BATCH_SIZE, INPUT_CHANNELS, SEQUENCE_LENGTH)
-    assert reconstructed_output.shape == (BATCH_SIZE, OUTPUT_CHANNELS, SEQUENCE_LENGTH)
+    assert dummy_input.shape == (BATCH_SIZE, INPUT_DIMS, SEQUENCE_LENGTH)
+    assert reconstructed_output.shape == (BATCH_SIZE, OUT_DIMS, SEQUENCE_LENGTH)
     assert results[2].shape == (BATCH_SIZE, LATENT_DIM)
     assert results[3].shape == (BATCH_SIZE, LATENT_DIM)
     print("\nAll shapes are correct!")

@@ -72,7 +72,7 @@ class Block1D(nn.Module):
 
 class AE1D(nn.Module):
     def __init__(self,
-                 in_channels: int,
+                 input_dim: int,
                  out_channels: int,
                  latent_dim: int,
                  sequence_length: int,
@@ -82,25 +82,25 @@ class AE1D(nn.Module):
         super().__init__()
 
         self.latent_dim = latent_dim
-        self.in_channels = in_channels
+        self.input_dim = input_dim
         self.out_channels = out_channels
 
         # ----------- Encoder -----------
         modules = []
 
         modules.append(
-            Block1D(in_channels, hidden_dims[0], kernel_size=3, n_groups=n_groups)
+            Block1D(input_dim, hidden_dims[0], kernel_size=3, n_groups=n_groups)
         )
-        in_channels = hidden_dims[0]
+        input_dim = hidden_dims[0]
 
         for h_dim in hidden_dims[1:]:
             modules.append(
-                Block1D(in_channels, h_dim, kernel_size=3, n_groups=n_groups)
+                Block1D(input_dim, h_dim, kernel_size=3, n_groups=n_groups)
             )
             modules.append(
                 Downsample1d(h_dim)
             )
-            in_channels = h_dim
+            input_dim = h_dim
 
         self.encoder = nn.Sequential(*modules)
 
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
     # 实例化 VAE 模型 (使用默认的 hidden_dims: [32, 64, 128])
     model = AE1D(
-        in_channels=INPUT_CHANNELS,
+        input_dim=INPUT_CHANNELS,
         out_channels=OUTPUT_CHANNELS,
         latent_dim=LATENT_DIM,
         sequence_length=SEQUENCE_LENGTH,

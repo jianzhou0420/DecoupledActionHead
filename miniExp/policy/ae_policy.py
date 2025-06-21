@@ -19,12 +19,12 @@ class AEPolicy(BaseImagePolicy):
 
     def __init__(self):
         super().__init__()
-        INPUT_CHANNELS = 7
+        INPUT_CHANNELS = 8
         OUTPUT_CHANNELS = 10
         SEQUENCE_LENGTH = 16
         LATENT_DIM = 16 * 8
         model = AE1D(
-            in_channels=INPUT_CHANNELS,
+            input_dim=INPUT_CHANNELS,
             out_channels=OUTPUT_CHANNELS,
             latent_dim=LATENT_DIM,
             sequence_length=SEQUENCE_LENGTH,

@@ -194,17 +194,28 @@ class Trainer_all(pl.LightningModule):
             self.train_sampling_batch = batch
 
         loss = self.policy.compute_loss(batch)
-        total_loss = loss['loss']
-        mse_loss = loss['mseloss']
-        kld_loss = loss['kldloss']
-        self.logger.experiment.log({
-            'train/total_loss': total_loss.item(),
-            'train/mse_loss': mse_loss.item(),
-            'train/kld_loss': kld_loss.item(),
-            'train/lr': self.optimizers().param_groups[0]['lr'],
-            'trainer/global_step': self.global_step,
-            'trainer/epoch': self.current_epoch,
-        }, step=self.global_step)
+        if self.cfg.policy_name == 'vae':
+            total_loss = loss['loss']
+            mse_loss = loss['mseloss']
+            kld_loss = loss['kldloss']
+            self.logger.experiment.log({
+                'train/total_loss': total_loss.item(),
+                'train/mse_loss': mse_loss.item(),
+                'train/kld_loss': kld_loss.item(),
+                'train/lr': self.optimizers().param_groups[0]['lr'],
+                'trainer/global_step': self.global_step,
+                'trainer/epoch': self.current_epoch,
+            }, step=self.global_step)
+        elif self.cfg.policy_name == 'ae':
+            total_loss = loss
+            self.logger.experiment.log({
+                'train/mse_loss': loss.item(),
+                'train/lr': self.optimizers().param_groups[0]['lr'],
+                'trainer/global_step': self.global_step,
+                'trainer/epoch': self.current_epoch,
+            }, step=self.global_step)
+        else:
+            raise ValueError(f"Unsupported policy name: {self.cfg.policy_name}, check config.policy_name")
         return total_loss
 
     def on_train_batch_end(self, outputs, batch, batch_idx):
@@ -216,14 +227,24 @@ class Trainer_all(pl.LightningModule):
 
     def validation_step(self, batch):
         loss = self.policy_ema.compute_loss(batch)
-        total_loss = loss['loss']
-        mse_loss = loss['mseloss']
-        kld_loss = loss['kldloss']
-        self.logger.experiment.log({
-            'train/val_loss': total_loss.item(),
-            'train/val_mse_loss': mse_loss.item(),
-            'train/val_kld_loss': kld_loss.item(),
-        }, step=self.global_step)
+        if self.cfg.policy_name == 'vae':
+            total_loss = loss['loss']
+            mse_loss = loss['mseloss']
+            kld_loss = loss['kldloss']
+            self.logger.experiment.log({
+                'val/total_loss': total_loss.item(),
+                'val/mse_loss': mse_loss.item(),
+                'val/kld_loss': kld_loss.item(),
+                'trainer/global_step': self.global_step,
+                'trainer/epoch': self.current_epoch,
+            }, step=self.global_step)
+        elif self.cfg.policy_name == 'ae':
+            self.logger.experiment.log({
+                'val/mse_loss': loss.item(),
+                'trainer/global_step': self.global_step,
+                'trainer/epoch': self.current_epoch,
+            }, step=self.global_step)
+
         return loss
 
     def configure_optimizers(self):

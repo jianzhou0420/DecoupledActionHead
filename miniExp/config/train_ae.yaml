@@ -22,9 +22,10 @@ dataset_path: /media/jian/ssd4t/DP/first/data/robomimic/datasets/stack_d1/stack_
 run_name: ${name}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
-policy_name: vae
+policy_name: ae
+
 policy:
-  _target_: miniExp.policy.vae_policy.VAEPolicy
+  _target_: miniExp.policy.ae_policy.AEPolicy
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel

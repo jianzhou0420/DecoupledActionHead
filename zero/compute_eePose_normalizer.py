@@ -18,7 +18,7 @@ from equi_diffpo.common.normalize_util import (
 )
 
 from equi_diffpo.dataset.robomimic_replay_image_dataset import _convert_actions
-dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets"
+dataset_dir = "data/robomimic/datasets"
 all_datasets = natsorted(os.listdir(dataset_dir))
 
 if 'ABC' in all_datasets:

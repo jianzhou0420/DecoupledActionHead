@@ -76,7 +76,7 @@ tasks_meta = {
 
 
 def get_actions_all():
-    dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets"
+    dataset_dir = "data/robomimic/datasets"
 
     # 确保 actions_all 按照 tasks_meta 的键的字母顺序排列
     # 获取 tasks_meta 中任务名称的有序列表

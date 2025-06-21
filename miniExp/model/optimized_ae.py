@@ -174,7 +174,7 @@ if __name__ == '__main__':
     dummy_input = torch.randn(BATCH_SIZE, INPUT_CHANNELS, SEQUENCE_LENGTH).to(device)
 
     # 实例化 VAE 模型 (使用默认的 hidden_dims: [32, 64, 128])
-    model = VAE1D(
+    model = AE1D(
         in_channels=INPUT_CHANNELS,
         out_channels=OUTPUT_CHANNELS,
         latent_dim=LATENT_DIM,

@@ -6,7 +6,7 @@ import os
 from natsort import natsorted
 
 
-dataset_dir = "/media/jian/ssd4t/DP/first/data/robomimic/datasets_abs"
+dataset_dir = "data/robomimic/datasets_abs"
 all_datasets = natsorted(os.listdir(dataset_dir))
 
 average_demo_length = {}

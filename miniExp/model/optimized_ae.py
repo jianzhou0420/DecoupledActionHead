@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
     # 定义模型超参数
     BATCH_SIZE = 4
-    INPUT_CHANNELS = 7
+    INPUT_CHANNELS = 8
     OUTPUT_CHANNELS = 10
     SEQUENCE_LENGTH = 16
     LATENT_DIM = 32

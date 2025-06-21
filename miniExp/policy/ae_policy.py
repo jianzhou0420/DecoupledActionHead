@@ -22,7 +22,7 @@ class AEPolicy(BaseImagePolicy):
         INPUT_CHANNELS = 7
         OUTPUT_CHANNELS = 10
         SEQUENCE_LENGTH = 16
-        LATENT_DIM = 6 * 7
+        LATENT_DIM = 16 * 8
         model = AE1D(
             in_channels=INPUT_CHANNELS,
             out_channels=OUTPUT_CHANNELS,
@@ -65,7 +65,7 @@ class AEPolicy(BaseImagePolicy):
         #     nobs, nactions = self.rot_randomizer(nobs, nactions)
         batch_size = nactions.shape[0]
         horizon = nactions.shape[1]
-        nobs = nobs['JPOpen'][:, :, :7]
+        nobs = nobs['JPOpen']
 
         nobs = einops.rearrange(nobs, 'b h t -> b t h')
         nactions = einops.rearrange(nactions, 'b h t -> b t h')

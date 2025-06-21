@@ -20,10 +20,10 @@ class VAEPolicy(BaseImagePolicy):
     def __init__(self):
         super().__init__()
         BATCH_SIZE = 4
-        INPUT_CHANNELS = 7
+        INPUT_CHANNELS = 8
         OUTPUT_CHANNELS = 10
         SEQUENCE_LENGTH = 16
-        LATENT_DIM = 7
+        LATENT_DIM = 16 * 8
         model = VAE1D(
             in_channels=INPUT_CHANNELS,
             out_channels=OUTPUT_CHANNELS,
@@ -66,7 +66,7 @@ class VAEPolicy(BaseImagePolicy):
         #     nobs, nactions = self.rot_randomizer(nobs, nactions)
         batch_size = nactions.shape[0]
         horizon = nactions.shape[1]
-        nobs = nobs['JPOpen'][:, :, :7]
+        nobs = nobs['JPOpen']
 
         nobs = einops.rearrange(nobs, 'b h t -> b t h')
         nactions = einops.rearrange(nactions, 'b h t -> b t h')

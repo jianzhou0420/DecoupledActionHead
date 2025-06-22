@@ -26,6 +26,8 @@ policy_name: ae
 
 policy:
   _target_: miniExp.policy.ae_policy.AEPolicy
+  shape_meta: ${shape_meta}
+  
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel

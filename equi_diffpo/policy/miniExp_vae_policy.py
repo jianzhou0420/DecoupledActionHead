@@ -8,7 +8,7 @@ import torch
 
 from typing import Dict, List
 from equi_diffpo.model.common.normalizer import LinearNormalizer
-from miniExp.model.optimized_vae_with_KL_Annealing import VAE1D
+from equi_diffpo.model.ae.optimized_vae import VAE1D
 
 
 class VAEPolicy(BaseImagePolicy):
@@ -56,7 +56,7 @@ class VAEPolicy(BaseImagePolicy):
     #     vae_out, _, mu, log_var = self.model(nobs['obs'].to(device=device, dtype=dtype))
         # TODO
 
-    def compute_loss(self, batch, current_epoch=None):
+    def compute_loss(self, batch, *args, **kwargs):
         # normalize input
         assert 'valid_mask' not in batch
         nobs = self.normalizer.normalize(batch['obs'])
@@ -70,7 +70,7 @@ class VAEPolicy(BaseImagePolicy):
         nobs = einops.rearrange(nobs, 'b h t -> b t h')
         nactions = einops.rearrange(nactions, 'b h t -> b t h')
         vae_out, _, mu, log_var = self.model(nobs)
-        loss = self.model.loss_function(vae_out, nobs, mu, log_var, nactions, current_epoch=current_epoch)
+        loss = self.model.loss_function(vae_out, nobs, mu, log_var, nactions)
         return loss
 
     def set_normalizer(self, normalizer: LinearNormalizer):

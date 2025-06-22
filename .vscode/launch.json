@@ -159,15 +159,14 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        { // Train JianAE
-            "name": "Train JianAE",
+        { // Train JianAE Stage1
+            "name": "Train JianAE Stage1",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_all.py",
             "console": "integratedTerminal",
             "args": [
                 "--config-name=JianAE_Stage1",
-                // "task_alphabet=A",
                 "n_demo=1",
                 // "task.env_runner.n_envs=2",
                 // "task.env_runner.n_train=1",

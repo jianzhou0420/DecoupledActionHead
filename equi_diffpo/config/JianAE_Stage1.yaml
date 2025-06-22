@@ -7,7 +7,7 @@ _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffu
 
 shape_meta: ${task.shape_meta}
 
-task_name: null
+task_name: stack_d1 # in stage1, task_name is just for coding convenience, not used in dataset
 n_demo: 200
 horizon: 16
 n_obs_steps: 16
@@ -19,7 +19,7 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5
 
-run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
+run_name: ${name}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 policy_name: JianAE

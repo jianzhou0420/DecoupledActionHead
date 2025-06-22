@@ -1,27 +1,31 @@
 defaults:
   - _self_
-  - task: mimicgen_abs_JP2eePose_stage1
+  - task: mimicgen_abs_JP2eePose_stage2
 
-name: stage1
-policy_name: JianAE
-
+name: stage2
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
 
-task_name: stack_d1 # in stage1, task_name is just for coding convenience, not used in dataset
+# equidiff overrides
+task_name: null
 n_demo: 200
 horizon: 16
-n_obs_steps: 16
-n_action_steps: 16
-n_latency_steps: -15
+n_obs_steps: 2
+n_action_steps: 8
+n_latency_steps: 0
 dataset_obs_steps: ${n_obs_steps}
 past_action_visible: False
 obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
-dataset_path: data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5
+dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
-run_name: ${policy_name}_${name}_${task_name}_${n_demo}
+
+task_alphabet: null
+ckpt_epoch: null
+ckpt_path: data/outputs/2025.06.22/19.51.51_JianAE_stage1_stack_d1_1000/checkpoints/JianAE_stage1_stack_d1_1000_epoch=004.ckpt
+
+run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}_ABC_D
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -43,8 +47,7 @@ policy:
   obs_encoder_group_norm: True
   eval_fixed_crop: True
   z_dim: 64
-  # scheduler.step params
-  # predict_epsilon: True
+
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
@@ -56,14 +59,14 @@ ema:
 
 dataloader:
   batch_size: 64
-  num_workers: 8
+  num_workers: 4
   shuffle: True
   pin_memory: True
   persistent_workers: True
 
 val_dataloader:
   batch_size: 64
-  num_workers: 4
+  num_workers: 1
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -76,26 +79,24 @@ optimizer:
   weight_decay: 1.0e-6
 
 training:
-  device: "cuda:0"
+  # device: "cuda:0"
   seed: 0
   debug: False
   resume: False
   # optimization
   lr_scheduler: cosine
-  lr_warmup_steps: 50
-  num_epochs: 50
+  lr_warmup_steps: 500
+  num_epochs: ${eval:'50000 / ${n_demo}'}
   gradient_accumulate_every: 1
   # EMA destroys performance when used with BatchNorm
   # replace BatchNorm with GroupNorm.
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: ${eval:'50000 / ${n_demo} /50'}
-  checkpoint_every: 1
-  val_every: 1
+  rollout_every: 1
+  checkpoint_every: 10
+  val_every: 10000
   sample_every: 5
-  # steps per epoch
-
   # misc
   tqdm_interval_sec: 1.0
 
@@ -104,9 +105,10 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage1","miniExp",]
+  tags: ["stage2","${task_alphabet}", "${task_name}"]
   id: null
   group: null
+
 
 # multi_run:
 #   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}

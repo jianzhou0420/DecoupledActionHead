@@ -39,3 +39,6 @@ rsync -avP /data/
 scp -r outputs/2025.06.10/19.12.37_DecoupleActionHead_stage1_None_1000
 
 a1946536@p2-log-1.hpc.adelaide.edu.au:/hpcfs/users/a1946536/git_all/first/data/robomimic/datasets
+
+python trainer_pl_all.py --config-name=JianAE_Stage1 n_demo=1000
+python trainer_pl_all.py --config-name=JianAE_Stage2 task_name=stack_d1 n_demo=1000 task_alphabet=A

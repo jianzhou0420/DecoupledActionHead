@@ -397,7 +397,7 @@ def train(cfg: AppConfig):
 
     if cfg.name == 'stage1':
         callback_list = [checkpoint_callback,
-                         ActionMseLossForDiffusion(cfg),
+                         #  ActionMseLossForDiffusion(cfg),
                          ]
     elif cfg.name == 'stage2':
         callback_list = [checkpoint_callback,

@@ -179,6 +179,42 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
+        { // Train JianAE Stage2
+            "name": "Train JianAE Stage2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=JianAE_Stage2",
+                "n_demo=1",
+                "task_name=stack_d1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "task_alphabet=A",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train JianAE Stage2
+            "name": "Train JianAE Stage2 with 1000 demos",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=JianAE_Stage2",
+                "n_demo=1000",
+                "task_name=stack_d1",
+                "task_alphabet=A",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
         {
             "name": "OnlineEval",
             "type": "debugpy",

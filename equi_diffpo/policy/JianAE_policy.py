@@ -40,14 +40,10 @@ class JianAEPolicy(BaseImagePolicy):
                  horizon,
                  n_action_steps,
                  n_obs_steps,
-                 num_inference_steps=None,
                  obs_as_global_cond=True,
                  crop_shape=(76, 76),
-                 diffusion_step_embed_dim=256,
                  down_dims=(256, 512, 1024),
-                 kernel_size=5,
                  n_groups=8,
-                 cond_predict_scale=True,
                  obs_encoder_group_norm=False,
                  eval_fixed_crop=False,
                  z_dim=64,  # z_dim
@@ -157,12 +153,11 @@ class JianAEPolicy(BaseImagePolicy):
         # 3. decoder: convert latent to action
 
         decoder = AEDecoder(
-            hidden_dim=down_dims,
+            out_dim=action_dim,
+            horizon=horizon,
+            hidden_dims=down_dims,
             z_dim=z_dim,
-            out_dim=10,
-            final_seq_len=None,
-            n_groups=n_groups,
-            flattened_dim=None,
+            n_groups=8,
         )
 
         self.deocder = decoder
@@ -179,17 +174,13 @@ class JianAEPolicy(BaseImagePolicy):
 
     def compute_loss(self, batch, *args, **kwargs):
         # normalize input
-        assert 'valid_mask' not in batch
-        nobs = self.normalizer.normalize(batch['obs'])
-        nactions = self.normalizer['action'].normalize(batch['action'])
-        batch_size = nactions.shape[0]
-        horizon = nactions.shape[1]
-        nobs = nobs['JPOpen']
-        nobs = einops.rearrange(nobs, 'b h t -> b t h')
-        nactions = einops.rearrange(nactions, 'b h t -> b t h')
+        nobs: Dict = self.normalizer.normalize(batch['obs'])
+        batch_size = nobs[list(nobs.keys())[0]].shape[0]
 
         # 1. encode obs
-        obs_features = self.obs_encoder(nobs)
+        this_nobs = dict_apply(nobs,
+                               lambda x: x[:, :self.n_obs_steps, ...].reshape(-1, *x.shape[2:]))
+        obs_features = self.obs_encoder(this_nobs)
         obs_features = obs_features.reshape(batch_size, -1)
 
         # 2. project obs features to latent space
@@ -198,8 +189,37 @@ class JianAEPolicy(BaseImagePolicy):
         # 3. decode latent to action
         out = self.deocder(z)
 
+        out = einops.rearrange(out, 'b t h -> b h t')
+
+        nactions = self.normalizer['action'].normalize(batch['action'])
+
         # loss_function
         loss = F.mse_loss(out, nactions, reduction='none')
         loss = reduce(loss, 'b ... -> b (...)', 'mean')
         loss = loss.mean()
         return loss
+
+    def predict_action(self, obs_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        # normalize input
+        nobs: Dict = self.normalizer.normalize(obs_dict)
+        batch_size = nobs[list(nobs.keys())[0]].shape[0]
+
+        # 1. encode obs
+        this_nobs = dict_apply(nobs,
+                               lambda x: x[:, :self.n_obs_steps, ...].reshape(-1, *x.shape[2:]))
+        obs_features = self.obs_encoder(this_nobs)
+        obs_features = obs_features.reshape(batch_size, -1)
+
+        # 2. project obs features to latent space
+        z = self.project_obs_feature_2_latent(obs_features)
+
+        # 3. decode latent to action
+        out = self.deocder(z)
+
+        out = einops.rearrange(out, 'b t h -> b h t')
+        out = self.normalizer['action'].unnormalize(out)
+        return {'action': out[:, :self.n_action_steps, :],
+                'action_pred': out}
+
+    def set_normalizer(self, normalizer: LinearNormalizer):
+        self.normalizer.load_state_dict(normalizer.state_dict())

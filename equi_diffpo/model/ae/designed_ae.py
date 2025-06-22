@@ -275,35 +275,39 @@ class ObsEncoder(nn.Module):
 
 class AEDecoder(nn.Module):
     def __init__(self,
-                 hidden_dim: list,
-                 z_dim: int,
                  out_dim: int,
-                 final_seq_len,
+                 horizon: int,
+                 hidden_dims: list,
+                 z_dim: int,
                  n_groups=8,
-                 flattened_dim=None,):
+                 ):
         super().__init__()
-        self.flattened_dim = flattened_dim if flattened_dim is not None else hidden_dim[-1] * final_seq_len
+
+        self.final_seq_len = horizon // (2 ** (len(hidden_dims) - 1))
+        flattened_dim = hidden_dims[-1] * self.final_seq_len
+
+        self.flattened_dim = flattened_dim if flattened_dim is not None else hidden_dims[-1] * self.final_seq_len
         modules = []
 
         self.decoder_input = nn.Linear(z_dim, self.flattened_dim)
 
-        hidden_dim.reverse()
+        hidden_dims.reverse()
 
-        for i in range(len(hidden_dim) - 1):
+        for i in range(len(hidden_dims) - 1):
             modules.append(
-                Upsample1d(hidden_dim[i])
+                Upsample1d(hidden_dims[i])
             )
             modules.append(
-                Block1D(hidden_dim[i], hidden_dim[i + 1], kernel_size=3, n_groups=n_groups)
+                Block1D(hidden_dims[i], hidden_dims[i + 1], kernel_size=3, n_groups=n_groups)
             )
 
         self.decoder = nn.Sequential(*modules)
 
-        self.final_conv = nn.Conv1d(hidden_dim[-1], out_dim, kernel_size=3, padding=1)
+        self.final_conv = nn.Conv1d(hidden_dims[-1], out_dim, kernel_size=3, padding=1)
 
-    def forward(self, z, final_seq_len):
+    def forward(self, z):
         result = self.decoder_input(z)
-        result = result.view(result.size(0), -1, final_seq_len)
+        result = result.view(result.size(0), -1, self.final_seq_len)
         result = self.decoder(result)
         result = self.final_conv(result)
         return result

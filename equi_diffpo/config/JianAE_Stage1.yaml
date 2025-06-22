@@ -19,7 +19,7 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5
 
-run_name: ${name}_${task_name}_${n_demo}
+run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 policy_name: JianAE

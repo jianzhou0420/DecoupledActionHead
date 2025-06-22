@@ -395,12 +395,24 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
-    callback_list = []
+    if cfg.name == 'stage1':
+        callback_list = [checkpoint_callback,
+                         ActionMseLossForDiffusion(cfg),
+                         ]
+    elif cfg.name == 'stage2':
+        callback_list = [checkpoint_callback,
+                         RolloutCallback(cfg),
+                         ActionMseLossForDiffusion(cfg),
+                         ]
+    elif cfg.name == 'normal':
+        callback_list = [checkpoint_callback,
+                         RolloutCallback(cfg),
+                         ActionMseLossForDiffusion(cfg),
+                         ]
+    else:
+        raise ValueError(f"Unsupported task type: {cfg.name}, check config.name")
 
-    trainer = pl.Trainer(callbacks=[checkpoint_callback,
-                                    RolloutCallback(cfg),
-                                    ActionMseLossForDiffusion(cfg),
-                                    ],
+    trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
                          devices=[0],
                          strategy='auto',

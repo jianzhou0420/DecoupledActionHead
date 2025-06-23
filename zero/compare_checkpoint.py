@@ -137,7 +137,7 @@ if __name__ == '__main__':
     # stage1_epoch50_ckpt_path = "/media/jian/ssd4t/DP/first/data/outputs/Archive/2025.06.08_00.00.00_pretrain_JPee_stage1_stack_d1_1000/checkpoint_epoch=049.ckpt"
     # stage2_epoch50_ckpt_path = "data/outputs/Archive/2025.06.08_21.00.23_pretrain_JPee_stage2_stack_d1_1000/checkpoint_epoch=049.ckpt"
     stage1_epoch50_ckpt_path = "data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt"
-    stage2_epoch50_ckpt_path = "/media/jian/ssd4t/stage2_J_kitchen_d1_1000_ABC_D_epoch=049.ckpt"
+    stage2_epoch50_ckpt_path = "/media/jian/ssd4t/DP/first/data/outputs/2025.06.22/20.55.19_stage2_H_mug_cleanup_d1_1000_ABC_D/checkpoints/stage2_H_mug_cleanup_d1_1000_ABC_D_epoch=039.ckpt"
 
     try:
         comparison_results = compare_checkpoints(stage1_epoch50_ckpt_path, stage2_epoch50_ckpt_path)

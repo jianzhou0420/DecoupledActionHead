@@ -115,7 +115,7 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActionHead_ABC_D
+  project: DecoupleActionHead_ABC_D_encoder
   resume: False
   mode: online
   name: ${run_name}

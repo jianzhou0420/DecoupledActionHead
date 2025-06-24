@@ -312,15 +312,22 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         """
         obs_config = self.obs_config
 
-        image_features = []
+        # encode images
+        features_to_clip = []
         for key in obs_config['rgb']:
             if key in obs_dict:
                 image_tensor = obs_dict[key]
-                features = self.clip_encoder.encode(image_tensor)
-                image_features.append(features)
+                features_to_clip.append(image_tensor)
             else:
                 raise RuntimeError(f"Missing required key {key} in obs_dict")
+        features_to_clip = torch.stack(features_to_clip, dim=1)  # (B,N_image,C,H,W)
+        bs = features_to_clip.shape[0]
+        features_to_clip = rearrange(features_to_clip, 'b n c h w -> (b n) c h w')
+        image_features = self.clip_encoder.encode(features_to_clip)
+        image_features = rearrange(image_features, '(b n) d -> b n d', b=bs)
+        image_features = rearrange(image_features, 'b n d -> b (n d)')
 
+        # encode low_dim features
         low_dim_features = []
         for key in obs_config['low_dim']:
             if key in obs_dict:
@@ -328,9 +335,10 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             else:
                 raise RuntimeError(f"Missing required key {key} in obs_dict")
 
+        # concatenate all low_dim features
         obs_features = []
-        if len(image_features) > 0:
-            obs_features.extend(image_features)
+        if len(obs_config['rgb']) > 0:
+            obs_features.append(image_features)
         if len(low_dim_features) > 0:
             obs_features.extend(low_dim_features)
 

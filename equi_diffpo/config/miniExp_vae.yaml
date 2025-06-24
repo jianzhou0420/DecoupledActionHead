@@ -24,7 +24,7 @@ run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 policy_name: vae
 policy:
-  _target_: miniExp.policy.vae_policy.VAEPolicy
+  _target_: equi_diffpo.policy.miniExp_vae_policy.VAEPolicy
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel

@@ -215,6 +215,30 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
+        { // Train pl_stage2 ABC_D_encoder
+            "name": "Train pl_stage2 ABC_D encoder",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_stage2_ABC_D_obs_encoder",
+                "task_name=stack_d1",
+                "task_alphabet=A",
+                "n_demo=1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "logging.mode=online",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "dataloader.batch_size=8",
+                "val_dataloader.num_workers=1",
+                "val_dataloader.batch_size=8",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
         {
             "name": "OnlineEval",
             "type": "debugpy",

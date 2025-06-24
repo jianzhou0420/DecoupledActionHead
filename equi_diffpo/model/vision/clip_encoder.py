@@ -14,9 +14,10 @@ import torch.nn as nn
 
 class CLIPImageEncoder(nn.Module):
 
-    def __init__(self, model_name: str = "openai/clip-vit-base-patch32", shape_meta: dict = None):
+    def __init__(self):
         super(CLIPImageEncoder, self).__init__()
 
+        model_name = "openai/clip-vit-base-patch32"
         # Load the pre-trained CLIP model and processor
         try:
             self.model = CLIPModel.from_pretrained(model_name, use_safetensors=True)
@@ -43,6 +44,10 @@ class CLIPImageEncoder(nn.Module):
             resize_transform,
             normalize_transform,
         ])
+
+        # required grad false
+        for param in self.model.parameters():
+            param.requires_grad = False
 
     def _preprocess_tensor(self, image_tensor: torch.Tensor) -> torch.Tensor:
 

@@ -10,16 +10,7 @@ from equi_diffpo.model.common.normalizer import LinearNormalizer
 from equi_diffpo.policy.base_image_policy import BaseImagePolicy
 from equi_diffpo.model.diffusion.conditional_unet1d import ConditionalUnet1D
 from equi_diffpo.model.diffusion.mask_generator import LowdimMaskGenerator
-from equi_diffpo.common.robomimic_config_util import get_robomimic_config
-from robomimic.algo import algo_factory
-from robomimic.algo.algo import PolicyAlgo
-import robomimic.utils.obs_utils as ObsUtils
-try:
-    import robomimic.models.base_nets as rmbn
-    if not hasattr(rmbn, 'CropRandomizer'):
-        raise ImportError("CropRandomizer is not in robomimic.models.base_nets")
-except ImportError:
-    import robomimic.models.obs_core as rmbn
+
 import equi_diffpo.model.vision.crop_randomizer as dmvc
 from equi_diffpo.common.pytorch_util import dict_apply, replace_submodules
 from equi_diffpo.model.vision.rot_randomizer import RotRandomizer
@@ -48,6 +39,12 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
                  **kwargs):
         super().__init__()
 
+        # trigger
+        low_dim_mode_candidate = set(['projection', 'original'])
+        low_dim_mode = 'original'
+
+        assert low_dim_mode in low_dim_mode_candidate
+
         # parse shape_meta
         action_shape = shape_meta['action']['shape']
         assert len(action_shape) == 1
@@ -72,75 +69,23 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             else:
                 raise RuntimeError(f"Unsupported obs type: {type}")
 
-        # get raw robomimic config
-        config = get_robomimic_config(
-            algo_name='bc_rnn',
-            hdf5_type='image',
-            task_name='square',
-            dataset_type='ph')
+        # obs_encoder
+        num_image = len(obs_config['rgb'])
+        clip_encoder = CLIPImageEncoder()
+        encoder_output_shape = (num_image, 512)  # per data pair
+        low_dim_length = 0
 
-        with config.unlocked():
-            # set config with shape_meta
-            config.observation.modalities.obs = obs_config
+        for key in obs_config['low_dim']:
+            if key in obs_key_shapes:
+                low_dim_length += obs_key_shapes[key][0]
 
-            if crop_shape is None:
-                for key, modality in config.observation.encoder.items():
-                    if modality.obs_randomizer_class == 'CropRandomizer':
-                        modality['obs_randomizer_class'] = None
-            else:
-                # set random crop parameter
-                ch, cw = crop_shape
-                for key, modality in config.observation.encoder.items():
-                    if modality.obs_randomizer_class == 'CropRandomizer':
-                        modality.obs_randomizer_kwargs.crop_height = ch
-                        modality.obs_randomizer_kwargs.crop_width = cw
-
-        # init global state
-        ObsUtils.initialize_obs_utils_with_config(config)
-
-        # load model
-        policy: PolicyAlgo = algo_factory(
-            algo_name=config.algo_name,
-            config=config,
-            obs_key_shapes=obs_key_shapes,
-            ac_dim=action_dim,
-            device='cpu',
-        )
-
-        obs_encoder = policy.nets['policy'].nets['encoder'].nets['obs']
-
-        if obs_encoder_group_norm:
-            # replace batch norm with group norm
-            replace_submodules(
-                root_module=obs_encoder,
-                predicate=lambda x: isinstance(x, nn.BatchNorm2d),
-                func=lambda x: nn.GroupNorm(
-                    num_groups=x.num_features // 16,
-                    num_channels=x.num_features)
-            )
-            # obs_encoder.obs_nets['agentview_image'].nets[0].nets
-
-        # obs_encoder.obs_randomizers['agentview_image']
-        if eval_fixed_crop:
-            replace_submodules(
-                root_module=obs_encoder,
-                predicate=lambda x: isinstance(x, rmbn.CropRandomizer),
-                func=lambda x: dmvc.CropRandomizer(
-                    input_shape=x.input_shape,
-                    crop_height=x.crop_height,
-                    crop_width=x.crop_width,
-                    num_crops=x.num_crops,
-                    pos_enc=x.pos_enc
-                )
-            )
+        obs_feature_dim = low_dim_length + num_image * encoder_output_shape[1]
+        # /obs_encoder
 
         # create diffusion model
-        obs_feature_dim = obs_encoder.output_shape()[0]
-        input_dim = action_dim + obs_feature_dim
-        global_cond_dim = None
-        if obs_as_global_cond:
-            input_dim = action_dim
-            global_cond_dim = obs_feature_dim * n_obs_steps
+
+        input_dim = action_dim
+        global_cond_dim = obs_feature_dim * n_obs_steps
 
         model = ConditionalUnet1D(
             input_dim=input_dim,
@@ -153,7 +98,7 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             cond_predict_scale=cond_predict_scale
         )
 
-        self.obs_encoder = obs_encoder
+        self.clip_encoder = clip_encoder
         self.model = model
         self.noise_scheduler = noise_scheduler
         self.mask_generator = LowdimMaskGenerator(
@@ -166,6 +111,7 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         self.normalizer = LinearNormalizer()
         self.rot_randomizer = RotRandomizer()
 
+        self.obs_config = obs_config
         self.horizon = horizon
         self.obs_feature_dim = obs_feature_dim
         self.action_dim = action_dim
@@ -178,9 +124,6 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         if num_inference_steps is None:
             num_inference_steps = noise_scheduler.config.num_train_timesteps
         self.num_inference_steps = num_inference_steps
-
-        print("Diffusion params: %e" % sum(p.numel() for p in self.model.parameters()))
-        print("Vision params: %e" % sum(p.numel() for p in self.obs_encoder.parameters()))
 
     # ========= inference  ============
     def conditional_sample(self,
@@ -361,3 +304,31 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         loss = reduce(loss, 'b ... -> b (...)', 'mean')
         loss = loss.mean()
         return loss
+
+    def obs_encoder(self, obs_dict: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """
+        obs_dict: must include "obs" key
+        result: must include "action" key
+        """
+        obs_config = self.obs_config
+        num_image = len(obs_config['rgb'])
+        if num_image == 0:
+            image_features = None
+        else:
+            # encode rgb images
+            image_features = []
+            for key in obs_config['rgb']:
+                if key in obs_dict:
+                    image_tensor = obs_dict[key]
+                    if isinstance(image_tensor, torch.Tensor):
+                        image_tensor = image_tensor.to(self.device)
+                    else:
+                        raise RuntimeError(f"Unsupported type {type(image_tensor)} for {key}")
+
+                    features = self.clip_encoder.encode(image_tensor)
+                    image_features.append(features)
+                else:
+                    raise RuntimeError(f"Missing required key {key} in obs_dict")
+            image_features = torch.stack(image_features, dim=1)
+
+        assert 'past_action' not in obs_dict

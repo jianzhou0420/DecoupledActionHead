@@ -311,24 +311,29 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         result: must include "action" key
         """
         obs_config = self.obs_config
-        num_image = len(obs_config['rgb'])
-        if num_image == 0:
-            image_features = None
-        else:
-            # encode rgb images
-            image_features = []
-            for key in obs_config['rgb']:
-                if key in obs_dict:
-                    image_tensor = obs_dict[key]
-                    if isinstance(image_tensor, torch.Tensor):
-                        image_tensor = image_tensor.to(self.device)
-                    else:
-                        raise RuntimeError(f"Unsupported type {type(image_tensor)} for {key}")
 
-                    features = self.clip_encoder.encode(image_tensor)
-                    image_features.append(features)
-                else:
-                    raise RuntimeError(f"Missing required key {key} in obs_dict")
-            image_features = torch.stack(image_features, dim=1)
+        image_features = []
+        for key in obs_config['rgb']:
+            if key in obs_dict:
+                image_tensor = obs_dict[key]
+                features = self.clip_encoder.encode(image_tensor)
+                image_features.append(features)
+            else:
+                raise RuntimeError(f"Missing required key {key} in obs_dict")
 
-        assert 'past_action' not in obs_dict
+        low_dim_features = []
+        for key in obs_config['low_dim']:
+            if key in obs_dict:
+                low_dim_features.append(obs_dict[key])
+            else:
+                raise RuntimeError(f"Missing required key {key} in obs_dict")
+
+        obs_features = []
+        if len(image_features) > 0:
+            obs_features.extend(image_features)
+        if len(low_dim_features) > 0:
+            obs_features.extend(low_dim_features)
+
+        obs_features = torch.concatenate(obs_features, dim=-1)
+
+        return obs_features

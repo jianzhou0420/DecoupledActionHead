@@ -19,10 +19,8 @@ class CLIPImageEncoder(nn.Module):
 
         model_name = "openai/clip-vit-base-patch32"
         # Load the pre-trained CLIP model and processor
-        try:
-            self.model = CLIPModel.from_pretrained(model_name, use_safetensors=True)
-        except Exception as e:
-            self.model = CLIPModel.from_pretrained(model_name)
+
+        self.model = CLIPModel.from_pretrained(model_name)
 
         self.processor = CLIPProcessor.from_pretrained(model_name)
 

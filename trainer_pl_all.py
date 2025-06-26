@@ -425,14 +425,14 @@ def train(cfg: AppConfig):
     trainer.fit(trainer_model, datamodule=data_module)
 
     # 5. Upload all checkpoints as a single wandb artifact
-    artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
+    # artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
 
     # Add all .ckpt files from the checkpoint directory
-    for filename in os.listdir(ckpt_path):
-        if filename.endswith(".ckpt"):
-            artifact.add_file(os.path.join(ckpt_path, filename))
+    # for filename in os.listdir(ckpt_path):
+    #     if filename.endswith(".ckpt"):
+    #         artifact.add_file(os.path.join(ckpt_path, filename))
 
-    # Log artifact
+    # # Log artifact
     # wandb_logger.experiment.log_artifact(artifact)
 
 

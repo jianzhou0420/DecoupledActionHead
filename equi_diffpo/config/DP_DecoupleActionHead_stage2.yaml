@@ -78,7 +78,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 1
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -105,15 +105,15 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: 1
-  checkpoint_every: 10
+  rollout_every: ${eval:'50000 / ${n_demo} / 50'}
+  checkpoint_every: ${eval:'50000 / ${n_demo} / 5'}
   val_every: 10000
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActionHead_stage2
+  project: DecoupleActionHead_ABC_D
   resume: False
   mode: online
   name: ${run_name}

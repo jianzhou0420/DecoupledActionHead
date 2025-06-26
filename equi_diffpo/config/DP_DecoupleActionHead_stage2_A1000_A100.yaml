@@ -2,12 +2,11 @@ defaults:
   - _self_
   - task: mimicgen_abs_JP2eePose_stage2
 
-name: normal
+name: stage2
 _target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
 shape_meta: ${task.shape_meta}
 
-# equidiff overrides
 task_name: null
 n_demo: 200
 horizon: 16
@@ -20,12 +19,11 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
-
 task_alphabet: null
 ckpt_epoch: null
-ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
 
-run_name: stage2_${task_alphabet}_${task_name}_${n_demo}_ABC_D
+ckpt_path: data/robomimic/Stage1/A1000_A100_Stage1/stage1_${task_alphabet}_${task_name}_1000_epoch=049.ckpt
+run_name: stage2_${task_alphabet}_${task_name}_${n_demo}_A1000_A100
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -80,7 +78,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 1
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -107,21 +105,21 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: 1
-  checkpoint_every: 10
+  rollout_every: ${eval:'50000 / ${n_demo} / 50'}
+  checkpoint_every: ${eval:'50000 / ${n_demo} / 5'}
   val_every: 10000
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActionHead_normal
+  project: DecoupleActionHead_ABC_D
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["normal","${task_alphabet}", "${task_name}"]
+  tags: ["stage2","${task_alphabet}", "${task_name}"]
   id: null
-  group: null
+  group: A1000_A100_Stage2
 
 
 # multi_run:

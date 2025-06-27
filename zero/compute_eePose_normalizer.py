@@ -84,8 +84,7 @@ for dataset, stats in statistic_dict.items():
 # eePose的normalizer其实是xyz的normalizer（rot本身就是-1，1；详见dataset的class怎么写的）
 # 所以，真正重要的normalizer就是action的xyz的normalizer。
 
-stat = array_to_stats(all_action)
-
+stat = array_to_stats(all_action[:, :3])
 this_normalizer = robomimic_abs_action_only_normalizer_from_stat(stat)
 
 with open('normalizer.pkl', 'wb') as f:

@@ -3,7 +3,7 @@ defaults:
   - task: mimicgen_abs_JP2eePose_stage1_multitask
 
 train_mode: stage1
-dataset_tail: traj_eePose
+dataset_tail: JP2eePose
 
 # train_meta
 task_alphabet: null

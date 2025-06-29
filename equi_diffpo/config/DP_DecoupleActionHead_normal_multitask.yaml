@@ -1,34 +1,31 @@
 defaults:
   - _self_
-  - task: mimicgen_abs_JP2eePose_stage2
+  - task: mimicgen_abs_JP2eePose_stage2_multitask
 
-name: normal
-_target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
+train_mode: normal
+dataset_tail: traj_eePose
 
+# train_meta
+task_alphabet: null
 shape_meta: ${task.shape_meta}
+train_tasks_meta: ${get_train_tasks_meta:${task_alphabet}}
 
-# equidiff overrides
-task_name: null
-n_demo: 200
+# env_runner
 horizon: 16
 n_obs_steps: 2
 n_action_steps: 8
 n_latency_steps: 0
 dataset_obs_steps: ${n_obs_steps}
-past_action_visible: False
 obs_as_global_cond: True
+
+
+# dataset
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
-dataset_path: 
-        - data/robomimic/datasets/stack_d1/stack_d1_abs_traj_eePose.hdf5
-        - data/robomimic/datasets/coffee_d2/coffee_d2_abs_traj_eePose.hdf5
-        - data/robomimic/datasets/pick_place_d0/pick_place_d0_abs_traj_eePose.hdf5
+dataset_path: null
+n_demo: 200
 
-
-task_alphabet: null
-ckpt_epoch: null
-ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
-
-run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
+# logging
+run_name: ${train_mode}_${task_alphabet}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 
@@ -122,18 +119,14 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["normal","${task_alphabet}", "${task_name}"]
+  tags: ["normal","${task_alphabet}",]
   id: null
   group: null
 
 
-# multi_run:
-#   run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
-#   wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
-
 hydra:
   job:
-    override_dirname: ${name}
+    override_dirname: ${train_mode}
   run:
     dir: ${run_dir}
   sweep:

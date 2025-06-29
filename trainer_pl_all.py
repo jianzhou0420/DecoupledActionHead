@@ -51,6 +51,7 @@ import hydra
 import sys
 from termcolor import cprint
 import mimicgen
+from natsort import natsorted
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
 sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)
@@ -199,7 +200,7 @@ class Trainer_all(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg
-        task_type = cfg.name
+        task_type = cfg.train_mode
 
         if task_type == 'stage2':
             ckpt_path = cfg.ckpt_path
@@ -355,15 +356,16 @@ class RolloutCallback(pl.Callback):
     A Callback to run a policy rollout in an environment periodically.
     """
 
-    def __init__(self, cfg: AppConfig):
+    def __init__(self, env_runner_cfg: DictConfig, rollout_every_n_epochs: int = 1):
         super().__init__()
         env_runner: BaseImageRunner
         env_runner = hydra.utils.instantiate(
-            cfg.task.env_runner,
-            output_dir='data/outputs')  # TODO:fix it
-        assert isinstance(env_runner, BaseImageRunner)
+            env_runner_cfg,
+            output_dir='data/outputs'
+        )  # TODO:fix it
 
-        self.rollout_every_n_epochs = cfg.training.rollout_every
+        assert isinstance(env_runner, BaseImageRunner)
+        self.rollout_every_n_epochs = rollout_every_n_epochs
         self.env_runner = env_runner
 
     def on_train_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
@@ -422,7 +424,23 @@ class ActionMseLossForDiffusion(pl.Callback):
 
 def train(cfg: AppConfig):
 
+    # 0. extra config processing
+
+    cfg_env_runner = []
+    dataset_path = []
+    for key, value in cfg.train_tasks_meta.items():
+        this_dataset_path = f"data/robomimic/datasets/{key}/{key}_abs_{cfg.dataset_tail}.hdf5"
+        this_env_runner_cfg = copy.deepcopy(cfg.task.env_runner)
+        this_env_runner_cfg.dataset_path = this_dataset_path
+        this_env_runner_cfg.max_steps = value
+
+        OmegaConf.resolve(this_env_runner_cfg)
+        dataset_path.append(this_dataset_path)
+        cfg_env_runner.append(this_env_runner_cfg)
+
+    cfg.task.dataset.dataset_path = OmegaConf.create(dataset_path)
     # 1. Define a unique name and directory for this specific run
+
     this_run_dir = cfg.run_dir
     run_name = cfg.run_name
 
@@ -448,22 +466,23 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
-    if cfg.name == 'stage1':
+    rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
+
+    if cfg.train_mode == 'stage1':
         callback_list = [checkpoint_callback,
-                         #  ActionMseLossForDiffusion(cfg),
                          ]
-    elif cfg.name == 'stage2':
+    elif cfg.train_mode == 'stage2':
         callback_list = [checkpoint_callback,
-                         RolloutCallback(cfg),
                          ActionMseLossForDiffusion(cfg),
                          ]
-    elif cfg.name == 'normal':
+        callback_list.extend(rollout_callback_list)
+
+    elif cfg.train_mode == 'normal':
         callback_list = [checkpoint_callback,
-                         #  RolloutCallback(cfg),
-                         #  ActionMseLossForDiffusion(cfg),
                          ]
+        callback_list.extend(rollout_callback_list)
     else:
-        raise ValueError(f"Unsupported task type: {cfg.name}, check config.name")
+        raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
 
     trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
@@ -568,7 +587,17 @@ if __name__ == '__main__':
     def get_ws_y_center(task_name):
         return 0.
 
-    OmegaConf.register_new_resolver("get_max_steps", lambda x: max_steps[x], replace=True)
+    def get_train_tasks_meta(task_alphabet):
+        task_alphabet_list = natsorted(task_alphabet)
+        train_tasks_meta = dict()
+        for task_alphabet in task_alphabet_list:
+            task_name = tasks_meta[task_alphabet]['name']
+            task_max_steps = max_steps[task_name]
+            train_tasks_meta.update({task_name: task_max_steps})
+        train_tasks_meta = OmegaConf.create(train_tasks_meta)
+        return train_tasks_meta
+
+    OmegaConf.register_new_resolver("get_train_tasks_meta", get_train_tasks_meta, replace=True)
     OmegaConf.register_new_resolver("get_ws_x_center", get_ws_x_center, replace=True)
     OmegaConf.register_new_resolver("get_ws_y_center", get_ws_y_center, replace=True)
 

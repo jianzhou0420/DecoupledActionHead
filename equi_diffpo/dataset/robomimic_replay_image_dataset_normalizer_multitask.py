@@ -55,9 +55,15 @@ class RobomimicReplayImageDataset(BaseImageDataset):
             from_rep='axis_angle', to_rep=rotation_rep)
         dataset_path = list(dataset_path)
 
+        dataset_name = []
+        for dataset in dataset_path:
+            dataset_name.append(dataset.split('/')[-2])
+
+        dataset_name = '-'.join(dataset_name)
+
         replay_buffer = None
         if use_cache:
-            cache_zarr_path = dataset_paths + f'.{n_demo}.' + '.zarr.zip'
+            cache_zarr_path = dataset_name + f'.{n_demo}.' + '.zarr.zip'
             cache_lock_path = cache_zarr_path + '.lock'
             print('Acquiring lock on cache.')
             with FileLock(cache_lock_path):
@@ -69,7 +75,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                         replay_buffer = _convert_robomimic_to_replay_multitask(
                             store=zarr.MemoryStore(),
                             shape_meta=shape_meta,
-                            dataset_path=dataset_paths,
+                            dataset_path=dataset_path,
                             abs_action=abs_action,
                             rotation_transformer=rotation_transformer,
                             n_demo=n_demo)

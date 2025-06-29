@@ -505,7 +505,7 @@ def train(cfg: AppConfig):
             artifact.add_file(os.path.join(ckpt_path, filename))
 
     # Log artifact
-    wandb_logger.experiment.log_artifact(artifact)
+    # wandb_logger.experiment.log_artifact(artifact)
 
 
 @hydra.main(

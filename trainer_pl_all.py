@@ -466,7 +466,7 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
-    rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
+    # rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
 
     if cfg.train_mode == 'stage1':
         callback_list = [checkpoint_callback,

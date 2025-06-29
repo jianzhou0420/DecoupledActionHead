@@ -23,7 +23,7 @@ task_alphabet: null
 ckpt_epoch: null
 
 ckpt_path: data/robomimic/Stage1/A1000_A100_Stage1/stage1_${task_alphabet}_${task_name}_1000_epoch=049.ckpt
-run_name: stage2_${task_alphabet}_${task_name}_${n_demo}_A1000_A100
+run_name: stage2_${task_alphabet}_${task_name}_${n_demo}_A1000_A100_new_normalizer
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
 

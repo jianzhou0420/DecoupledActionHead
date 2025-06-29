@@ -475,12 +475,12 @@ def train(cfg: AppConfig):
         callback_list = [checkpoint_callback,
                          ActionMseLossForDiffusion(cfg),
                          ]
-        callback_list.extend(rollout_callback_list)
+        # callback_list.extend(rollout_callback_list)
 
     elif cfg.train_mode == 'normal':
         callback_list = [checkpoint_callback,
                          ]
-        callback_list.extend(rollout_callback_list)
+        # callback_list.extend(rollout_callback_list)
     else:
         raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
 

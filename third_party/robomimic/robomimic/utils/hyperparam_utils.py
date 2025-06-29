@@ -16,6 +16,7 @@ class ConfigGenerator(object):
     Useful class to keep track of hyperparameters to sweep, and to generate
     the json configs for each experiment run.
     """
+
     def __init__(self, base_config_file, wandb_proj_name="debug", script_file=None, generated_config_dir=None):
         """
         Args:
@@ -63,10 +64,10 @@ class ConfigGenerator(object):
         if value_names is not None:
             assert len(values) == len(value_names)
         self.parameters[key] = argparse.Namespace(
-            key=key, 
-            name=name, 
-            group=group, 
-            values=values, 
+            key=key,
+            name=name,
+            group=group,
+            values=values,
             value_names=value_names,
         )
 
@@ -133,7 +134,7 @@ class ConfigGenerator(object):
                 number of configs that will be generated from this scan.
         """
 
-        # mapping from group id to list of indices to grab from each parameter's list 
+        # mapping from group id to list of indices to grab from each parameter's list
         # of values in the parameter group
         parameter_group_indices = OrderedDict()
         for k in self.parameters:
@@ -149,7 +150,7 @@ class ConfigGenerator(object):
         keys = list(parameter_group_indices.keys())
         inds = list(parameter_group_indices.values())
         new_parameter_group_indices = OrderedDict(
-            { k : [] for k in keys }
+            {k: [] for k in keys}
         )
         # get all combinations of the different parameter group indices
         # and then use these indices to determine the new parameter ranges
@@ -157,7 +158,7 @@ class ConfigGenerator(object):
         #
         # e.g. with two parameter groups, one with two values, and another with three values
         # we have [0, 1] x [0, 1, 2] = [0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2]
-        # so the corresponding parameter group indices are [0, 0, 0, 1, 1, 1] and 
+        # so the corresponding parameter group indices are [0, 0, 0, 1, 1, 1] and
         # [0, 1, 2, 0, 1, 2], and all parameters in each parameter group are indexed
         # together using these indices, to get each parameter range.
         for comb in itertools.product(*inds):
@@ -225,7 +226,7 @@ class ConfigGenerator(object):
 
         for i in range(num_settings):
             # the specific parameter setting for this experiment
-            setting = { k : parameter_ranges[k][i] for k in parameter_ranges }
+            setting = {k: parameter_ranges[k][i] for k in parameter_ranges}
             maybe_parameter_names = OrderedDict()
             for k in parameter_names:
                 maybe_parameter_names[k] = None
@@ -234,8 +235,8 @@ class ConfigGenerator(object):
 
             # experiment name from setting
             exp_name = self._name_for_experiment(
-                base_name=base_exp_name, 
-                parameter_values=setting, 
+                base_name=base_exp_name,
+                parameter_values=setting,
                 parameter_value_names=maybe_parameter_names,
             )
 
@@ -247,7 +248,7 @@ class ConfigGenerator(object):
 
             # populate list of identifying meta for logger;
             # see meta_config method in base_config.py for more info
-            json_dict["experiment"]["logging"]["wandb_proj_name"] = self.wandb_proj_name
+            # json_dict["experiment"]["logging"]["wandb_proj_name"] = self.wandb_proj_name
             if "meta" not in json_dict:
                 json_dict["meta"] = dict()
             json_dict["meta"].update(
@@ -263,7 +264,7 @@ class ConfigGenerator(object):
                         value_name = maybe_parameter_names[k]
                     else:
                         value_name = setting[k]
-            
+
                     json_dict["meta"]["hp_keys"].append(key_name)
                     json_dict["meta"]["hp_values"].append(value_name)
 
@@ -286,7 +287,7 @@ class ConfigGenerator(object):
             for path in json_paths:
                 # write python command to file
                 cmd = "python train.py --config {}\n".format(path)
-                
+
                 print()
                 print(cmd)
                 f.write(cmd)
@@ -358,7 +359,7 @@ def set_value_for_key(dic, k, v):
         v: the value to set at the provided key
     """
     val = dic
-    subkeys = re.split('/|\.', k) #k.split('/')
+    subkeys = re.split('/|\.', k)  # k.split('/')
     for s in subkeys[:-1]:
         val = val[s]
     val[subkeys[-1]] = v

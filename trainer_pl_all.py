@@ -459,8 +459,8 @@ def train(cfg: AppConfig):
                          ]
     elif cfg.name == 'normal':
         callback_list = [checkpoint_callback,
-                         RolloutCallback(cfg),
-                         ActionMseLossForDiffusion(cfg),
+                         #  RolloutCallback(cfg),
+                         #  ActionMseLossForDiffusion(cfg),
                          ]
     else:
         raise ValueError(f"Unsupported task type: {cfg.name}, check config.name")
@@ -555,6 +555,7 @@ if __name__ == '__main__':
             "average_steps": 687,
         },
     }
+
     max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}
     print(f"max_steps: {max_steps}")
 

@@ -6,6 +6,6 @@
         "./third_party/mimicgen",
         "./third_party/equidiff",
         "./third_party/robosuite-task-zoo",
-        "/data/codebase"
+        "/data/git_all/codebase"
     ]
 }

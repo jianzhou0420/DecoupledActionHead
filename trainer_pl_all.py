@@ -441,6 +441,8 @@ def train(cfg: AppConfig):
         cfg_env_runner.append(this_env_runner_cfg)
 
     cfg.task.dataset.dataset_path = OmegaConf.create(dataset_path)
+
+    OmegaConf.save(cfg, os.path.join(cfg.run_dir, 'config.yaml'))
     # 1. Define a unique name and directory for this specific run
 
     this_run_dir = cfg.run_dir

@@ -2,30 +2,33 @@ defaults:
   - _self_
   - task: mimicgen_abs_JP2eePose_stage2
 
-name: diff_c
-_target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
+train_mode: stage2
+dataset_tail: traj_eePose
 
+# train_meta
+task_alphabet: null
 shape_meta: ${task.shape_meta}
+train_tasks_meta: ${get_train_tasks_meta:${task_alphabet}}
 
-task_name: null
-n_demo: 200
+# env_runner
 horizon: 16
 n_obs_steps: 2
 n_action_steps: 8
 n_latency_steps: 0
 dataset_obs_steps: ${n_obs_steps}
-past_action_visible: False
 obs_as_global_cond: True
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
-dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
 
 
-ckpt_epoch: null
+# dataset
+dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+dataset_path: null
+n_demo: 200
+ckpt_path: null
 
-ckpt_path: ./data/outputs/Archive/2025.06.08_00.00.00_pretrain_JPee_stage1_stack_d1_1000/checkpoint_epoch=049.ckpt
-
-run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
+# logging
+run_name: ${train_mode}_${task_alphabet}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
+
 
 
 policy:

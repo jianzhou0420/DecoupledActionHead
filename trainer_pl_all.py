@@ -525,54 +525,18 @@ def main(cfg: OmegaConf):
 # ---------------------------------------------------------------
 if __name__ == '__main__':
     tasks_meta = {
-        "A": {
-            "name": "stack_d1",
-            "average_steps": 108,
-        },
-        "B": {
-            "name": "square_d2",
-            "average_steps": 153,
-        },
-        "C": {
-            "name": "coffee_d2",
-            "average_steps": 224,
-        },
-        "D": {
-            "name": "threading_d2",
-            "average_steps": 227,
-        },
-        "E": {
-            "name": "stack_three_d1",
-            "average_steps": 255,
-        },
-        "F": {
-            "name": "hammer_cleanup_d1",
-            "average_steps": 286,
-        },
-        "G": {
-            "name": "three_piece_assembly_d2",
-            "average_steps": 335,
-        },
-        "H": {
-            "name": "mug_cleanup_d1",
-            "average_steps": 338,
-        },
-        "I": {
-            "name": "nut_assembly_d0",
-            "average_steps": 358,
-        },
-        "J": {
-            "name": "kitchen_d1",
-            "average_steps": 619,
-        },
-        "K": {
-            "name": "pick_place_d0",
-            "average_steps": 677,
-        },
-        "L": {
-            "name": "coffee_preparation_d1",
-            "average_steps": 687,
-        },
+        "A": {"name": "stack_d1", "average_steps": 108, },
+        "B": {"name": "square_d2", "average_steps": 153, },
+        "C": {"name": "coffee_d2", "average_steps": 224, },
+        "D": {"name": "threading_d2", "average_steps": 227, },
+        "E": {"name": "stack_three_d1", "average_steps": 255, },
+        "F": {"name": "hammer_cleanup_d1", "average_steps": 286, },
+        "G": {"name": "three_piece_assembly_d2", "average_steps": 335, },
+        "H": {"name": "mug_cleanup_d1", "average_steps": 338, },
+        "I": {"name": "nut_assembly_d0", "average_steps": 358, },
+        "J": {"name": "kitchen_d1", "average_steps": 619, },
+        "K": {"name": "pick_place_d0", "average_steps": 677, },
+        "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
     }
 
     max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}

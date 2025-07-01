@@ -1,3 +1,4 @@
+import copy
 import hydra
 import os
 from termcolor import cprint
@@ -28,45 +29,34 @@ def resolve_output_dir(output_dir: str):
 
 
 if __name__ == "__main__":
-    # 0.some config resolvers
-    def get_ws_x_center(task_name):
-        if task_name.startswith('kitchen_') or task_name.startswith('hammer_cleanup_'):
-            return -0.2
-        else:
-            return 0.
-
-    def get_ws_y_center(task_name):
-        return 0.
-
-    OmegaConf.register_new_resolver("get_max_steps", lambda x: max_steps[x], replace=True)
-    OmegaConf.register_new_resolver("get_ws_x_center", get_ws_x_center, replace=True)
-    OmegaConf.register_new_resolver("get_ws_y_center", get_ws_y_center, replace=True)
-
-    # allows arbitrary python code execution in configs using the ${eval:''} resolver
-    OmegaConf.register_new_resolver("eval", eval, replace=True)
-
-    # 1.dataset_path
-    output_path = "data/outputs/Archive/20.10.57_pretrain_JPee_stage2_coffee_d2_1000"
+    output_path = "/media/jian/ssd4t/23.27.09_normal_ACK_1000"
     cfg, checkpoint_all, run_name = resolve_output_dir(output_path)
 
-    max_steps = {
-        'stack_d1': 400,
-        'stack_three_d1': 400,
-        'square_d2': 400,
-        'threading_d2': 400,
-        'coffee_d2': 1200,
-        'three_piece_assembly_d2': 500,
-        'hammer_cleanup_d1': 500,
-        'mug_cleanup_d1': 500,
-        'kitchen_d1': 800,
-        'nut_assembly_d0': 500,
-        'pick_place_d0': 1000,
-        'coffee_preparation_d1': 800,
-        'tool_hang': 700,
-        'can': 400,
-        'lift': 400,
-        'square': 400,
+    tasks_meta = {
+        "A": {"name": "stack_d1", "average_steps": 108, },
+        "B": {"name": "square_d2", "average_steps": 153, },
+        "C": {"name": "coffee_d2", "average_steps": 224, },
+        "D": {"name": "threading_d2", "average_steps": 227, },
+        "E": {"name": "stack_three_d1", "average_steps": 255, },
+        "F": {"name": "hammer_cleanup_d1", "average_steps": 286, },
+        "G": {"name": "three_piece_assembly_d2", "average_steps": 335, },
+        "H": {"name": "mug_cleanup_d1", "average_steps": 338, },
+        "I": {"name": "nut_assembly_d0", "average_steps": 358, },
+        "J": {"name": "kitchen_d1", "average_steps": 619, },
+        "K": {"name": "pick_place_d0", "average_steps": 677, },
+        "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
     }
+    cfg_env_runner = []
+    dataset_path = []
+    for key, value in cfg.train_tasks_meta.items():
+        this_dataset_path = f"data/robomimic/datasets/{key}/{key}_abs_{cfg.dataset_tail}.hdf5"
+        this_env_runner_cfg = copy.deepcopy(cfg.task.env_runner)
+        this_env_runner_cfg.dataset_path = this_dataset_path
+        this_env_runner_cfg.max_steps = value
+
+        OmegaConf.resolve(this_env_runner_cfg)
+        dataset_path.append(this_dataset_path)
+        cfg_env_runner.append(this_env_runner_cfg)
 
     policy: BaseImagePolicy = hydra.utils.instantiate(cfg.policy)
     policy.load_state_dict(

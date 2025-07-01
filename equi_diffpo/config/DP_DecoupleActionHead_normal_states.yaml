@@ -2,30 +2,32 @@ defaults:
   - _self_
   - task: mimicgen_abs_states_traj_eePose
 
-name: normal
-_target_: equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
 
-shape_meta: ${task.shape_meta}
+train_mode: stage1
+dataset_tail: JP2eePose
 
-task_name: null
-n_demo: 200
-horizon: 16
-n_obs_steps: 2
-n_action_steps: 8
-n_latency_steps: 0
-dataset_obs_steps: ${n_obs_steps}
-past_action_visible: False
-obs_as_global_cond: True
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer.RobomimicReplayImageDataset
-dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_traj_eePose.hdf5
-
+# train_meta
 task_alphabet: null
-ckpt_epoch: null
+shape_meta: ${task.shape_meta}
+train_tasks_meta: ${get_train_tasks_meta:${task_alphabet}}
 
-ckpt_path: data/robomimic/Stage1/tmp/DecoupleActhonHead_stage1_None_1000_epoch=049.ckpt
-run_name: ${name}_${task_alphabet}_${task_name}_${n_demo}
+# env_runner
+horizon: 16
+n_obs_steps: 16
+n_action_steps: 16
+n_latency_steps: -15
+dataset_obs_steps: ${n_obs_steps}
+obs_as_global_cond: True
+
+# dataset
+dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+dataset_path: null
+n_demo: 200
+ckpt_path: null
+
+# logging
+run_name: ${train_mode}_${task_alphabet}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
-
 
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy

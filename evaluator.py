@@ -109,6 +109,7 @@ if __name__ == "__main__":
         policy.to("cuda" if torch.cuda.is_available() else "cpu")
         policy.eval()
         epoch = int(ckpt.split("=")[-1].split(".")[0])
+        print(f"Evaluating policy at epoch {epoch} with checkpoint {ckpt}...")
 
         for env_cfg in cfg_env_runner:
             # debug
@@ -118,28 +119,24 @@ if __name__ == "__main__":
             env_runner: RobomimicImageRunner = hydra.utils.instantiate(
                 config=env_cfg,
                 output_dir=eval_result_dir,
-                n_envs=2,
-                n_test_vis=1,
-                n_train_vis=1,
-                n_train=1,
-                n_test=1,
+                n_envs=56,
+                n_test_vis=50,
+                n_train_vis=6,
             )
 
             cprint("Starting environment runner...", "yellow")
             evaluation_results = env_runner.run(policy)
             cprint("Environment runner finished.", "yellow")
-            for key, value in evaluation_results:
-                if 'sim_video_' in key:
-                    new_key = key.replace('sim_video_', f'sim_video_{task_name}')
-                    evaluation_results[new_key] = value
-                    del evaluation_results[key]
+            new_results = dict()
+            for key, value in evaluation_results.items():
+                new_results[f"{task_name}/{key}"] = value
 
             print("\nEvaluation Results:")
-            print(evaluation_results)
+            print(new_results)
 
             # raise EOFError
             cprint("Logging results to WandB...", "green")
-            wandb.log(evaluation_results, step=epoch)  # 直接将字典传递给 wandb.log
+            wandb.log(new_results, step=epoch)  # 直接将字典传递给 wandb.log
             cprint("Results logged to WandB successfully!", "green")
 
             # --- Finish WandB run ---

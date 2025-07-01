@@ -509,7 +509,7 @@ def train(cfg: AppConfig):
     )
     wandb.finish()
     evaluate_run(
-        seed=cfg.seed,
+        seed=42,
         run_dir=this_run_dir,)
 
 

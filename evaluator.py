@@ -65,8 +65,8 @@ if __name__ == "__main__":
         "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
     }
     max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}
-    run_path = "/media/jian/data/outputs/Normal/23.27.09_normal_ACK_1000"
-    cfg, checkpoint_all, run_name = resolve_output_dir(run_path)
+    run_dir = args.run_dir
+    cfg, checkpoint_all, run_name = resolve_output_dir(run_dir)
 
     cfg_env_runner = []
     dataset_path = []
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     for ckpt in checkpoint_all:
         policy: BaseImagePolicy = hydra.utils.instantiate(cfg.policy)
         policy.load_state_dict(
-            torch.load(os.path.join(run_path, "checkpoints", ckpt), map_location="cpu")["state_dict"]
+            torch.load(os.path.join(run_dir, "checkpoints", ckpt), map_location="cpu")["state_dict"]
         )
         policy.to("cuda" if torch.cuda.is_available() else "cpu")
         policy.eval()

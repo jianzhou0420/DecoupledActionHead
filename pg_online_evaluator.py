@@ -277,5 +277,5 @@ def validate_dataset(dataset_path):
 
 
 if __name__ == "__main__":
-    a = validate_dataset('data/robomimic/datasets/stack_d1/stack_d1_abs_JP.hdf5')
+    a = validate_dataset('data/robomimic/datasets/stack_d1/stack_d1_abs_traj_eePose.hdf5')
     a.close()

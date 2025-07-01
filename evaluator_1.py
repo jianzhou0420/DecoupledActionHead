@@ -48,24 +48,10 @@ if __name__ == "__main__":
     parser.add_argument("--run_dir", type=str, default="/media/jian/data/outputs/Normal/23.27.09_normal_ACK_1000",)
     args = parser.parse_args()
 
-    seed_everything(args.seed)
 
-    tasks_meta = {
-        "A": {"name": "stack_d1", "average_steps": 108, },
-        "B": {"name": "square_d2", "average_steps": 153, },
-        "C": {"name": "coffee_d2", "average_steps": 224, },
-        "D": {"name": "threading_d2", "average_steps": 227, },
-        "E": {"name": "stack_three_d1", "average_steps": 255, },
-        "F": {"name": "hammer_cleanup_d1", "average_steps": 286, },
-        "G": {"name": "three_piece_assembly_d2", "average_steps": 335, },
-        "H": {"name": "mug_cleanup_d1", "average_steps": 338, },
-        "I": {"name": "nut_assembly_d0", "average_steps": 358, },
-        "J": {"name": "kitchen_d1", "average_steps": 619, },
-        "K": {"name": "pick_place_d0", "average_steps": 677, },
-        "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
-    }
-    max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}
-    run_dir = args.run_dir
+def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_normal_ACK_1000", results_dir: str = "data/outputs/eval_results"):
+    seed_everything(seed)
+
     cfg, checkpoint_all, run_name = resolve_output_dir(run_dir)
 
     cfg_env_runner = []
@@ -81,7 +67,7 @@ if __name__ == "__main__":
         dataset_path.append(this_dataset_path)
         cfg_env_runner.append(this_env_runner_cfg)
 
-    eval_result_dir = os.path.join(args.results_dir, run_name)  # 建议为评估结果创建一个独立的子目录
+    eval_result_dir = os.path.join(results_dir, run_name)  # 建议为评估结果创建一个独立的子目录
     media_dir = os.path.join(eval_result_dir, "media")
     os.makedirs(media_dir, exist_ok=True)
 
@@ -119,7 +105,7 @@ if __name__ == "__main__":
             env_runner: RobomimicImageRunner = hydra.utils.instantiate(
                 config=env_cfg,
                 output_dir=eval_result_dir,
-                n_envs=56,
+                n_envs=28,
                 n_test_vis=50,
                 n_train_vis=6,
             )

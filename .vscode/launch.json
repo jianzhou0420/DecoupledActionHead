@@ -285,7 +285,7 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // OnlineEval
             "name": "OnlineEval",
             "type": "debugpy",
             "request": "launch",

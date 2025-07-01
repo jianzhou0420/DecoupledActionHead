@@ -7,6 +7,7 @@
 # except:
 #     pass
 
+from zero.evaluator import evaluate_run
 import wandb
 import pathlib
 import gym  # Or your custom environment library
@@ -506,6 +507,10 @@ def train(cfg: AppConfig):
         hostname='10.12.65.19',
         username='jian',
     )
+    wandb.finish()
+    evaluate_run(
+        seed=cfg.seed,
+        run_dir=this_run_dir,)
 
 
 @hydra.main(

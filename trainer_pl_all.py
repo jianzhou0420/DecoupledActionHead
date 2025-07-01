@@ -52,6 +52,8 @@ import sys
 from termcolor import cprint
 import mimicgen
 from natsort import natsorted
+from zero.z_utils.scp_utils import scp_to_another_computer
+
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
 sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)
@@ -496,16 +498,12 @@ def train(cfg: AppConfig):
     data_module = MyDataModule(cfg)
     trainer.fit(trainer_model, datamodule=data_module)
 
-    # 5. Upload all checkpoints as a single wandb artifact
-    artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
-
-    # Add all .ckpt files from the checkpoint directory
-    for filename in os.listdir(ckpt_path):
-        if filename.endswith(".ckpt"):
-            artifact.add_file(os.path.join(ckpt_path, filename))
-
-    # Log artifact
-    # wandb_logger.experiment.log_artifact(artifact)
+    scp_to_another_computer(
+        local_path=this_run_dir,
+        remote_path=os.path.join('/media/jian/ssd4t/tmp', run_name),
+        hostname='10.12.65.19',
+        username='jian',
+    )
 
 
 @hydra.main(

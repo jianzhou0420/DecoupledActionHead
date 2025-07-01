@@ -97,7 +97,7 @@ def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_no
             env_runner: RobomimicImageRunner = hydra.utils.instantiate(
                 config=env_cfg,
                 output_dir=eval_result_dir,
-                n_envs=19,
+                n_envs=28,
                 n_test_vis=50,
                 n_train_vis=6,
             )

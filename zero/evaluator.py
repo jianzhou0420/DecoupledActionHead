@@ -116,6 +116,7 @@ def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_no
             cprint("Logging results to WandB...", "green")
             wandb.log(new_results, step=epoch)  # 直接将字典传递给 wandb.log
             cprint("Results logged to WandB successfully!", "green")
+            del env_runner
 
             # --- Finish WandB run ---
     wandb.finish()

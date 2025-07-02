@@ -46,7 +46,6 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                  rotation_rep='rotation_6d',  # ignored when abs_action=False
                  use_legacy_normalizer=False,
                  use_cache=False,
-                 cache_type='directory',  # 'directory' or 'zip'
                  seed=42,
                  val_ratio=0.0,
                  n_demo=100
@@ -66,12 +65,15 @@ class RobomimicReplayImageDataset(BaseImageDataset):
 
         replay_buffer = None
         if use_cache:
-            if cache_type == 'zip':
-                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + '.zarr.zip'
+            cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}.' + '.zarr.zip'
+            cache_lock_path = cache_zarr_path + '.lock'
+            print('Acquiring lock on cache.')
+            with FileLock(cache_lock_path):
                 if not os.path.exists(cache_zarr_path):
                     # cache does not exists
                     try:
                         print('Cache does not exist. Creating!')
+                        # store = zarr.DirectoryStore(cache_zarr_path)
                         replay_buffer = _convert_robomimic_to_replay_multitask(
                             store=zarr.MemoryStore(),
                             shape_meta=shape_meta,
@@ -80,7 +82,6 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                             rotation_transformer=rotation_transformer,
                             n_demo=n_demo)
                         print('Saving cache to disk.')
-
                         with zarr.ZipStore(cache_zarr_path) as zip_store:
                             replay_buffer.save_to_store(
                                 store=zip_store
@@ -94,28 +95,6 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                         replay_buffer = ReplayBuffer.copy_from_store(
                             src_store=zip_store, store=zarr.MemoryStore())
                     print('Loaded!')
-
-            elif cache_type == 'directory':
-                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + '.zarr'
-                if not os.path.exists(cache_zarr_path):
-                    try:
-                        print('Cache does not exist. Creating!')
-                        replay_buffer = _convert_robomimic_to_replay_multitask(
-                            store=zarr.DirectoryStore(cache_zarr_path),
-                            shape_meta=shape_meta,
-                            dataset_paths=dataset_path,
-                            abs_action=abs_action,
-                            rotation_transformer=rotation_transformer,
-                            n_demo=n_demo)
-                        print('Saving cache to disk.')
-                    except Exception as e:
-                        shutil.rmtree(cache_zarr_path)
-                        raise e
-                else:
-                    print('Loading cached ReplayBuffer from Disk.')
-                    replay_buffer = ReplayBuffer.create_from_path(cache_zarr_path)
-                    print('Loaded!')
-
         else:
             replay_buffer = _convert_robomimic_to_replay_multitask(
                 store=zarr.MemoryStore(),

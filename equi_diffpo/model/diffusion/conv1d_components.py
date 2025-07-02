@@ -10,7 +10,9 @@ class Downsample1d(nn.Module):
         self.conv = nn.Conv1d(dim, dim, 3, 2, 1)
 
     def forward(self, x):
-        return self.conv(x)
+        out = self.conv(x)
+        return out
+
 
 class Upsample1d(nn.Module):
     def __init__(self, dim):
@@ -19,6 +21,7 @@ class Upsample1d(nn.Module):
 
     def forward(self, x):
         return self.conv(x)
+
 
 class Conv1dBlock(nn.Module):
     '''
@@ -42,5 +45,5 @@ class Conv1dBlock(nn.Module):
 
 def test():
     cb = Conv1dBlock(256, 128, kernel_size=3)
-    x = torch.zeros((1,256,16))
+    x = torch.zeros((1, 256, 16))
     o = cb(x)

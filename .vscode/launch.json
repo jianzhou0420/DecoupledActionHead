@@ -4,7 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
+        { //CURRENTFILE
             "name": "CURRENTFILE",
             "type": "debugpy",
             "request": "launch",
@@ -13,7 +13,7 @@
             "justMyCode": false,
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train pl_normal
             "name": "Train pl_normal",
             "type": "debugpy",
             "request": "launch",
@@ -29,10 +29,11 @@
                 "logging.mode=offline",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train pl_stage1
             "name": "Train pl_stage1",
             "type": "debugpy",
             "request": "launch",
@@ -47,11 +48,12 @@
                 // "task.env_runner.n_test=1",
                 "logging.mode=online",
                 "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1"
+                "val_dataloader.num_workers=1",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train pl_stage1 data_debug
             "name": "Train pl_stage1 data_debug",
             "type": "debugpy",
             "request": "launch",
@@ -67,11 +69,12 @@
                 "logging.mode=online",
                 "dataloader.num_workers=1",
                 "val_dataloader.num_workers=1",
-                "task.dataset.dataset_path=./data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5"
+                "task.dataset.dataset_path=./data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5",
+                "task_alphabet=A",
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train pl_stage2
             "name": "Train pl_stage2",
             "type": "debugpy",
             "request": "launch",
@@ -91,7 +94,7 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train pl_stage2 ABC_D
             "name": "Train pl_stage2 ABC_D",
             "type": "debugpy",
             "request": "launch",
@@ -113,7 +116,176 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // Train vae_stage1
+            "name": "Train vae_stage1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_all_miniExp.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=train_vae",
+                "task_name=stack_d1",
+                // "task_alphabet=A",
+                "n_demo=1",
+                // "task.env_runner.n_envs=2",
+                // "task.env_runner.n_train=1",
+                // "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train vae_annealing
+            "name": "Train vae_annealing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_all_miniExp.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=train_vae_KL_Annealing",
+                // "task_alphabet=A",
+                "n_demo=1",
+                // "task.env_runner.n_envs=2",
+                // "task.env_runner.n_train=1",
+                // "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train JianAE Stage1
+            "name": "Train JianAE Stage1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=JianAE_Stage1",
+                "n_demo=1",
+                // "task.env_runner.n_envs=2",
+                // "task.env_runner.n_train=1",
+                // "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train JianAE Stage2
+            "name": "Train JianAE Stage2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=JianAE_Stage2",
+                "n_demo=1",
+                "task_name=stack_d1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "task_alphabet=A",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "val_dataloader.num_workers=1",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train JianAE Stage2
+            "name": "Train JianAE Stage2 with 1000 demos",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=JianAE_Stage2",
+                "n_demo=1000",
+                "task_name=stack_d1",
+                "task_alphabet=A",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train pl_stage2 ABC_D_encoder
+            "name": "Train pl_stage2 ABC_D encoder",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_stage2_ABC_D_obs_encoder",
+                "task_name=stack_d1",
+                "task_alphabet=A",
+                "n_demo=1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "logging.mode=online",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "dataloader.batch_size=8",
+                "val_dataloader.num_workers=1",
+                "val_dataloader.batch_size=8",
+                "training.num_epochs=50",
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train pl_stage2 ABC_D_encoder
+            "name": "Train multi-task",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_normal_multitask",
+                "task_alphabet=ACK",
+                "n_demo=1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "dataloader.batch_size=8",
+                "val_dataloader.num_workers=1",
+                "val_dataloader.batch_size=8",
+                "training.rollout_every=1"
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // Train pl_stage2 ABC_D_encoder
+            "name": "Train multi-task Stage1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_stage1_new",
+                "task_alphabet=ACK",
+                "n_demo=1",
+                "task.env_runner.n_envs=2",
+                "task.env_runner.n_train=1",
+                "task.env_runner.n_test=1",
+                "logging.mode=offline",
+                "logging.project='debug'",
+                "dataloader.num_workers=1",
+                "dataloader.batch_size=8",
+                "val_dataloader.num_workers=1",
+                "val_dataloader.batch_size=8",
+                "training.rollout_every=1"
+            ],
+            "envFile": "${workspaceFolder}/.vscode/.env"
+        },
+        { // OnlineEval
             "name": "OnlineEval",
             "type": "debugpy",
             "request": "launch",

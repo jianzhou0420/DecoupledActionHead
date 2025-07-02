@@ -7,6 +7,7 @@
 # except:
 #     pass
 
+from zero.evaluator import evaluate_run
 import wandb
 import pathlib
 import gym  # Or your custom environment library
@@ -51,6 +52,9 @@ import hydra
 import sys
 from termcolor import cprint
 import mimicgen
+from natsort import natsorted
+from zero.z_utils.scp_utils import scp_to_another_computer
+
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
 sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)
@@ -66,76 +70,129 @@ torch.set_float32_matmul_precision('medium')
 
 
 def load_pretrained_weights(model, ckpt_path):
+    """
+    加载预训练权重，并根据策略冻结参数。
 
-    pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
+    此函数执行以下操作：
+    1. 记录模型中初始状态就为冻结的参数。
+    2. 从指定的 `ckpt_path` 加载权重。
+    3. 将权重加载到模型中匹配的层。
+    4. 强制冻结模型中所有的 'clip' 子模块参数，并将其设置为评估模式。
+    5. 冻结所有其他从检查点成功加载的参数。
+    6. 确保初始状态为冻结的参数保持冻结。
+    7. 保持模型中其余参数（如新的分类头）为可训练状态。
+
+    Args:
+        model (nn.Module): 需要加载权重和设置梯度的模型。
+        ckpt_path (str): 预训练权重文件（.pth）的路径。
+
+    Returns:
+        nn.Module: 处理完成后的模型。
+    """
+    # --------------------------------------------------------------------------
+    # ✨ 新增步骤：记录初始冻结状态
+    # --------------------------------------------------------------------------
+    initially_frozen_keys = {name for name, param in model.named_parameters() if not param.requires_grad}
+    if initially_frozen_keys:
+        print(f"检测到 {len(initially_frozen_keys)} 个参数在函数调用前已被设置为冻结状态。这些参数将保持冻结。")
+        # for name in initially_frozen_keys:
+        #     print(f"  - 初始冻结: {name}")
+
+    if not ckpt_path:
+        print("未提供权重路径，跳过权重加载过程。")
+        # 即使不加载权重，我们仍然需要冻结CLIP和保持初始冻结状态
+        if hasattr(model, 'clip'):
+            print("正在冻结 CLIP 模块并设置为评估模式...")
+            model.clip.eval()
+            for name, param in model.clip.named_parameters():
+                param.requires_grad = False
+                print(f"🧊 [强制冻结] {name}")
+        return model
+
+    # --------------------------------------------------------------------------
+    # 第1步：识别出可以安全加载的权重 (逻辑不变)
+    # --------------------------------------------------------------------------
+    print(f"正在从 '{ckpt_path}' 加载权重...")
+    try:
+        pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
+    except Exception as e:
+        print(f"错误：无法加载或解析权重文件 {ckpt_path}。错误信息: {e}")
+        return model
+
     new_model_dict = model.state_dict()
-
     loadable_keys = set()
     filtered_dict = {}
-    # --------------------------------------------------------------------------
-    # 第1步：识别出可以安全加载的权重
-    # --------------------------------------------------------------------------
 
     print("正在筛选兼容的权重...")
-
     for k, v in pretrained_dict.items():
         if k in new_model_dict and new_model_dict[k].shape == v.shape:
-            # 如果键名存在且形状匹配，则将其加入待加载字典和键名集合
             filtered_dict[k] = v
             loadable_keys.add(k)
     print(f"识别出 {len(loadable_keys)} 个参数可以从 checkpoint 安全加载。")
 
     # --------------------------------------------------------------------------
-    # 第2步：加载筛选后的权重
+    # 第2步：加载筛选后的权重 (逻辑不变)
     # --------------------------------------------------------------------------
-    # 使用筛选后的字典来更新新模型的权重字典
     new_model_dict.update(filtered_dict)
-    # 加载这个完美匹配的字典
     model.load_state_dict(new_model_dict)
     print("已成功加载所有兼容的权重。")
-    # --------------------------------------------------------------------------
-    # 第3步：根据加载情况设置梯度
-    # --------------------------------------------------------------------------
-    # --------------------------------------------------------------------------
-    # 第3步（已修正）：根据加载情况智能地设置梯度
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
+    # 第3步：强制设置 CLIP 模块为评估模式 (逻辑不变)
+    # --------------------------------------------------------------------------
+    if hasattr(model, 'clip'):
+        print("正在将 CLIP 模块设置为评估模式 (model.clip.eval())...")
+        model.clip.eval()
+    else:
+        print("⚠️  警告: 模型中未找到名为 'clip' 的属性，无法设置为评估模式。")
+
+    # --------------------------------------------------------------------------
+    # 第4步（已修改）：根据加载情况、模块名称和初始状态智能地设置梯度
+    # --------------------------------------------------------------------------
     print("正在智能地设置参数的梯度计算状态...")
     trainable_params = 0
     frozen_params = 0
 
     for name, param in model.named_parameters():
-        # 默认假定参数是可加载和可冻结的
-        is_loadable_and_should_be_frozen = name in loadable_keys
+        # 检查参数是否在初始时就已冻结
+        is_initially_frozen = name in initially_frozen_keys
+        # 检查参数是否属于CLIP模块
+        is_clip_param = name.startswith('clip.')
+        # 检查参数是否从checkpoint加载
+        is_loaded_from_ckpt = name in loadable_keys
 
-        # ✨ 智能逻辑的核心：检查偏置对应的权重是否也被加载了
-        if name.endswith('.bias'):
-            # 找到对应权重的名字
+        # 智能逻辑：检查偏置对应的权重是否也被加载了
+        if name.endswith('.bias') and not is_clip_param and not is_initially_frozen:
             weight_name = name.replace('.bias', '.weight')
             if weight_name not in loadable_keys:
-                # 如果权重没有被加载，那么即使偏置本身是兼容的，我们也不应该冻结它
-                is_loadable_and_should_be_frozen = False
+                is_loaded_from_ckpt = False
                 print(f"ℹ️  注意: 偏置 '{name}' 将保持可训练，因为其对应的权重 '{weight_name}' 未被加载。")
 
-        # 根据最终判断来设置梯度
-        if is_loadable_and_should_be_frozen:
+        # 最终冻结决策：只要是初始冻结、CLIP参数或从checkpoint加载的参数，就冻结
+        if is_initially_frozen or is_clip_param or is_loaded_from_ckpt:
             param.requires_grad = False
             frozen_params += 1
         else:
             param.requires_grad = True
             trainable_params += 1
 
-    print(f"策略执行完毕：{frozen_params} 个参数被加载并冻结，{trainable_params} 个参数保持可训练。")
+    print(f"策略执行完毕：{frozen_params} 个参数被冻结，{trainable_params} 个参数保持可训练。")
 
     # --------------------------------------------------------------------------
-    # 第4步：最终验证（代码不变）
+    # 第5步：最终验证 (已修改)
     # --------------------------------------------------------------------------
     print("\n--- 最终模型梯度状态验证 ---")
     for name, param in model.named_parameters():
-        if param.requires_grad:
-            print(f"✅ [可训练] {name}")
-        else:
-            print(f"🧊 [已冻结] {name}")
+        status = "🧊 [已冻结]" if not param.requires_grad else "✅ [可训练]"
+        reason = ""
+        if not param.requires_grad:
+            if name in initially_frozen_keys:
+                reason = "(原因: 初始状态为冻结)"
+            elif name.startswith('clip.'):
+                reason = "(原因: CLIP模块)"
+            elif name in loadable_keys:
+                reason = "(原因: 从ckpt加载)"
+        print(f"{status} {name} {reason}")
     print("---------------------------------")
 
     return model
@@ -146,7 +203,7 @@ class Trainer_all(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg
-        task_type = cfg.name
+        task_type = cfg.train_mode
 
         if task_type == 'stage2':
             ckpt_path = cfg.ckpt_path
@@ -302,15 +359,16 @@ class RolloutCallback(pl.Callback):
     A Callback to run a policy rollout in an environment periodically.
     """
 
-    def __init__(self, cfg: AppConfig):
+    def __init__(self, env_runner_cfg: DictConfig, rollout_every_n_epochs: int = 1):
         super().__init__()
         env_runner: BaseImageRunner
         env_runner = hydra.utils.instantiate(
-            cfg.task.env_runner,
-            output_dir='data/outputs')  # TODO:fix it
-        assert isinstance(env_runner, BaseImageRunner)
+            env_runner_cfg,
+            output_dir='data/outputs'
+        )  # TODO:fix it
 
-        self.rollout_every_n_epochs = cfg.training.rollout_every
+        assert isinstance(env_runner, BaseImageRunner)
+        self.rollout_every_n_epochs = rollout_every_n_epochs
         self.env_runner = env_runner
 
     def on_train_epoch_end(self, trainer: pl.Trainer, pl_module: Trainer_all):
@@ -369,7 +427,25 @@ class ActionMseLossForDiffusion(pl.Callback):
 
 def train(cfg: AppConfig):
 
+    # 0. extra config processing
+
+    cfg_env_runner = []
+    dataset_path = []
+    for key, value in cfg.train_tasks_meta.items():
+        this_dataset_path = f"data/robomimic/datasets/{key}/{key}_abs_{cfg.dataset_tail}.hdf5"
+        this_env_runner_cfg = copy.deepcopy(cfg.task.env_runner)
+        this_env_runner_cfg.dataset_path = this_dataset_path
+        this_env_runner_cfg.max_steps = value
+
+        OmegaConf.resolve(this_env_runner_cfg)
+        dataset_path.append(this_dataset_path)
+        cfg_env_runner.append(this_env_runner_cfg)
+
+    cfg.task.dataset.dataset_path = OmegaConf.create(dataset_path)
+
+    OmegaConf.save(cfg, os.path.join(cfg.run_dir, 'config.yaml'))
     # 1. Define a unique name and directory for this specific run
+
     this_run_dir = cfg.run_dir
     run_name = cfg.run_name
 
@@ -395,6 +471,7 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
+<<<<<<< HEAD
     if cfg.name == 'stage1':
         callback_list = [checkpoint_callback,
                          #  ActionMseLossForDiffusion(cfg),
@@ -411,6 +488,25 @@ def train(cfg: AppConfig):
                          ]
     else:
         raise ValueError(f"Unsupported task type: {cfg.name}, check config.name")
+=======
+    # rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
+
+    if cfg.train_mode == 'stage1':
+        callback_list = [checkpoint_callback,
+                         ]
+    elif cfg.train_mode == 'stage2':
+        callback_list = [checkpoint_callback,
+                         #  ActionMseLossForDiffusion(cfg),
+                         ]
+        # callback_list.extend(rollout_callback_list)
+
+    elif cfg.train_mode == 'normal':
+        callback_list = [checkpoint_callback,
+                         ]
+        # callback_list.extend(rollout_callback_list)
+    else:
+        raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
+>>>>>>> miniExp
 
     trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
@@ -424,6 +520,7 @@ def train(cfg: AppConfig):
     data_module = MyDataModule(cfg)
     trainer.fit(trainer_model, datamodule=data_module)
 
+<<<<<<< HEAD
     # 5. Upload all checkpoints as a single wandb artifact
     # artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
 
@@ -434,6 +531,18 @@ def train(cfg: AppConfig):
 
     # # Log artifact
     # wandb_logger.experiment.log_artifact(artifact)
+=======
+    scp_to_another_computer(
+        local_path=this_run_dir,
+        remote_path=os.path.join('/media/jian/ssd4t/tmp', run_name),
+        hostname='10.12.65.19',
+        username='jian',
+    )
+    wandb.finish()
+    evaluate_run(
+        seed=42,
+        run_dir=this_run_dir,)
+>>>>>>> miniExp
 
 
 @hydra.main(
@@ -453,55 +562,20 @@ def main(cfg: OmegaConf):
 # ---------------------------------------------------------------
 if __name__ == '__main__':
     tasks_meta = {
-        "A": {
-            "name": "stack_d1",
-            "average_steps": 108,
-        },
-        "B": {
-            "name": "square_d2",
-            "average_steps": 153,
-        },
-        "C": {
-            "name": "coffee_d2",
-            "average_steps": 224,
-        },
-        "D": {
-            "name": "threading_d2",
-            "average_steps": 227,
-        },
-        "E": {
-            "name": "stack_three_d1",
-            "average_steps": 255,
-        },
-        "F": {
-            "name": "hammer_cleanup_d1",
-            "average_steps": 286,
-        },
-        "G": {
-            "name": "three_piece_assembly_d2",
-            "average_steps": 335,
-        },
-        "H": {
-            "name": "mug_cleanup_d1",
-            "average_steps": 338,
-        },
-        "I": {
-            "name": "nut_assembly_d0",
-            "average_steps": 358,
-        },
-        "J": {
-            "name": "kitchen_d1",
-            "average_steps": 619,
-        },
-        "K": {
-            "name": "pick_place_d0",
-            "average_steps": 677,
-        },
-        "L": {
-            "name": "coffee_preparation_d1",
-            "average_steps": 687,
-        },
+        "A": {"name": "stack_d1", "average_steps": 108, },
+        "B": {"name": "square_d2", "average_steps": 153, },
+        "C": {"name": "coffee_d2", "average_steps": 224, },
+        "D": {"name": "threading_d2", "average_steps": 227, },
+        "E": {"name": "stack_three_d1", "average_steps": 255, },
+        "F": {"name": "hammer_cleanup_d1", "average_steps": 286, },
+        "G": {"name": "three_piece_assembly_d2", "average_steps": 335, },
+        "H": {"name": "mug_cleanup_d1", "average_steps": 338, },
+        "I": {"name": "nut_assembly_d0", "average_steps": 358, },
+        "J": {"name": "kitchen_d1", "average_steps": 619, },
+        "K": {"name": "pick_place_d0", "average_steps": 677, },
+        "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
     }
+
     max_steps = {meta['name']: int(meta['average_steps'] * 2.5) for task, meta in tasks_meta.items()}
     print(f"max_steps: {max_steps}")
 
@@ -514,7 +588,17 @@ if __name__ == '__main__':
     def get_ws_y_center(task_name):
         return 0.
 
-    OmegaConf.register_new_resolver("get_max_steps", lambda x: max_steps[x], replace=True)
+    def get_train_tasks_meta(task_alphabet):
+        task_alphabet_list = natsorted(task_alphabet)
+        train_tasks_meta = dict()
+        for task_alphabet in task_alphabet_list:
+            task_name = tasks_meta[task_alphabet]['name']
+            task_max_steps = max_steps[task_name]
+            train_tasks_meta.update({task_name: task_max_steps})
+        train_tasks_meta = OmegaConf.create(train_tasks_meta)
+        return train_tasks_meta
+
+    OmegaConf.register_new_resolver("get_train_tasks_meta", get_train_tasks_meta, replace=True)
     OmegaConf.register_new_resolver("get_ws_x_center", get_ws_x_center, replace=True)
     OmegaConf.register_new_resolver("get_ws_y_center", get_ws_y_center, replace=True)
 

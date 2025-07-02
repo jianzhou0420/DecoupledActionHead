@@ -40,7 +40,7 @@ def create_env(env_meta, shape_meta, enable_render=True):
 
     env = EnvUtils.create_env_from_metadata(
         env_meta=env_meta,
-        render=False,
+        render=True,
         render_offscreen=enable_render,
         use_image_obs=enable_render,
     )
@@ -57,10 +57,10 @@ def direct_test():
     eval_config = get_config('./zero/config/online_eval.yaml')
     print(eval_config)
 
-    with open("mimicgen_env.json", "r") as f:
-        all_env = json.load(f)
-    with open("mimicgen_robots.json", "r") as f:
-        all_robots = json.load(f)
+    # with open("mimicgen_env.json", "r") as f:
+    #     all_env = json.load(f)
+    # with open("mimicgen_robots.json", "r") as f:
+    #     all_robots = json.load(f)
 
     env_name = eval_config['env_name']
     robot = eval_config['robot']
@@ -264,7 +264,7 @@ def validate_dataset(dataset_path):
             break
         action = actions[i * (n_action_steps):i * (n_action_steps) + n_action_steps]
         obs, reward, done, info = test_env.step(action)
-
+        pass
     # for i in tqdm(range(len(actions) // 1 + 1)):
     #     action = actions[i:i + 1]
     #     obs, reward, done, info = test_env.step(action)
@@ -277,5 +277,6 @@ def validate_dataset(dataset_path):
 
 
 if __name__ == "__main__":
-    a = validate_dataset('data/robomimic/datasets/stack_d1/stack_d1_abs_traj_eePose.hdf5')
-    a.close()
+    # a = validate_dataset('data/robomimic/datasets/stack_d1/stack_d1_abs_traj_eePose.hdf5')
+    # a.close()
+    direct_test()

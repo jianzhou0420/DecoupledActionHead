@@ -77,11 +77,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-<<<<<<< HEAD
-  num_workers: 2
-=======
   num_workers: 1
->>>>>>> miniExp
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -108,15 +104,9 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-<<<<<<< HEAD
-  rollout_every: ${eval:'50000 / ${n_demo} /50'}
-  checkpoint_every: ${eval:'50000 / ${n_demo} /5'}
-  val_every: 1
-=======
   rollout_every:  ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
   val_every: 10000
->>>>>>> miniExp
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0

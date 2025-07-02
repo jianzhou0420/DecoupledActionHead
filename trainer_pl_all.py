@@ -471,24 +471,6 @@ def train(cfg: AppConfig):
         **cfg.logging,
     )
 
-<<<<<<< HEAD
-    if cfg.name == 'stage1':
-        callback_list = [checkpoint_callback,
-                         #  ActionMseLossForDiffusion(cfg),
-                         ]
-    elif cfg.name == 'stage2':
-        callback_list = [checkpoint_callback,
-                         RolloutCallback(cfg),
-                         ActionMseLossForDiffusion(cfg),
-                         ]
-    elif cfg.name == 'normal':
-        callback_list = [checkpoint_callback,
-                         RolloutCallback(cfg),
-                         ActionMseLossForDiffusion(cfg),
-                         ]
-    else:
-        raise ValueError(f"Unsupported task type: {cfg.name}, check config.name")
-=======
     # rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
 
     if cfg.train_mode == 'stage1':
@@ -506,7 +488,6 @@ def train(cfg: AppConfig):
         # callback_list.extend(rollout_callback_list)
     else:
         raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
->>>>>>> miniExp
 
     trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
@@ -520,18 +501,6 @@ def train(cfg: AppConfig):
     data_module = MyDataModule(cfg)
     trainer.fit(trainer_model, datamodule=data_module)
 
-<<<<<<< HEAD
-    # 5. Upload all checkpoints as a single wandb artifact
-    # artifact = wandb.Artifact(name="all-checkpoints", type="checkpoints")
-
-    # Add all .ckpt files from the checkpoint directory
-    # for filename in os.listdir(ckpt_path):
-    #     if filename.endswith(".ckpt"):
-    #         artifact.add_file(os.path.join(ckpt_path, filename))
-
-    # # Log artifact
-    # wandb_logger.experiment.log_artifact(artifact)
-=======
     scp_to_another_computer(
         local_path=this_run_dir,
         remote_path=os.path.join('/media/jian/ssd4t/tmp', run_name),
@@ -542,7 +511,6 @@ def train(cfg: AppConfig):
     evaluate_run(
         seed=42,
         run_dir=this_run_dir,)
->>>>>>> miniExp
 
 
 @hydra.main(

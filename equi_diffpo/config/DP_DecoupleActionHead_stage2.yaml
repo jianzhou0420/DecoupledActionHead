@@ -107,24 +107,15 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-<<<<<<< HEAD
-  rollout_every: ${eval:'50000 / ${n_demo} / 50'}
-  checkpoint_every: ${eval:'50000 / ${n_demo} / 5'}
-=======
   rollout_every:  ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
->>>>>>> miniExp
   val_every: 10000
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0
 
 logging:
-<<<<<<< HEAD
-  project: DecoupleActionHead_ABC_D
-=======
   project: DecoupleActionHead
->>>>>>> miniExp
   resume: False
   mode: online
   name: ${run_name}

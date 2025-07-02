@@ -117,7 +117,7 @@ training:
 logging:
   project: DecoupleActionHead
   resume: False
-  mode: offline
+  mode: online
   name: ${run_name}
   tags: ["stage2","${task_alphabet}",]
   id: null

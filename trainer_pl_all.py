@@ -205,11 +205,12 @@ class Trainer_all(pl.LightningModule):
         self.cfg = cfg
         task_type = cfg.train_mode
 
-        if task_type == 'stage2':
+        if task_type == 'stage2' or task_type == 'stage2_rollout':
             ckpt_path = cfg.ckpt_path
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path)
             policy_ema = copy.deepcopy(policy)
+
         elif task_type == 'stage1':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)

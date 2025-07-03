@@ -8,7 +8,7 @@ TASK_NAME="stack_d1" # 任务 A 的描述名
 echo "开始执行 Task $TASK_LETTER ($TASK_NAME) 在 indices 0,10,20,30,40 上共 5 次，n_demo=$N_DEMOS"
 echo "---------------------------------------------------------"
 
-for i in $(seq 9 10 29); do
+for i in $(seq 0 1 4); do
     # 格式化两位数：00, 10, 20, 30, 40
     idx=$(printf "%02d" "$i")
 

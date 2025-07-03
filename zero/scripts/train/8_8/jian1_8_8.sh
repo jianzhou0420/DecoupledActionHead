@@ -61,7 +61,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         n_demo=1000 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
-        training.val_every=1 \
+        training.val_every=1000 \
         logging.project="DecoupleActionHead_8_8" \
         run_dir="$run_dir"
 
@@ -70,7 +70,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         n_demo=1000 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
-        training.val_every=1 \
+        training.val_every=1000 \
         logging.project="DecoupleActionHead_8_8" \
         run_dir="$run_dir" \
         ckpt_path="$ckpt_path" \

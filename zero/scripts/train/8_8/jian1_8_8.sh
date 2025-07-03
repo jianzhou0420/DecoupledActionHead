@@ -46,9 +46,9 @@ time_part=$(date +'%H.%M.%S')
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+    run_dir="data/outputs/${date_part}/${time_part}_${DESCRIPTIVE_TASK_NAME}_${LETTER}"
 
-    ckpt_path="data/outputs/${date_part}/${time_part}_${run_name}/checkpoints/last.ckpt"
+    ckpt_path="${run_dir}/checkpoints/last.ckpt"
 
     if [ -z "$DESCRIPTIVE_TASK_NAME" ]; then
         echo "Warning: No descriptive name found for task letter '$LETTER'. Skipping."

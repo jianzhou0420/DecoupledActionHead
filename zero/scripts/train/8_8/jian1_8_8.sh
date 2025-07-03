@@ -58,7 +58,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     echo "Running trainer.py for task: '$LETTER' (Descriptive Name: $DESCRIPTIVE_TASK_NAME)"
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_8 \
-        n_demo=1 \
+        n_demo=1000 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
         training.val_every=1 \
@@ -67,7 +67,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
-        n_demo=1 \
+        n_demo=1000 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
         training.val_every=1 \

@@ -60,10 +60,11 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         dataset_name = []
         for dataset in dataset_path:
             dataset_name.append(dataset.split('/')[-2])
+        dataset_tail = dataset_path[0].split('abs_')[-1].split('.hdf5')[0]
 
         zarr_path = 'data/robomimic/zarr/'
         dataset_name = '-'.join(dataset_name)
-
+        dataset_name = dataset_name + f'_{dataset_tail}'
         replay_buffer = None
         if use_cache:
             if cache_type == 'zip':

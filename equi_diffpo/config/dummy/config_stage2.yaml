@@ -1,0 +1,265 @@
+train_mode: stage2_rollout
+dataset_tail: traj_eePose
+task_alphabet: A
+shape_meta:
+  obs:
+    agentview_image:
+      shape:
+      - 3
+      - 84
+      - 84
+      type: rgb
+    robot0_eye_in_hand_image:
+      shape:
+      - 3
+      - 84
+      - 84
+      type: rgb
+    robot0_eef_pos:
+      shape:
+      - 3
+    robot0_eef_quat:
+      shape:
+      - 4
+    robot0_gripper_qpos:
+      shape:
+      - 2
+  action:
+    shape:
+    - 10
+train_tasks_meta:
+  stack_d1: 270
+horizon: 16
+n_obs_steps: 2
+n_action_steps: 8
+n_latency_steps: 0
+dataset_obs_steps: 2
+obs_as_global_cond: true
+dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+dataset_path: null
+n_demo: 1000
+ckpt_path: data/robomimic/Stage1/2025.06.08_00.00.00_pretrain_JPee_stage1_stack_d1_1000/checkpoint_epoch=009.ckpt
+run_name: stage2_rollout_A_1000
+run_dir: data/outputs/2025.07.03/13.05.07_stage2_rollout_A_1000
+policy:
+  _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
+  shape_meta:
+    obs:
+      agentview_image:
+        shape:
+        - 3
+        - 84
+        - 84
+        type: rgb
+      robot0_eye_in_hand_image:
+        shape:
+        - 3
+        - 84
+        - 84
+        type: rgb
+      robot0_eef_pos:
+        shape:
+        - 3
+      robot0_eef_quat:
+        shape:
+        - 4
+      robot0_gripper_qpos:
+        shape:
+        - 2
+    action:
+      shape:
+      - 10
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    variance_type: fixed_small
+    clip_sample: true
+    prediction_type: epsilon
+  horizon: 16
+  n_action_steps: 8
+  n_obs_steps: 2
+  num_inference_steps: 100
+  obs_as_global_cond: true
+  crop_shape:
+  - 76
+  - 76
+  diffusion_step_embed_dim: 128
+  down_dims:
+  - 512
+  - 1024
+  - 2048
+  kernel_size: 5
+  n_groups: 8
+  cond_predict_scale: true
+  obs_encoder_group_norm: true
+  eval_fixed_crop: true
+  rot_aug: false
+ema:
+  _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+dataloader:
+  batch_size: 64
+  num_workers: 4
+  shuffle: true
+  pin_memory: true
+  persistent_workers: true
+val_dataloader:
+  batch_size: 64
+  num_workers: 2
+  shuffle: false
+  pin_memory: true
+  persistent_workers: true
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 0.0001
+  betas:
+  - 0.95
+  - 0.999
+  eps: 1.0e-08
+  weight_decay: 1.0e-06
+training:
+  seed: 0
+  debug: false
+  resume: false
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  num_epochs: 50.0
+  gradient_accumulate_every: 1
+  use_ema: true
+  rollout_every: 1
+  checkpoint_every: 10000
+  val_every: 10000
+  sample_every: 5
+  tqdm_interval_sec: 1.0
+logging:
+  project: BestEpoch
+  resume: false
+  mode: online
+  name: Stage2_A_1000_idx_009
+  tags:
+  - stage2
+  - A
+  id: null
+  group: null
+task:
+  name: mimicgen_abs_JP2eePose
+  shape_meta:
+    obs:
+      agentview_image:
+        shape:
+        - 3
+        - 84
+        - 84
+        type: rgb
+      robot0_eye_in_hand_image:
+        shape:
+        - 3
+        - 84
+        - 84
+        type: rgb
+      robot0_eef_pos:
+        shape:
+        - 3
+      robot0_eef_quat:
+        shape:
+        - 4
+      robot0_gripper_qpos:
+        shape:
+        - 2
+    action:
+      shape:
+      - 10
+  abs_action: true
+  env_runner:
+    _target_: equi_diffpo.env_runner.robomimic_image_runner.RobomimicImageRunner
+    dataset_path: null
+    shape_meta:
+      obs:
+        agentview_image:
+          shape:
+          - 3
+          - 84
+          - 84
+          type: rgb
+        robot0_eye_in_hand_image:
+          shape:
+          - 3
+          - 84
+          - 84
+          type: rgb
+        robot0_eef_pos:
+          shape:
+          - 3
+        robot0_eef_quat:
+          shape:
+          - 4
+        robot0_gripper_qpos:
+          shape:
+          - 2
+      action:
+        shape:
+        - 10
+    n_train: 6
+    n_train_vis: 2
+    train_start_idx: 0
+    n_test: 50
+    n_test_vis: 4
+    test_start_seed: 100000
+    max_steps: null
+    n_obs_steps: 2
+    n_action_steps: 8
+    render_obs_key: agentview_image
+    fps: 10
+    crf: 22
+    past_action: false
+    abs_action: true
+    tqdm_interval_sec: 1.0
+    n_envs: 28
+  dataset:
+    _target_: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+    n_demo: 1000
+    shape_meta:
+      obs:
+        agentview_image:
+          shape:
+          - 3
+          - 84
+          - 84
+          type: rgb
+        robot0_eye_in_hand_image:
+          shape:
+          - 3
+          - 84
+          - 84
+          type: rgb
+        robot0_eef_pos:
+          shape:
+          - 3
+        robot0_eef_quat:
+          shape:
+          - 4
+        robot0_gripper_qpos:
+          shape:
+          - 2
+      action:
+        shape:
+        - 10
+    dataset_path:
+    - data/robomimic/datasets/stack_d1/stack_d1_abs_traj_eePose.hdf5
+    horizon: 16
+    pad_before: 1
+    pad_after: 7
+    n_obs_steps: 2
+    abs_action: true
+    rotation_rep: rotation_6d
+    use_legacy_normalizer: false
+    use_cache: 1
+    seed: 42
+    val_ratio: 0.02

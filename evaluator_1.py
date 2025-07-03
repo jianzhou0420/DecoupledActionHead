@@ -41,14 +41,6 @@ def resolve_output_dir(output_dir: str):
     return cfg, checkpoint_all, run_name
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Evaluate a policy on Robomimic tasks.")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
-    parser.add_argument("--results_dir", type=str, default="data/outputs/eval_results",)
-    parser.add_argument("--run_dir", type=str, default="/media/jian/data/outputs/Normal/23.27.09_normal_ACK_1000",)
-    args = parser.parse_args()
-
-
 def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_normal_ACK_1000", results_dir: str = "data/outputs/eval_results"):
     seed_everything(seed)
 
@@ -128,3 +120,16 @@ def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_no
             # --- Finish WandB run ---
     wandb.finish()
     cprint("WandB run finished.", "green")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Evaluate a policy on Robomimic tasks.")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
+    parser.add_argument("--results_dir", type=str, default="data/outputs/eval_results",)
+    parser.add_argument("--run_dir", type=str, default="/media/jian/data/outputs/Normal/23.27.09_normal_ACK_1000",)
+    args = parser.parse_args()
+
+    evaluate_run(seed=args.seed,
+                 run_dir=args.run_dir,
+                 results_dir=args.results_dir
+                 )

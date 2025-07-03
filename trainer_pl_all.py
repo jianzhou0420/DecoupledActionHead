@@ -205,9 +205,7 @@ class Trainer_all(pl.LightningModule):
             ckpt_path = cfg.ckpt_path
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path)
-
             policy_ema = copy.deepcopy(policy)
-
         elif task_type == 'stage1':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
@@ -215,7 +213,7 @@ class Trainer_all(pl.LightningModule):
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
         else:
-            raise ValueError(f"Unsupported task type: {task_type}, check config.name")
+            raise ValueError(f"Unsupported task type: {task_type}, check config.train_mode")
 
         if cfg.training.use_ema:
             ema_handler: EMAModel = hydra.utils.instantiate(

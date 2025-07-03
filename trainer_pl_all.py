@@ -113,11 +113,7 @@ def load_pretrained_weights(model, ckpt_path):
     # 第1步：识别出可以安全加载的权重 (逻辑不变)
     # --------------------------------------------------------------------------
     print(f"正在从 '{ckpt_path}' 加载权重...")
-    try:
-        pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
-    except Exception as e:
-        print(f"错误：无法加载或解析权重文件 {ckpt_path}。错误信息: {e}")
-        return model
+    pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
 
     new_model_dict = model.state_dict()
     loadable_keys = set()
@@ -209,6 +205,7 @@ class Trainer_all(pl.LightningModule):
             ckpt_path = cfg.ckpt_path
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path)
+
             policy_ema = copy.deepcopy(policy)
 
         elif task_type == 'stage1':

@@ -41,7 +41,14 @@ def resolve_output_dir(output_dir: str):
     return cfg, checkpoint_all, run_name
 
 
-def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_normal_ACK_1000", results_dir: str = "data/outputs/"):
+def evaluate_run(seed: int = 42,
+                 run_dir: str = "data/outputs/Normal/23.27.09_normal_ACK_1000",
+                 results_dir: str = "data/outputs/eval_results",
+                 n_envs: int = 28,
+                 n_test_vis: int = 6,
+                 n_train_vis: int = 3,
+                 n_train: int = 6,
+                 n_test: int = 50):
     seed_everything(seed)
 
     cfg, checkpoint_all, run_name = resolve_output_dir(run_dir)
@@ -78,33 +85,32 @@ def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_no
     )
     cprint("WandB initialized successfully!", "green")
     # --- Environment Runner Execution ---
-
-    for ckpt in checkpoint_all:
-        policy: BaseImagePolicy = hydra.utils.instantiate(cfg.policy)
-        policy.load_state_dict(
-            torch.load(os.path.join(run_dir, "checkpoints", ckpt), map_location="cpu")["state_dict"]
+    for env_cfg in cfg_env_runner:
+        # debug
+        cprint('debugging code is on', 'red')
+        # /debug
+        task_name = env_cfg.dataset_path.split("/")[-2]
+        env_runner: RobomimicImageRunner = hydra.utils.instantiate(
+            config=env_cfg,
+            output_dir=eval_result_dir,
+            n_envs=n_envs,
+            n_test_vis=n_test_vis,
+            n_train_vis=n_train_vis,
+            n_train=n_train,
+            n_test=n_test,
         )
-        policy.to("cuda" if torch.cuda.is_available() else "cpu")
-        policy.eval()
-        epoch = int(ckpt.split("=")[-1].split(".")[0])
-        print(f"Evaluating policy at epoch {epoch} with checkpoint {ckpt}...")
 
-        for env_cfg in cfg_env_runner:
-            # debug
-            cprint('debugging code is on', 'red')
-            # /debug
-            task_name = env_cfg.dataset_path.split("/")[-2]
-            env_runner: RobomimicImageRunner = hydra.utils.instantiate(
-                config=env_cfg,
-                output_dir=eval_result_dir,
-                n_envs=28,
-                n_test_vis=50,
-                n_train_vis=6,
+        for ckpt in checkpoint_all:
+            policy: BaseImagePolicy = hydra.utils.instantiate(cfg.policy)
+            policy.load_state_dict(
+                torch.load(os.path.join(run_dir, "checkpoints", ckpt), map_location="cpu")["state_dict"]
             )
+            policy.to("cuda" if torch.cuda.is_available() else "cpu")
+            policy.eval()
+            epoch = int(ckpt.split("=")[-1].split(".")[0])
+            print(f"Evaluating policy at epoch {epoch} with checkpoint {ckpt}...")
 
-            cprint("Starting environment runner...", "yellow")
             evaluation_results = env_runner.run(policy)
-            cprint("Environment runner finished.", "yellow")
             new_results = dict()
             for key, value in evaluation_results.items():
                 new_results[f"{task_name}/{key}"] = value
@@ -116,11 +122,10 @@ def evaluate_run(seed: int = 42, run_dir: str = "data/outputs/Normal/23.27.09_no
             cprint("Logging results to WandB...", "green")
             wandb.log(new_results, step=epoch)  # 直接将字典传递给 wandb.log
             cprint("Results logged to WandB successfully!", "green")
-            del env_runner
 
             # --- Finish WandB run ---
-    wandb.finish()
-    cprint("WandB run finished.", "green")
+        wandb.finish()
+        cprint("WandB run finished.", "green")
 
 
 if __name__ == "__main__":

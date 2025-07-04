@@ -129,7 +129,3 @@ def evaluate_run(seed: int = 42,
 
     wandb.finish()
     cprint("WandB run finished.", "green")
-
-
-if __name__ == "__main__":
-    run_dir = "data/outputs/Normal/23.27.09_normal_ACK_1000"

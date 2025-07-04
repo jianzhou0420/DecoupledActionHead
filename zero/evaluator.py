@@ -1,4 +1,3 @@
-from zero.evaluator import evaluate_run
 import time
 import argparse
 import numpy as np

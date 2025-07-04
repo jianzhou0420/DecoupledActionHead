@@ -1,3 +1,4 @@
+import time
 import argparse
 import numpy as np
 import copy
@@ -82,8 +83,8 @@ def evaluate_run(seed: int = 42,
         dataset_path.append(this_dataset_path)
         cfg_env_runner.append(this_env_runner_cfg)
 
-    current_time = np.datetime64('now', 's')
-    eval_result_dir = os.path.join(results_dir, current_time)
+    date_time = time.strftime("%y.%d.%m_%H.%M.%S", time.localtime())
+    eval_result_dir = os.path.join(results_dir, date_time)
     media_dir = os.path.join(eval_result_dir, "media")
     os.makedirs(media_dir, exist_ok=True)
 

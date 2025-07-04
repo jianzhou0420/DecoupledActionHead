@@ -124,6 +124,9 @@ def evaluate_run(seed: int = 42,
             cprint("Results logged to WandB successfully!", "green")
 
             # --- Finish WandB run ---
+
+        del env_runner
+
     wandb.finish()
     cprint("WandB run finished.", "green")
 

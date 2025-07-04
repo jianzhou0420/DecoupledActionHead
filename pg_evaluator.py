@@ -11,7 +11,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_train_vis", type=int, default=3, help="Number of training environments to visualize.")
     parser.add_argument("--n_train", type=int, default=6, help="Number of training episodes to run.")
     parser.add_argument("--n_test", type=int, default=50, help="Number of test episodes to run.")
-
+    parser.add_argument("--wandb_mode", type=str, default="offline", help="WandB mode for logging.")
     args = parser.parse_args()
 
     evaluate_run(seed=args.seed,
@@ -21,5 +21,6 @@ if __name__ == "__main__":
                  n_test_vis=args.n_test_vis,
                  n_train_vis=args.n_train_vis,
                  n_train=args.n_train,
-                 n_test=args.n_test
+                 n_test=args.n_test,
+                 wandb_mode=args.wandb_mode
                  )

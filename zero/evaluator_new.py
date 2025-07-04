@@ -25,20 +25,7 @@ def seed_everything(seed: int):
 
 
 def resolve_output_dir(output_dir: str):
-    tasks_meta = {
-        "A": {"name": "stack_d1", "average_steps": 108, },
-        "B": {"name": "square_d2", "average_steps": 153, },
-        "C": {"name": "coffee_d2", "average_steps": 224, },
-        "D": {"name": "threading_d2", "average_steps": 227, },
-        "E": {"name": "stack_three_d1", "average_steps": 255, },
-        "F": {"name": "hammer_cleanup_d1", "average_steps": 286, },
-        "G": {"name": "three_piece_assembly_d2", "average_steps": 335, },
-        "H": {"name": "mug_cleanup_d1", "average_steps": 338, },
-        "I": {"name": "nut_assembly_d0", "average_steps": 358, },
-        "J": {"name": "kitchen_d1", "average_steps": 619, },
-        "K": {"name": "pick_place_d0", "average_steps": 677, },
-        "L": {"name": "coffee_preparation_d1", "average_steps": 687, },
-    }
+
     # 1. run_name
     run_name = output_dir.split("_")[1:]
     run_name = "_".join(run_name)
@@ -50,10 +37,8 @@ def resolve_output_dir(output_dir: str):
     # 3. cfg
     config_path = os.path.join(output_dir, "config.yaml")
     cfg = OmegaConf.load(config_path)
-    task_alphabet_list = natsorted(cfg.task_alphabet)
-    task_name_list = {key: tasks_meta[key]["name"] for key in task_alphabet_list}
 
-    return cfg, checkpoint_all, task_alphabet_list, task_name_list
+    return cfg, checkpoint_all, run_name
 
 
 def evaluate_run(seed: int = 42,
@@ -63,11 +48,10 @@ def evaluate_run(seed: int = 42,
                  n_test_vis: int = 6,
                  n_train_vis: int = 3,
                  n_train: int = 6,
-                 n_test: int = 50,
-                 wandb_mode: str = "offline"):
+                 n_test: int = 50):
     seed_everything(seed)
 
-    cfg, checkpoint_all, task_alphabet_list, task_name_list = resolve_output_dir(run_dir)
+    cfg, checkpoint_all, run_name = resolve_output_dir(run_dir)
 
     cfg_env_runner = []
     dataset_path = []
@@ -82,16 +66,26 @@ def evaluate_run(seed: int = 42,
         dataset_path.append(this_dataset_path)
         cfg_env_runner.append(this_env_runner_cfg)
 
-    current_time = np.datetime64('now', 's')
-    eval_result_dir = os.path.join(results_dir, current_time)
+    eval_result_dir = os.path.join(results_dir, run_name)  # 建议为评估结果创建一个独立的子目录
     media_dir = os.path.join(eval_result_dir, "media")
     os.makedirs(media_dir, exist_ok=True)
 
     cprint(f"Evaluation output will be saved to: {eval_result_dir}", "blue")
 
+    # --- WandB Initialization ---
+    wandb_project_name = "Eval"
+    wandb_run_name = f"eval_{run_name}"
+
+    wandb.init(
+        project=wandb_project_name,
+        name=wandb_run_name,
+        mode="online",
+        config=OmegaConf.to_container(cfg, resolve=False),
+        dir=eval_result_dir,
+    )
     cprint("WandB initialized successfully!", "green")
     # --- Environment Runner Execution ---
-    for i, env_cfg in cfg_env_runner:
+    for env_cfg in cfg_env_runner:
         # debug
         cprint('debugging code is on', 'red')
         # /debug
@@ -104,17 +98,6 @@ def evaluate_run(seed: int = 42,
             n_train_vis=n_train_vis,
             n_train=n_train,
             n_test=n_test,
-        )
-        # --- WandB Initialization ---
-        wandb_project_name = "Eval"
-        wandb_run_name = f"{cfg.train_mode}_{task_alphabet_list[i]}_{task_name_list[task_alphabet_list[i]]}"
-
-        wandb.init(
-            project=wandb_project_name,
-            name=wandb_run_name,
-            mode=wandb_mode,
-            config=OmegaConf.to_container(cfg, resolve=False),
-            dir=eval_result_dir,
         )
 
         for ckpt in checkpoint_all:
@@ -144,5 +127,5 @@ def evaluate_run(seed: int = 42,
 
         del env_runner
 
-        wandb.finish()
+    wandb.finish()
     cprint("WandB run finished.", "green")

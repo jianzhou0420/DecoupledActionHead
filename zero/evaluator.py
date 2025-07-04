@@ -124,8 +124,8 @@ def evaluate_run(seed: int = 42,
             cprint("Results logged to WandB successfully!", "green")
 
             # --- Finish WandB run ---
-        wandb.finish()
-        cprint("WandB run finished.", "green")
+    wandb.finish()
+    cprint("WandB run finished.", "green")
 
 
 if __name__ == "__main__":

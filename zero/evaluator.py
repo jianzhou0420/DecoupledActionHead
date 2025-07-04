@@ -93,7 +93,7 @@ def evaluate_run(seed: int = 42,
 
     cprint("WandB initialized successfully!", "green")
     # --- Environment Runner Execution ---
-    for i, env_cfg in cfg_env_runner:
+    for i, env_cfg in enumerate(cfg_env_runner):
         # debug
         cprint('debugging code is on', 'red')
         # /debug

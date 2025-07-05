@@ -64,7 +64,8 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         logging.project="DecoupleActionHead_Stage2_Summary" \
         logging.group="A1000_A100_Stage2" \
         ckpt_path="$ckpt_path" \
-        train_mode=stage2_rollout
+        train_mode=stage2_rollout \
+        dataloader.num_workers=16
 
 done
 

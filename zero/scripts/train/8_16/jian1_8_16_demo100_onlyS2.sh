@@ -62,7 +62,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         task.env_runner.n_envs=28 \
         training.val_every=1000 \
         logging.project="DecoupleActionHead_Stage2_Summary" \
-        logging.grouping="A1000_A100_Stage2" \
+        logging.group="A1000_A100_Stage2" \
         ckpt_path="$ckpt_path" \
         train_mode=stage2_rollout
 

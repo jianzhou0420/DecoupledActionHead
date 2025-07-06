@@ -12,6 +12,7 @@ from equi_diffpo.env_runner.robomimic_image_runner_tmp import RobomimicImageRunn
 from equi_diffpo.policy.base_image_policy import BaseImagePolicy
 import torch
 import wandb
+import mimicgen
 
 
 def seed_everything(seed: int):

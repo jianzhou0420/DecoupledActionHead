@@ -48,24 +48,14 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     run_dir="data/outputs/${date_part}/${time_part}_${DESCRIPTIVE_TASK_NAME}_${LETTER}_8_16"
 
-    ckpt_path="data/tmp/stage1_${LETTER}_1000_epoch\=049.ckpt"
-
-    if [ -z "$DESCRIPTIVE_TASK_NAME" ]; then
-        echo "Warning: No descriptive name found for task letter '$LETTER'. Skipping."
-        continue # Skip to the next iteration if no mapping is found
-    fi
-
     python trainer_pl_all.py \
-        --config-name=DP_DecoupleActionHead_stage2 \
-        n_demo=100 \
+        --config-name=DP_DecoupleActionHead_stage1_8_16 \
+        n_demo=1000 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
         training.val_every=1000 \
-        logging.project="DecoupleActionHead_Stage2_Summary" \
-        logging.group="stage2_A1000_A100_8_16" \
-        ckpt_path="$ckpt_path" \
-        train_mode=stage2_rollout \
-        dataloader.num_workers=16
+        logging.project="DecoupleActionHead_Stage1_Summary" \
+        run_dir="$run_dir"
 
 done
 

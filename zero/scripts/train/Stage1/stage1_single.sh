@@ -48,7 +48,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     fi
 
     echo "Running trainer.py for task: '$LETTER' (Descriptive Name: $DESCRIPTIVE_TASK_NAME)"
-    python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage1 n_demo=1000 task_alphabet=$LETTER dataloader.num_workers=16
+    python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage1 n_demo=100 task_alphabet=$LETTER dataloader.num_workers=16 training.checkpoint_every=100
     echo "Finished trainer.py for task: '$LETTER'"
     echo "---"
 done

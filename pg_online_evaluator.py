@@ -264,6 +264,7 @@ def validate_dataset(dataset_path):
             break
         action = actions[i * (n_action_steps):i * (n_action_steps) + n_action_steps]
         obs, reward, done, info = test_env.step(action)
+        test_env.render()
         pass
     # for i in tqdm(range(len(actions) // 1 + 1)):
     #     action = actions[i:i + 1]

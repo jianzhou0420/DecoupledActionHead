@@ -1,4 +1,4 @@
-env_name: Stack_D1
+env_name: PickPlace_D0
 robot: Panda
 controller: JOINT_POSITION
 has_renderer: true

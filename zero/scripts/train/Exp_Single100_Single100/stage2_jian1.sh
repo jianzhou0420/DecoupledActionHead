@@ -64,7 +64,8 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         logging.name="${EXP_NAME}__stage2_${LETTER}" \
         ckpt_path="$ckpt_path" \
         train_mode=stage2_rollout \
-        dataloader.num_workers=16
+        dataloader.num_workers=16 \
+        training.checkpoint_every=1000
 
 done
 

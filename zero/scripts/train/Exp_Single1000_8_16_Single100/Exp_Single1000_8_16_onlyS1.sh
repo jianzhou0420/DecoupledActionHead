@@ -37,7 +37,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-
+EXP_NAME="Exp_Single1000_8_16_Stage1"
 # build your run_dir
 
 # ---
@@ -46,7 +46,8 @@ time_part=$(date +'%H.%M.%S')
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_dir="data/outputs/${date_part}/${time_part}_${DESCRIPTIVE_TASK_NAME}_${LETTER}_8_16"
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_16 \
@@ -55,7 +56,10 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         task.env_runner.n_envs=28 \
         training.val_every=1000 \
         logging.project="DecoupleActionHead_Stage1_Summary" \
-        run_dir="$run_dir"
+        logging.group="${EXP_NAME}" \
+        logging.name="$run_name" \
+        run_dir="$run_dir" \
+        run_name="$run_name"
 
 done
 

@@ -52,12 +52,12 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
         n_demo=100 \
-        task_alphabet=A \
+        task_alphabet=E \
         task.env_runner.n_envs=28 \
         training.val_every=1000 \
         logging.project="DecoupleActionHead_Stage2_Summary" \
-        logging.group="stage2_A1000_A100_8_16" \
-        logging.name="stage2_${LETTER}1000_A100_8_16" \
+        logging.group="Exp_Other1000_E100_8_16" \
+        logging.name="Exp_${LETTER}1000_E100_8_16" \
         ckpt_path="$ckpt_path" \
         train_mode=stage2_rollout \
         dataloader.num_workers=16

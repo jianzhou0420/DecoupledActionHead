@@ -493,7 +493,7 @@ def train(cfg: AppConfig):
 
     trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
-                         devices=[0],
+                         devices='auto',
                          strategy='auto',
                          logger=[wandb_logger],
                          use_distributed_sampler=False,

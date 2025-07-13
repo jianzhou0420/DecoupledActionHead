@@ -112,10 +112,10 @@ training:
   tqdm_interval_sec: 1.0
 
 logging:
-  project: DecoupleActionHead
+  project: null
   resume: False
   mode: online
-  name: ${run_name}
+  name: null
   tags: ["stage2","${task_alphabet}",]
   id: null
   group: null

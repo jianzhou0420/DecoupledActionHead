@@ -494,7 +494,7 @@ def train(cfg: AppConfig):
     trainer = pl.Trainer(callbacks=callback_list,
                          max_epochs=int(cfg.training.num_epochs),
                          devices='auto',
-                         strategy='auto',
+                         strategy='ddp_find_unused_parameters_true',
                          logger=[wandb_logger],
                          use_distributed_sampler=False,
                          check_val_every_n_epoch=cfg.training.val_every,

@@ -37,20 +37,21 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Single1000_8_16_Stage1"
+EXP_NAME="Exp_Single100_8_16_Stage1"
+
 # build your run_dir
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
+
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
-
     run_dir="data/outputs/${date_part}/${time_part}_${EXP_NAME}__${LETTER}"
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_16 \
-        n_demo=1000 \
+        n_demo=100 \
         task_alphabet=$INPUT_TASK_LETTERS \
         task.env_runner.n_envs=28 \
         training.val_every=1000 \
@@ -60,7 +61,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         train_mode=normal \
         run_dir="$run_dir" \
         run_name="${run_name}_normal" \
-        training.checkpoint_every=10 &&
+        training.checkpoint_every=100 &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ && rm -rf ${run_dir}
 
 done

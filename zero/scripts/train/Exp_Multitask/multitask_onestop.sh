@@ -59,7 +59,8 @@ python trainer_pl_all.py \
     logging.name="${run_name}_stage1" \
     train_mode=stage1 \
     run_dir="$run_dir" \
-    run_name="${run_name}_stage1" &&
+    run_name="${run_name}_stage1" \
+    training.checkpoint_every=10 &&
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
         n_demo=1000 \

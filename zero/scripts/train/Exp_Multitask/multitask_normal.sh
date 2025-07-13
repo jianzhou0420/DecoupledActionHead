@@ -59,4 +59,5 @@ python trainer_pl_all.py \
     logging.name="${run_name}_normal" \
     train_mode=normal \
     run_dir="$run_dir" \
-    run_name="${run_name}_normal"
+    run_name="${run_name}_normal" &&
+    rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ && rm -rf ${run_dir}

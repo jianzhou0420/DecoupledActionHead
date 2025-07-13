@@ -503,17 +503,17 @@ def train(cfg: AppConfig):
     data_module = MyDataModule(cfg)
     trainer.fit(trainer_model, datamodule=data_module)
 
-    if cfg.train_mode == 'stage2':
-        scp_to_another_computer(
-            local_path=this_run_dir,
-            remote_path=os.path.join('/media/jian/ssd4t/tmp', run_name),
-            hostname='10.12.65.19',
-            username='jian',
-        )
-        wandb.finish()
-        evaluate_run(
-            seed=42,
-            run_dir=this_run_dir,)
+    # if cfg.train_mode == 'stage2':
+    #     scp_to_another_computer(
+    #         local_path=this_run_dir,
+    #         remote_path=os.path.join('/media/jian/ssd4t/tmp', run_name),
+    #         hostname='10.12.65.19',
+    #         username='jian',
+    #     )
+    #     wandb.finish()
+    #     evaluate_run(
+    #         seed=42,
+    #         run_dir=this_run_dir,)
 
 
 @hydra.main(

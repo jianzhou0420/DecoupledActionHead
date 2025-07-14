@@ -55,14 +55,14 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         --config-name=DP_DecoupleActionHead_stage1_8_16 \
         n_demo=100 \
         task_alphabet=$LETTER \
-        task.env_runner.n_envs=28 \
         training.val_every=1000 \
+        dataloader.num_workers=16 \
         logging.project="DecoupleActionHead_Stage1_Summary" \
         logging.group="${EXP_NAME}" \
-        logging.name="${run_name}_stage1" \
-        train_mode=normal \
+        logging.name="${run_name}" \
+        train_mode=stage1 \
         run_dir="$run_dir" \
-        run_name="${run_name}_normal" \
+        run_name="${run_name}" \
         training.checkpoint_every=100 &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
         rm -rf ${run_dir} &&

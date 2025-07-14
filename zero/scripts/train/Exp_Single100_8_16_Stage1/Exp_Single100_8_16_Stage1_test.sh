@@ -65,7 +65,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         run_dir="$run_dir" \
         run_name="${run_name}_normal" \
         training.num_epochs=1 \
-        training.checkpoint_every=100 &&
+        training.checkpoint_every=1 &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
         rsync -avP ${run_dir}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name}/ &&
         rm -rf ${run_dir} &&

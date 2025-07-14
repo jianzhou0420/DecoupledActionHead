@@ -47,7 +47,7 @@ def resolve_output_dir(output_dir: str):
     checkpoint_dir = os.path.join(output_dir, "checkpoints")
 
     # 2. checkpoints
-    checkpoint_all = natsorted(os.listdir(checkpoint_dir))[1:]  # exclude 'laste.ckpt'
+    checkpoint_all = natsorted([ckpt for ckpt in os.listdir(checkpoint_dir) if ckpt != "last.ckpt"])
 
     # 3. cfg
     config_path = os.path.join(output_dir, "config.yaml")

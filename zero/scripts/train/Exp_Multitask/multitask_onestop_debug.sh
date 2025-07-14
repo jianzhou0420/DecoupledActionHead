@@ -76,7 +76,8 @@ python trainer_pl_all.py \
         dataloader.num_workers=16 \
         run_dir="$run_dir_stage2" \
         run_name="${run_name_stage2}" \
-        training.num_epochs=1 && #debug
+        training.num_epochs=1 \
+        training.checkpoint_every=1 && #debug
     rsync -avP ${run_dir_stage1}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage1}/ &&
     rsync -avP ${run_dir_stage2}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage2}/ &&
     rsync -avP ${run_dir_stage2}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name_stage2}/ &&

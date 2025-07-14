@@ -23,9 +23,12 @@ if __name__ == "__main__":
         # find all directories in runtime_dir
         runs_exists_current = os.listdir(runs_dir)
         runs_new = [d for d in runs_exists_current if d not in runs_exists_before]
-        runs_new_ready = []
-        for run in runs_new:
-
-            pass
-
+        runs_new_notprocess = [r for r in runs_new if r not in runs_processed]
+        runs_new_notprocess_ready = [r for r in runs_new_notprocess if check_run_ready(os.path.join(runs_dir, r))]
         time.sleep(2)
+
+        for run in runs_new_notprocess_ready:
+            run_dir = os.path.join(runs_dir, run)
+            print(f"Evaluating run: {run_dir}")
+            evaluate_run(run_dir)
+            runs_processed.append(run)

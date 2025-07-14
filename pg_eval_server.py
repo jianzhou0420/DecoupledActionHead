@@ -31,3 +31,4 @@ if __name__ == "__main__":
             print(f"Evaluating run: {run_dir}")
             evaluate_run(run_dir)
             runs_processed.append(run)
+        time.sleep(5)

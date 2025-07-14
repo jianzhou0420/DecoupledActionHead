@@ -28,7 +28,7 @@ if __name__ == "__main__":
         for run in runs_new_notprocess_ready:
             run_dir = os.path.join(runs_dir, run)
             print(f"Evaluating run: {run_dir}")
-            evaluate_run(run_dir)
+            evaluate_run(run_dir=run_dir)
             runs_processed.append(run)
 
         if not runs_new_notprocess_ready:

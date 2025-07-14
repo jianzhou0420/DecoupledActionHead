@@ -60,4 +60,8 @@ python trainer_pl_all.py \
     train_mode=normal \
     run_dir="$run_dir" \
     run_name="${run_name}_normal" &&
-    rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ && rm -rf ${run_dir}
+    rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
+    rsync -avP ${run_dir}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name}/ &&
+    rm -rf ${run_dir} &&
+    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ready.flag" &&
+    ssh jian@10.12.65.130 "touch /data/eval_candidates/${time_part}_${run_name}/ready.flag"

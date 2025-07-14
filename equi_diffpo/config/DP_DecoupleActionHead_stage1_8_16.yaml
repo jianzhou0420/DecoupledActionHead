@@ -116,7 +116,7 @@ logging:
   resume: False
   mode: online
   name: null
-  tags: ["stage2","${task_alphabet}",]
+  tags: ["stage1","${task_alphabet}",]
   id: null
   group: null
 

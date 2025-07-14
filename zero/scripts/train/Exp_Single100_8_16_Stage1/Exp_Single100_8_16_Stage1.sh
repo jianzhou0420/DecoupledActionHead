@@ -47,7 +47,9 @@ EXP_NAME="Exp_Single100_8_16_Stage1"
 
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
-    run_dir="data/outputs/${date_part}/${time_part}_${EXP_NAME}__${LETTER}"
+
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_16 \

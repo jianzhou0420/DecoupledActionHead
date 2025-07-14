@@ -13,7 +13,6 @@ def check_run_ready(run_dir):
 
 
 if __name__ == "__main__":
-
     runs_dir = "/data/eval_candidates"
     runs_exists_before = os.listdir(runs_dir)
     runs_exists_current = []

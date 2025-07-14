@@ -38,31 +38,35 @@ echo "---"
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
 EXP_NAME="Exp_Single1000_8_16_Stage1"
+
 # build your run_dir
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
+
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_dir="data/outputs/${date_part}/${time_part}_${EXP_NAME}__${LETTER}"
+    run_name="${EXP_NAME}__${LETTER}_stage1"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_16 \
         n_demo=1000 \
-        task_alphabet=$INPUT_TASK_LETTERS \
-        task.env_runner.n_envs=28 \
+        task_alphabet=$LETTER \
+        dataloader.num_workers=16 \
+        training.checkpoint_every=10 \
         training.val_every=1000 \
         logging.project="DecoupleActionHead_Stage1_Summary" \
         logging.group="${EXP_NAME}" \
-        logging.name="${run_name}_stage1" \
-        train_mode=normal \
+        logging.name="${run_name}" \
+        train_mode=stage1 \
         run_dir="$run_dir" \
-        run_name="${run_name}_normal" \
-        training.checkpoint_every=10 &&
-        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ && rm -rf ${run_dir}
-
+        run_name="${run_name}" &&
+        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
+        rm -rf ${run_dir} &&
+        ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ready.flag"
 done
 
 echo "All specified tasks completed!"

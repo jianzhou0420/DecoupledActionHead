@@ -55,8 +55,9 @@ python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_stage1 \
     n_demo=1000 \
     task_alphabet=$INPUT_TASK_LETTERS \
-    task.env_runner.n_envs=28 \
+    dataloader.num_workers=16 \
     training.val_every=1000 \
+    training.checkpoint_every=10 \
     logging.project="DecoupleActionHead_Stage1_Summary" \
     logging.group="${EXP_NAME}" \
     logging.name="${run_name_stage1}" \

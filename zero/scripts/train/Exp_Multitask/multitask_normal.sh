@@ -52,7 +52,7 @@ python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_normal \
     n_demo=1000 \
     task_alphabet=$INPUT_TASK_LETTERS \
-    task.env_runner.n_envs=28 \
+    dataloader.num_workers=16 \
     training.val_every=1000 \
     logging.project="DecoupleActionHead_Stage2_Summary" \
     logging.group="${EXP_NAME}" \

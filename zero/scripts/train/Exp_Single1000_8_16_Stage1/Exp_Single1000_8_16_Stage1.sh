@@ -48,7 +48,7 @@ EXP_NAME="Exp_Single1000_8_16_Stage1"
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_name="${EXP_NAME}__${LETTER}_stage1"
+    run_name="${EXP_NAME}__${LETTER}"
     run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     python trainer_pl_all.py \

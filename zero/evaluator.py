@@ -117,6 +117,7 @@ def evaluate_run(seed: int = 42,
             mode=wandb_mode,
             config=OmegaConf.to_container(cfg, resolve=False),
             dir=eval_result_dir,
+            group=cfg.run_name,
         )
 
         for ckpt in checkpoint_all:

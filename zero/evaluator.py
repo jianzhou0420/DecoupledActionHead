@@ -131,10 +131,11 @@ def evaluate_run(seed: int = 42,
             print(f"Evaluating policy at epoch {epoch} with checkpoint {ckpt}...")
 
             evaluation_results = env_runner.run(policy)
-
+            evaluation_results['epoch'] = epoch
             # raise EOFError
             cprint("Logging results to WandB...", "green")
-            wandb.log(evaluation_results, step=epoch)  # 直接将字典传递给 wandb.log
+
+            wandb.log(evaluation_results, step=epoch)
             cprint("Results logged to WandB successfully!", "green")
 
             # --- Finish WandB run ---

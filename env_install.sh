@@ -47,3 +47,5 @@ cd ../..
 pip install -e .
 
 echo "--- ✅ All packages installed successfully! ---"
+
+echo "Mujoco version:"

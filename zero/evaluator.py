@@ -134,7 +134,7 @@ def evaluate_run(seed: int = 42,
             print(f"Evaluating policy at epoch {epoch} with checkpoint {ckpt}...")
 
             evaluation_results = env_runner.run(policy)
-            evaluation_results['epoch'] = epoch
+            evaluation_results['trainer/epoch'] = epoch
             # raise EOFError
             cprint("Logging results to WandB...", "green")
 

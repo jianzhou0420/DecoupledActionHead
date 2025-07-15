@@ -8,7 +8,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = ''.join(lines)
 
 print([
-  package for package in find_packages() if package.startswith("robosuite")
+    package for package in find_packages() if package.startswith("robosuite")
 ])
 
 setup(
@@ -20,7 +20,7 @@ setup(
         "numpy>=1.13.3",
         "numba>=0.49.1",
         "scipy>=1.2.3",
-        "mujoco-py>=2.0.2.9",
+        "mujoco=2.3.2",
     ],
     eager_resources=['*'],
     include_package_data=True,

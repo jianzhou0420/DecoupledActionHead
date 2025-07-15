@@ -52,7 +52,7 @@ dependencies:
   - imagecodecs==2022.8.8
   - huggingface_hub=0.25.2
   - natsort
-
+  - lightning
 
   - pip:
     - open3d

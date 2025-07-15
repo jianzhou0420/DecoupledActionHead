@@ -7,10 +7,8 @@
 # except:
 #     pass
 
-from zero.evaluator import evaluate_run
+
 import pathlib
-import gym  # Or your custom environment library
-import time
 import os
 import os
 from typing import Type, Dict, Any
@@ -25,7 +23,6 @@ from torch.utils.data import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger, CSVLogger, WandbLogger
 import pytorch_lightning as pl
-from torch.utils.data import Dataset
 # equidiff package
 from equi_diffpo.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
 from equi_diffpo.dataset.base_dataset import BaseImageDataset
@@ -38,18 +35,14 @@ from equi_diffpo.model.common.lr_scheduler import get_scheduler
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-from hydra.core.hydra_config import HydraConfig
 from equi_diffpo.config.config_hint import AppConfig
 
-from equi_diffpo.workspace.base_workspace import BaseWorkspace
 import pathlib
 from omegaconf import OmegaConf
 import hydra
 import sys
-from termcolor import cprint
 import mimicgen
 from natsort import natsorted
-from zero.z_utils.scp_utils import scp_to_another_computer
 
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)

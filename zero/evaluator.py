@@ -172,4 +172,5 @@ if __name__ == "__main__":
                  n_train=args.n_train,
                  n_test=args.n_test,
                  wandb_mode=args.wandb_mode
+                 skip=args.skip
                  )

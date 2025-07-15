@@ -10,7 +10,7 @@ mamba env create -f conda_environment.yaml -y
 echo "Please run 'mamba activate equidiff' manually, then run the rest of the script."
 echo "Or, if your shell is configured, the script will continue in the new environment."
 source $(conda info --base)/etc/profile.d/conda.sh
-mamba activate equidiff
+conda activate equidiff
 
 echo "--- 2. Installing robosuite ---"
 pip uninstall -y robosuite || true # Uninstall if exists, ignore if not

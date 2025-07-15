@@ -66,7 +66,8 @@ def evaluate_run(seed: int = 42,
                  n_train_vis: int = 3,
                  n_train: int = 6,
                  n_test: int = 50,
-                 wandb_mode: str = "offline"):
+                 wandb_mode: str = "offline",
+                 skip=0):
     seed_everything(seed)
 
     cfg, checkpoint_all, task_alphabet_list, task_name_list = resolve_output_dir(run_dir)
@@ -94,6 +95,8 @@ def evaluate_run(seed: int = 42,
     cprint("WandB initialized successfully!", "green")
     # --- Environment Runner Execution ---
     for i, env_cfg in enumerate(cfg_env_runner):
+        if i < skip:
+            continue
         # debug
         cprint('debugging code is on', 'red')
         # /debug
@@ -157,6 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_train", type=int, default=6, help="Number of training episodes to run.")
     parser.add_argument("--n_test", type=int, default=50, help="Number of test episodes to run.")
     parser.add_argument("--wandb_mode", type=str, default="offline", help="WandB mode for logging.")
+    parser.add_argument("--skip", type=int, default=0, help="Number of tasks to skip during evaluation.")
     args = parser.parse_args()
 
     evaluate_run(seed=args.seed,

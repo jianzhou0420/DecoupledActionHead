@@ -20,7 +20,7 @@ setup(
         "numpy>=1.13.3",
         "numba>=0.49.1",
         "scipy>=1.2.3",
-        "mujoco=2.3.2",
+        "mujoco==2.3.2",
     ],
     eager_resources=['*'],
     include_package_data=True,

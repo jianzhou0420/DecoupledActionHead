@@ -49,7 +49,7 @@ run_name_stage2="${EXP_NAME}__${INPUT_TASK_LETTERS}_stage2"
 run_dir_stage1="data/outputs/${date_part}/${time_part}_${run_name_stage1}"
 run_dir_stage2="data/outputs/${date_part}/${time_part}_${run_name_stage2}"
 
-ckpt_path=${run_dir}/checkpoints/last.ckpt
+ckpt_path=${run_dir_stage1}/checkpoints/last.ckpt
 
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_stage1 \

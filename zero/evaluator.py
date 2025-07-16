@@ -112,7 +112,7 @@ def evaluate_run(seed: int = 42,
         )
         # --- WandB Initialization ---
         wandb_project_name = "Eval"
-        wandb_run_name = f"{cfg.train_mode}_{task_alphabet_list[i]}_{task_name_list[task_alphabet_list[i]]}"
+        wandb_run_name = f"{cfg.run_name}_{task_alphabet_list[i]}"
 
         wandb.init(
             project=wandb_project_name,

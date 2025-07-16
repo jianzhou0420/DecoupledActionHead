@@ -57,7 +57,6 @@ python trainer_pl_all.py \
     task_alphabet=$INPUT_TASK_LETTERS \
     dataloader.num_workers=16 \
     training.val_every=1000 \
-    training.checkpoint_every=10 \
     logging.project="DecoupleActionHead_Stage1_Summary" \
     logging.group="${EXP_NAME}" \
     logging.name="${run_name_stage1}" \

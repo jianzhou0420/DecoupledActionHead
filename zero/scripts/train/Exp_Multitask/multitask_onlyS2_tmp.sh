@@ -37,27 +37,26 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Multitask_OneStop"
+EXP_NAME="Exp_Multitask_test"
 # build your run_dir
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
-run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}_stage2"
+run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
-ckpt_path="/home/jian/first/data/outputs/2025.07.15/10.31.51_Exp_Multitask_OneStop__BCDGI_stage1/checkpoints/last.ckpt"
 
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     n_demo=1000 \
     task_alphabet=$INPUT_TASK_LETTERS \
-    dataloader.num_workers=16 \
     training.val_every=1000 \
     logging.project="DecoupleActionHead_Stage2_Summary" \
     logging.group="${EXP_NAME}" \
-    logging.name="${run_name}" \
+    logging.name="${run_name}_stage2" \
     ckpt_path="$ckpt_path" \
     train_mode=stage2 \
+    dataloader.num_workers=16 \
     run_dir="$run_dir" \
     run_name="${run_name}_stage2" &&
     rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

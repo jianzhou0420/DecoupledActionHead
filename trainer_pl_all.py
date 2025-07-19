@@ -444,7 +444,7 @@ def train(cfg: AppConfig):
         filename=f'{run_name}' + '_{epoch:03d}',
         every_n_epochs=cfg.training.checkpoint_every,
         save_top_k=-1,
-        save_last=True,
+        save_last=False,
         save_weights_only=True,
         save_on_train_epoch_end=True
     )

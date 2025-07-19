@@ -54,7 +54,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     ckpt_path="data/robomimic/Stage1/Exp_Single1000_8_16_49/Exp_Single1000_8_16_Stage1__${LETTER}_epoch\=049.ckpt"
 
     python trainer_pl_all.py \
-        --config-name=DP_DecoupleActionHead_stage1 \
+        --config-name=DP_DecoupleActionHead_stage2 \
         \
         task_alphabet=A \
         train_mode=stage2 \

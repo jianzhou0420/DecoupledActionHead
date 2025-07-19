@@ -30,6 +30,14 @@ echo "---"
 # --------------------
 # region 2. Run
 
+INPUT_TASK_LETTERS="$1"
+echo "Received task letters: $INPUT_TASK_LETTERS"
+echo "---"
+
+date_part=$(date +'%Y.%m.%d')
+time_part=$(date +'%H.%M.%S')
+EXP_NAME="Exp_Single1000_Template_Stage1"
+
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 

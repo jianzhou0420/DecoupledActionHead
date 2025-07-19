@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# ---
-# Check for provided task names
-# ---
+# --------------------
+# region 1. Input
 if [ -z "$1" ]; then
     echo "Usage: $0 <task_letters>"
     echo "Example: $0 ABCDEFG"
@@ -10,9 +9,6 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# ---
-# Define the mapping of single letters to descriptive task names
-# ---
 declare -A TASK_MAP
 TASK_MAP["A"]="stack_d1"
 TASK_MAP["B"]="square_d2"
@@ -26,11 +22,14 @@ TASK_MAP["I"]="nut_assembly_d0"
 TASK_MAP["J"]="kitchen_d1"
 TASK_MAP["K"]="pick_place_d0"
 TASK_MAP["L"]="coffee_preparation_d1"
-# Add more mappings as needed
 
-# ---
-# Get the input task letters
-# ---
+INPUT_TASK_LETTERS="$1"
+echo "Received task letters: $INPUT_TASK_LETTERS"
+echo "---"
+
+# --------------------
+# region 2. Run
+
 INPUT_TASK_LETTERS="$1"
 echo "Received task letters: $INPUT_TASK_LETTERS"
 echo "---"
@@ -38,12 +37,6 @@ echo "---"
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
 EXP_NAME="Exp_Single1000_Template_Stage1"
-
-# build your run_dir
-
-# ---
-# Iterate through each letter and run the corresponding task
-# ---
 
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}

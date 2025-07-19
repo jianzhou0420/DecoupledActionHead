@@ -37,7 +37,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-
+EXP_NAME="Exp_Other1000_A100_8_16"
 # build your run_dir
 
 # ---
@@ -45,7 +45,8 @@ time_part=$(date +'%H.%M.%S')
 # ---
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
-    run_dir="data/outputs/${date_part}/${time_part}_stack_d1_A_8_16"
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     ckpt_path="data/robomimic/Stage1/Exp_Single1000_8_16_49/Exp_Single1000_8_16_Stage1__${LETTER}_epoch\=049.ckpt"
 
@@ -60,7 +61,11 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         logging.name="Exp_Other1000_A100_8_16_${LETTER}" \
         ckpt_path="$ckpt_path" \
         train_mode=stage2_rollout \
-        dataloader.num_workers=16
+        dataloader.num_workers=16 \
+        run_dir="$run_dir" \
+        run_name="$run_name" \
+        training.checkpoint_every=1000 &&
+        rm -rf "$run_dir"
 
 done
 

@@ -1,4 +1,4 @@
-name: DecoupledActionHead
+name: jiandecouple
 channels:
   - pytorch
   - pytorch3d

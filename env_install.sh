@@ -4,13 +4,8 @@ set -e
 
 echo "--- 1. Creating and activating conda environment ---"
 mamba env create -f conda_environment.yaml -y
-# Note: In a script, `source` or `conda` is often needed to make activate work
-# This part might need adjustment depending on your shell's configuration.
-# For simplicity, we assume activation works or you run the rest in the activated env.
-echo "Please run 'mamba activate equidiff' manually, then run the rest of the script."
-echo "Or, if your shell is configured, the script will continue in the new environment."
 source $(conda info --base)/etc/profile.d/conda.sh
-conda activate equidiff
+conda activate jiandecouple
 
 echo "--- 2. Installing robosuite ---"
 pip uninstall -y robosuite || true # Uninstall if exists, ignore if not

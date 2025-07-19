@@ -43,7 +43,6 @@ env_runner:
   n_envs: 28
 
 dataset:
-  # _target_: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
   _target_: ${dataset}
   n_demo: ${n_demo}
   shape_meta: *shape_meta

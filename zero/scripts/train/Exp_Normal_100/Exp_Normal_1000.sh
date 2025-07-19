@@ -1,6 +1,5 @@
 #!/bin/bash
-git stash
-git pull
+
 # ---
 # Check for provided task names
 # ---
@@ -36,21 +35,35 @@ INPUT_TASK_LETTERS="$1"
 echo "Received task letters: $INPUT_TASK_LETTERS"
 echo "---"
 
+date_part=$(date +'%Y.%m.%d')
+time_part=$(date +'%H.%M.%S')
+EXP_NAME="Exp_Normal_1000"
+# build your run_dir
+
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
-    DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    if [ -z "$DESCRIPTIVE_TASK_NAME" ]; then
-        echo "Warning: No descriptive name found for task letter '$LETTER'. Skipping."
-        continue # Skip to the next iteration if no mapping is found
-    fi
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
-    echo "Running trainer.py for task: '$LETTER' (Descriptive Name: $DESCRIPTIVE_TASK_NAME)"
-    python trainer_pl_all.py --config-name=DP_DecoupleActionHead_stage2_ABC_D n_demo=1000 task_name="$DESCRIPTIVE_TASK_NAME" task.env_runner.n_envs=19 task_alphabet=$LETTER
-    echo "Finished trainer.py for task: '$LETTER'"
-    echo "---"
+    python trainer_pl_all.py \
+        --config-name=DP_DecoupleActionHead_Normal \
+        n_demo=100 \
+        task_alphabet=A \
+        task.env_runner.n_envs=28 \
+        training.val_every=1000 \
+        logging.project="DecoupleActionHead_Stage2_Summary" \
+        logging.group="Exp_Other1000_A100_8_16" \
+        logging.name="Exp_Other1000_A100_8_16_${LETTER}" \
+        train_mode=stage2_rollout \
+        dataloader.num_workers=16 \
+        run_dir="$run_dir" \
+        run_name="$run_name" \
+        training.checkpoint_every=1000 &&
+        rm -rf "$run_dir"
+
 done
 
 echo "All specified tasks completed!"

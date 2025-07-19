@@ -1,3 +1,5 @@
+from tqdm import tqdm
+import re
 import matplotlib.pyplot as plt
 import wandb
 import natsort
@@ -5,6 +7,12 @@ import numpy as np
 
 
 np.set_printoptions(precision=3, suppress=True)
+
+
+def get_all_runs():
+    api = wandb.Api()
+    runs = api.runs('jianzhou0420-the-university-of-adelaide/DecoupleActionHead_Stage2_Summary')
+    return runs
 
 
 def get_mean_and_max_scores(runs):
@@ -63,32 +71,25 @@ def get_ExpAndNormRuns_ACK():
 
 if __name__ == "__main__":
 
-    normal_runs, exp_runs = get_ExpAndNormRuns_AEFH()
-    # normal_runs, exp_runs = get_ExpAndNormRuns_ACK()
-    for run in normal_runs:
-        print(run.name)
+    runs = get_all_runs()
+    runs_flagged = []
 
-    print(f"Experimental runs: {len(exp_runs)}")
-    for run in exp_runs:
-        print(run.name)
+    for run in tqdm(runs):
+        print(f"--- Run {run.id} ({run.name}) ---")
+        try:
+            file_obj = run.file("conda-environment.yaml")
+            local_path = file_obj.download(replace=True).name
 
-    exp_mean_scores, exp_max_scores = get_mean_and_max_scores(exp_runs)
-    normal_mean_scores, normal_max_scores = get_mean_and_max_scores(normal_runs)
+            with open(local_path, "r") as f:
+                for lineno, line in enumerate(f, start=1):
+                    if "mujoco==3.3.4" in line:
+                        print(f"Found in {run.id} [line {lineno}]: {line.strip()}")
+                        runs_flagged.append(run)
 
-    # print("Experimental mean scores:", exp_mean_scores)
-    print("Experimental max scores:", exp_max_scores)
-    # print("Normal mean scores:", normal_mean_scores)
-    print("Normal max scores:", normal_max_scores)
+        except Exception as e:
+            # catches missing file, download errors, etc.
+            print(f"{run.id}: could not search file ({e})")
 
-    plt.figure()
-    plt.plot(exp_mean_scores, label="Exp mean", color="red", linestyle="--")
-    plt.plot(exp_max_scores, label="Exp max", color="red")
-    plt.plot(normal_mean_scores, label="Normal mean", color="blue", linestyle="--")
-    plt.plot(normal_max_scores, label="Normal max", color="blue")
-    plt.xlabel("Step index")
-    plt.ylabel("Score")
-    plt.ylim(0, 1.0)
-    plt.title("Experimental vs. Normal Runs")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    print(f"\nTotal runs flagged: {len(runs_flagged)}")
+    for run in runs_flagged:
+        print(f"Run {run.id} ({run.name}) has mujoco==3.3.4 in conda-environment.yaml")

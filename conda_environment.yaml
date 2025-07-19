@@ -1,4 +1,4 @@
-name: equidiff
+name: DecoupledActionHead
 channels:
   - pytorch
   - pytorch3d

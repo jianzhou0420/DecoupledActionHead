@@ -52,7 +52,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         --config-name=DP_DecoupleActionHead_stage2 \
         \
         task_alphabet=A \
-        train_mode=stage2 \
+        train_mode=stage2_rollout \
         n_demo=100 \
         ckpt_path=${ckpt_path} \
         \

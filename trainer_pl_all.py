@@ -198,7 +198,7 @@ class Trainer_all(pl.LightningModule):
         elif task_type == 'stage1':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
-        elif task_type == 'normal':
+        elif task_type == 'normal' or task_type == 'normal_rollout':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
         else:
@@ -477,7 +477,14 @@ def train(cfg: AppConfig):
                          ActionMseLossForDiffusion(cfg),
                          ]
         callback_list.extend(rollout_callback_list)
+    elif cfg.train_mode == 'normal_rollout':
+        rollout_callback_list = [RolloutCallback(cfg_env_runner[i], rollout_every_n_epochs=cfg.training.rollout_every) for i in range(len(cfg_env_runner))]
+        callback_list = [checkpoint_callback,
+                         ActionMseLossForDiffusion(cfg),
+                         ]
+        callback_list.extend(rollout_callback_list)
     else:
+
         raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
 
     trainer = pl.Trainer(callbacks=callback_list,

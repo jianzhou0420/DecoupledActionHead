@@ -49,39 +49,44 @@ run_name_stage2="${EXP_NAME}__${INPUT_TASK_LETTERS}_stage2"
 run_dir_stage1="data/outputs/${date_part}/${time_part}_${run_name_stage1}"
 run_dir_stage2="data/outputs/${date_part}/${time_part}_${run_name_stage2}"
 
-ckpt_path=${run_dir_stage1}/checkpoints/last.ckpt
+ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=049.ckpt"
 
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_stage1_8_16 \
-    n_demo=1000 \
+    \
     task_alphabet=$INPUT_TASK_LETTERS \
+    train_mode=stage1 \
+    n_demo=1000 \
+    ckpt_path="" \
+    \
     dataloader.num_workers=16 \
     training.val_every=1000 \
+    \
+    run_dir="$run_dir_stage1" \
+    run_name="${run_name_stage1}" \
+    \
     logging.project="DecoupleActionHead_Stage1_Summary" \
     logging.group="${EXP_NAME}" \
-    logging.name="${run_name_stage1}" \
-    train_mode=stage1 \
-    run_dir="$run_dir_stage1" \
-    run_name="${run_name_stage1}" &&
+    logging.name="${run_name_stage1}" &&
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
-        n_demo=1000 \
+        \
         task_alphabet=$INPUT_TASK_LETTERS \
+        train_mode=stage2 \
+        n_demo=1000 \
+        ckpt_path="$ckpt_path" \
+        \
         dataloader.num_workers=16 \
         training.val_every=1000 \
+        \
+        run_dir="$run_dir_stage2" \
+        run_name="${run_name_stage2}" \
+        \
         logging.project="DecoupleActionHead_Stage2_Summary" \
         logging.group="${EXP_NAME}" \
-        logging.name="${run_name_stage2}" \
-        ckpt_path="$ckpt_path" \
-        train_mode=stage2 \
-        run_dir="$run_dir_stage2" \
-        run_name="${run_name_stage2}" &&
+        logging.name="${run_name_stage2}" &&
     rsync -avP ${run_dir_stage1}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage1}/ &&
     rsync -avP ${run_dir_stage2}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage2}/ &&
-    rsync -avP ${run_dir_stage2}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name_stage2}/ &&
     rm -rf ${run_dir_stage1} &&
     rm -rf ${run_dir_stage2} &&
-    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage2}/ready.flag" &&
-    ssh jian@10.12.65.130 "touch /data/eval_candidates/${time_part}_${run_name_stage2}/ready.flag"
-
-echo "All specified tasks completed!"
+    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage2}/ready.flag"

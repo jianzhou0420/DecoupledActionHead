@@ -61,10 +61,29 @@ def get_ExpAndNormRuns_ACK():
     return normal_runs, exp_runs
 
 
+def get_ExpAndNormRuns_ACK_new():
+    api = wandb.Api()
+    runs = api.runs('jianzhou0420-the-university-of-adelaide/Eval')
+    normal_runs = []
+    exp_runs = []
+    for run in runs:
+        if "Exp_Multitask_OneStop__ACK" in run.name:
+            exp_runs.append(run)
+
+        if "Exp_Multitask_Normal__ACK" in run.name:
+            normal_runs.append(run)
+
+    normal_runs = natsort.natsorted(normal_runs, key=lambda x: x.name)
+    exp_runs = natsort.natsorted(exp_runs, key=lambda x: x.name)
+
+    return normal_runs, exp_runs
+
+
 if __name__ == "__main__":
 
-    normal_runs, exp_runs = get_ExpAndNormRuns_AEFH()
+    # normal_runs, exp_runs = get_ExpAndNormRuns_AEFH()
     # normal_runs, exp_runs = get_ExpAndNormRuns_ACK()
+    normal_runs, exp_runs = get_ExpAndNormRuns_ACK_new()
     for run in normal_runs:
         print(run.name)
 

@@ -20,17 +20,16 @@ spec:
 
       containers:
         - name: zero-container # It is recommended to name your container according to the project
-          image: docker.aiml.team/jian.zhou/test:latest # You can reuse this image for different projects if their python dependencies are the same.
+          image: docker.aiml.team/jian.zhou/first:latest # You can reuse this image for different projects if their python dependencies are the same.
           imagePullPolicy: Always
           stdin: true
           tty: true
           command: ["/bin/bash", "-c"]
           args: 
               - |
-                conda activate equidiff
-                cd /data/first
-                git pull
-                pip install -e .
+                source /root/miniforge3/etc/profile.d/conda.sh
+                conda activate jiandecouple
+                
 
 
 

@@ -242,6 +242,7 @@ class Trainer_all(pl.LightningModule):
             'trainer/global_step': self.global_step,
             'trainer/epoch': self.current_epoch,
         }, step=self.global_step)
+        print('print for logging in Kubectl')
         return loss
 
     def on_train_batch_end(self, outputs, batch, batch_idx):

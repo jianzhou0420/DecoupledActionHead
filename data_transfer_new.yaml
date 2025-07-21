@@ -9,6 +9,8 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      imagePullSecrets:
+        - name: gitlab-docker-secret
       volumes:
         - name: shared-memory # This is to resolve the dataloader OOM issue.
           emptyDir:
@@ -19,7 +21,7 @@ spec:
 
       containers:
         - name: data-transfer-pvc
-          image: ubuntu:latest
+          image: docker.aiml.team/jian.zhou/jiandecouple:new
           imagePullPolicy: Always
           stdin: true
           tty: true
@@ -35,3 +37,9 @@ spec:
               mountPath: /data # You PVC is mounted as /data attached to the transfer POD
             - name: shared-memory
               mountPath: /dev/shm
+          env:
+            - name: GITLAB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-token # kubectl get secrets
+                  key: access-token

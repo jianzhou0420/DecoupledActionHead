@@ -32,16 +32,17 @@ def check_run_processed(run_dir):
 
 
 if __name__ == "__main__":
-    runs_dir = "/data/eval_candidates"
-    not_processed_runs = []
+    runs_dir = "/media/jian/data/cached_from_sub_machine/runtime"
     # first check all runs in the directory
 
     while True:
-        # find not processed runs
+        not_processed_runs = []
         for run in os.listdir(runs_dir):
             run_dir = os.path.join(runs_dir, run)
             if check_run_ready(run_dir) and not check_run_processed(run_dir):
                 not_processed_runs.append(run_dir)
+                print(f"Run {run} is ready for evaluation and not processed yet.")
+        print(f"Found {len(not_processed_runs)} runs to process.")
 
         # process not processed runs
         for run in not_processed_runs:

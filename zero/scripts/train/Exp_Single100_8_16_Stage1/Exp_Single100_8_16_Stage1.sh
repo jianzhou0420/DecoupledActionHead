@@ -53,20 +53,24 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1_8_16 \
-        n_demo=100 \
+        \
         task_alphabet=$LETTER \
-        training.val_every=1000 \
-        dataloader.num_workers=16 \
-        logging.project="DecoupleActionHead_Stage1_Summary" \
-        logging.group="${EXP_NAME}" \
-        logging.name="${run_name}" \
         train_mode=stage1 \
+        n_demo=100 \
+        ckpt_path=${ckpt_path} \
+        \
+        dataloader.num_workers=16 \
+        training.val_every=1000 \
+        training.checkpoint_every=100 \
+        \
         run_dir="$run_dir" \
         run_name="${run_name}" \
-        training.checkpoint_every=100 &&
-        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
-        rm -rf ${run_dir} &&
-        ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ready.flag"
+        \
+        logging.project="DecoupleActionHead_Stage1_Summary" \
+        logging.group="${EXP_NAME}" \
+        logging.name="${run_name}" &&
+        
+        rm -rf ${run_dir}
 done
 
 echo "All specified tasks completed!"

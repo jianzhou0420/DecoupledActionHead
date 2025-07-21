@@ -65,7 +65,6 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         logging.project="DecoupleActionHead_Stage2_Summary" \
         logging.group="${EXP_NAME}" \
         logging.name="${run_name}" &&
-        bash zero/scripts/train/ArchieveAndEval.sh ${run_dir} ${time_part} ${run_name} &&
         rm -rf ${run_dir}
 done
 

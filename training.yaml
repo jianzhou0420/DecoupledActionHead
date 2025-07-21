@@ -32,16 +32,16 @@ spec:
               cd /data/first
               git pull
               export MUJOCO_GL=osmesa
-              bash zero/scripts/train/Exp_Multitask/multitask_onestop_8_16.sh A
+              bash zero/scripts/train/Exp_Multitask/multitask_onestop_8_16_multi.sh A
 
           resources:
             limits:
               cpu: 8
-              nvidia.com/gpu: 1 # <------- If you don't need any of GPUs, Please comment-out this line.
+              nvidia.com/gpu: 4 # <------- If you don't need any of GPUs, Please comment-out this line.
               memory: 60Gi
             requests:
               cpu: 8
-              nvidia.com/gpu: 1 # <------- If you don't need any of GPUs, Please comment-out this line.
+              nvidia.com/gpu: 4 # <------- If you don't need any of GPUs, Please comment-out this line.
               memory: 60Gi
 
           volumeMounts:

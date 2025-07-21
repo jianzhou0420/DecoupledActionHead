@@ -46,7 +46,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                  rotation_rep='rotation_6d',  # ignored when abs_action=False
                  use_legacy_normalizer=False,
                  use_cache=False,
-                 cache_type='zip',  # 'directory' or 'zip'
+                 cache_type='directory',  # 'directory' or 'zip'
                  seed=42,
                  val_ratio=0.0,
                  n_demo=100

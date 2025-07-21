@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Single1000_Single1000_8_16"
+EXP_NAME="Exp_Single1000_Single100_8_16"
 
 # build your run_dir
 

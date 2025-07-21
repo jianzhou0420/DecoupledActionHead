@@ -12,25 +12,41 @@ def check_run_ready(run_dir):
     return os.path.exists(ready_file)
 
 
+def flag_processed(run_dir):
+    """
+    Flag the run as processed by creating a file in the run directory.
+    This function creates a 'processed.flag' file to indicate that the run has been evaluated.
+    """
+    processed_file = os.path.join(run_dir, "processed.flag")
+    with open(processed_file, 'w') as f:
+        f.write("This run has been processed.\n")
+
+
+def check_run_processed(run_dir):
+    """
+    Check if the run has already been processed.
+    This function checks for the existence of a 'processed.flag' file.
+    """
+    processed_file = os.path.join(run_dir, "processed.flag")
+    return os.path.exists(processed_file)
+
+
 if __name__ == "__main__":
     runs_dir = "/data/eval_candidates"
-    runs_exists_before = os.listdir(runs_dir)
-    runs_exists_current = []
-    runs_processed = []
+    not_processed_runs = []
+    # first check all runs in the directory
 
     while True:
-        # find all directories in runtime_dir
-        runs_exists_current = os.listdir(runs_dir)
-        runs_new = [d for d in runs_exists_current if d not in runs_exists_before]
-        runs_new_notprocess = [r for r in runs_new if r not in runs_processed]
-        runs_new_notprocess_ready = [r for r in runs_new_notprocess if check_run_ready(os.path.join(runs_dir, r))]
-
-        for run in runs_new_notprocess_ready:
+        # find not processed runs
+        for run in os.listdir(runs_dir):
             run_dir = os.path.join(runs_dir, run)
-            print(f"Evaluating run: {run_dir}")
-            evaluate_run(run_dir=run_dir, wandb_mode="online")
-            runs_processed.append(run)
+            if check_run_ready(run_dir) and not check_run_processed(run_dir):
+                not_processed_runs.append(run_dir)
 
-        if not runs_new_notprocess_ready:
-            print("No new runs ready for evaluation.")
-        time.sleep(5)
+        # process not processed runs
+        for run in not_processed_runs:
+            print(f"Evaluating run: {run}")
+            evaluate_run(run_dir=run, wandb_mode="online")
+            flag_processed(run_dir)
+
+        time.sleep(2)

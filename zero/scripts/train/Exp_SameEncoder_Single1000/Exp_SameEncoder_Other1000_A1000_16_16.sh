@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_SameEncoder_Single1000_16_16"
+EXP_NAME="Exp_SameEncoder_Other1000_A1000_16_16"
 
 # build your run_dir
 
@@ -51,7 +51,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     python trainer_pl_all_fix_encoder.py \
         --config-name=DP_DecoupleActionHead_stage2 \
         \
-        task_alphabet=$LETTER \
+        task_alphabet=A \
         train_mode=stage2_rollout \
         n_demo=1000 \
         ckpt_path=${ckpt_path} \
@@ -62,7 +62,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         run_dir="$run_dir" \
         run_name="${run_name}" \
         \
-        logging.project="DecoupleActionHead_Normal_Headless"  \
+        logging.project="DecoupleActionHead_SameEncoder"  \
         logging.group="${EXP_NAME}" \
         logging.name="${run_name}" &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

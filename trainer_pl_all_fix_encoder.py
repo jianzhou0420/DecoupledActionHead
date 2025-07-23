@@ -183,31 +183,48 @@ def load_pretrained_weights(model, ckpt_path):
     return model
 
 
-def load_pretrained_encoder():
-    pass
-
+def load_pretrained_encoder(model):
+    # 先fix住
+    encoder_path="/data/jian/first/data/tmp/tmp_encoder_A.pth"
+    encoder_state_dict = torch.load(encoder_path, map_location='cpu')
+    model.load_state_dict(encoder_state_dict, strict=False)
+    
+    for name, param in model.named_parameters():
+        if name in encoder_state_dict:
+            param.requires_grad = False
+            print(f"🧊 [已冻结] {name} (来自预训练编码器)")
+    return model
 
 class Trainer_all(pl.LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg
-        task_type = cfg.train_mode
-
-        if task_type == 'stage2' or task_type == 'stage2_rollout':
+        train_mode = cfg.train_mode
+        
+        # load policy
+        policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
+        
+        
+        
+        if train_mode == 'stage2' or train_mode == 'stage2_rollout':
             ckpt_path = cfg.ckpt_path
-            policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path)
-            policy_ema = copy.deepcopy(policy)
-        elif task_type == 'stage1':
-            policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-            policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
-        elif task_type == 'normal' or task_type == 'normal_rollout':
-            policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-            policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
+        elif train_mode == 'stage1':
+            pass
+        elif train_mode == 'normal' or train_mode == 'normal_rollout':
+            pass
         else:
-            raise ValueError(f"Unsupported task type: {task_type}, check config.train_mode")
-
+            raise ValueError(f"Unsupported task type: {train_mode}, check config.train_mode")
+        
+        # load pretrained encoder
+        policy= load_pretrained_encoder(policy)
+        
+        
+        policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
+        
+        
+        
         if cfg.training.use_ema:
             ema_handler: EMAModel = hydra.utils.instantiate(
                 cfg.ema,

@@ -185,7 +185,7 @@ def load_pretrained_weights(model, ckpt_path):
 
 def load_pretrained_encoder(model):
     # 先fix住
-    encoder_path="/home/jian/first/data/tmp_encoder_A.pth"
+    encoder_path="data/tmp_encoder_A.pth"
     encoder_state_dict = torch.load(encoder_path, map_location='cpu')
     model.load_state_dict(encoder_state_dict, strict=False)
     

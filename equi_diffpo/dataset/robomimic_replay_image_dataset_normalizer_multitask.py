@@ -81,7 +81,6 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                             rotation_transformer=rotation_transformer,
                             n_demo=n_demo)
                         print('Saving cache to disk.')
-
                         with zarr.ZipStore(cache_zarr_path) as zip_store:
                             replay_buffer.save_to_store(
                                 store=zip_store
@@ -150,17 +149,6 @@ class RobomimicReplayImageDataset(BaseImageDataset):
             val_ratio=val_ratio,
             seed=seed)
         train_mask = ~val_mask
-
-        # debug
-        # cprint('Debugging validation mask', 'yellow')
-        # val_list = []
-        # for i in range(len(val_mask)):
-        #     print(f'Episode {i} - train: {train_mask[i]}, val: {val_mask[i]}')
-        #     if val_mask[i]:
-        #         val_list.append(i)
-        # print(f'Validation episodes: {val_list}')
-        # /debug
-
         sampler = SequenceSampler(
             replay_buffer=replay_buffer,
             sequence_length=horizon,
@@ -217,8 +205,10 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                 this_normalizer = get_identity_normalizer_from_stat(stat)
             elif key.endswith('JPOpen'):
                 this_normalizer = get_range_normalizer_from_stat(stat)
+            elif key.endswith('states'):
+                this_normalizer = get_range_normalizer_from_stat(stat)
             else:
-                raise RuntimeError('unsupported')
+                raise RuntimeError('unsupported normalizer key: ' + key)
             normalizer[key] = this_normalizer
 
         # image

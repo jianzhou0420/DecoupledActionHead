@@ -1,9 +1,9 @@
 defaults:
   - _self_
-  - task: mimicgen_abs_JP2eePose_stage2
+  - task: mimicgen_abs_states_traj_eePose
 
 train_mode: null
-dataset_tail: traj_eePose
+dataset_tail: states_traj_eePose
 
 # train_meta
 task_alphabet: null

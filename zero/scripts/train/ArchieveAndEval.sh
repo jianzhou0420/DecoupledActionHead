@@ -14,9 +14,5 @@ fi
 # region Archieve
 
 rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
-    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name_stage2}/ready.flag"
+    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ready.flag"
 
-# --------------------
-# region Eval
-rsync -avP ${run_dir}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name}/ &&
-    ssh jian@10.12.65.130 "touch /data/eval_candidates/${time_part}_${run_name}/ready.flag"

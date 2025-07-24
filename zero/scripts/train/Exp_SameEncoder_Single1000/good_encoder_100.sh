@@ -53,7 +53,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         \
         task_alphabet=$LETTER \
         train_mode=stage2_rollout \
-        n_demo=1000 \
+        n_demo=100 \
         ckpt_path=${ckpt_path} \
         \
         dataloader.num_workers=16 \

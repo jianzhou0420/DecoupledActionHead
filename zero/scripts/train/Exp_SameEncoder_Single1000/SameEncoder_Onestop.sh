@@ -53,7 +53,7 @@ ckpt_path=""
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    encoder_path="data/encoder_Exp_Normal_1000__F_epoch=\049.ckpt.pth" \
+    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch=\049.ckpt.pth" \
     \
     task_alphabet=$LETTER \
     train_mode=normal_rollout \
@@ -95,7 +95,7 @@ ckpt_path="data/robomimic/Stage1/Exp_Single1000_16_16_49/Exp_Single1000_16_16_St
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    encoder_path="data/encoder_Exp_Normal_1000__F_epoch=\049.ckpt.pth" \
+    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth" \
     \
     task_alphabet=$LETTER \
     train_mode=stage2_rollout \
@@ -137,7 +137,7 @@ ckpt_path="data/robomimic/Stage1/Exp_Single1000_16_16_49/Exp_Single1000_16_16_St
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth" \
+    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth" \
     \
     task_alphabet=$LETTER \
     train_mode=stage2_rollout \

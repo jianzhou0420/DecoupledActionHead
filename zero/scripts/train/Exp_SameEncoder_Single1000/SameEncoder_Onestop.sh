@@ -28,7 +28,7 @@ echo "Received task letters: $INPUT_TASK_LETTERS"
 echo "---"
 
 
-
+encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth"
 
 
 # --------------------
@@ -53,7 +53,7 @@ ckpt_path=""
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch=\049.ckpt.pth" \
+    +encoder_path=$encoder_path \
     \
     task_alphabet=$LETTER \
     train_mode=normal_rollout \
@@ -95,7 +95,7 @@ ckpt_path="data/robomimic/Stage1/Exp_Single1000_16_16_49/Exp_Single1000_16_16_St
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth" \
+    +encoder_path=$encoder_path \
     \
     task_alphabet=$LETTER \
     train_mode=stage2_rollout \
@@ -134,10 +134,11 @@ run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
 ckpt_path="data/robomimic/Stage1/Exp_Single1000_16_16_49/Exp_Single1000_16_16_Stage1__B_epoch\=049.ckpt"
 
+
 python trainer_pl_all_fix_encoder.py \
     --config-name=DP_DecoupleActionHead_stage2 \
     \
-    +encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth" \
+    +encoder_path=$encoder_path \
     \
     task_alphabet=$LETTER \
     train_mode=stage2_rollout \

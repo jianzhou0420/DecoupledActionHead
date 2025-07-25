@@ -25,5 +25,5 @@ def get_encoder_pth(run_dir):
 
 
 if __name__ == "__main__":
-    run_dir = "/media/jian/data/cached_from_sub_machine/runtime/12.54.49_Exp_Normal_1000__F"
+    run_dir = "/media/jian/data/cached_from_sub_machine/runtime/12.54.49_Exp_Normal_1000__D"
     get_encoder_pth(run_dir)

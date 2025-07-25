@@ -28,7 +28,7 @@ echo "Received task letters: $INPUT_TASK_LETTERS"
 echo "---"
 
 
-encoder_path="data/encoder_Exp_Normal_1000__F_epoch\=049.ckpt.pth"
+encoder_path="data/encoder_Exp_Normal_1000__D_epoch\=049.ckpt.pth"
 
 
 # --------------------

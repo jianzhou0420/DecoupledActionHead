@@ -183,30 +183,28 @@ def load_pretrained_weights(model, ckpt_path):
     return model
 
 
-def load_pretrained_encoder(model):
+def load_pretrained_encoder(model, encoder_path):
     # 先fix住
-    encoder_path="data/tmp_encoder_A.pth"
     encoder_state_dict = torch.load(encoder_path, map_location='cpu')
     model.load_state_dict(encoder_state_dict, strict=False)
-    
+
     for name, param in model.named_parameters():
         if name in encoder_state_dict:
             param.requires_grad = False
             print(f"🧊 [已冻结] {name} (来自预训练编码器)")
     return model
 
+
 class Trainer_all(pl.LightningModule):
-    def __init__(self, cfg):
+    def __init__(self, cfg: AppConfig):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg
         train_mode = cfg.train_mode
-        
+
         # load policy
         policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-        
-        
-        
+
         if train_mode == 'stage2' or train_mode == 'stage2_rollout':
             ckpt_path = cfg.ckpt_path
             policy = load_pretrained_weights(policy, ckpt_path)
@@ -216,15 +214,14 @@ class Trainer_all(pl.LightningModule):
             pass
         else:
             raise ValueError(f"Unsupported task type: {train_mode}, check config.train_mode")
-        
+
         # load pretrained encoder
-        policy= load_pretrained_encoder(policy)
-        
-        
+
+        encoder_path = cfg.get('encoder_path', None)
+        policy = load_pretrained_encoder(policy, encoder_path)
+
         policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
-        
-        
-        
+
         if cfg.training.use_ema:
             ema_handler: EMAModel = hydra.utils.instantiate(
                 cfg.ema,

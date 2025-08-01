@@ -330,6 +330,35 @@ class DatasetConvertor:
                     del demo_data['obs'][obs_key]
                 demo_data['obs'].create_dataset('JPOpen', data=arr_JPOpen)
 
+    def eePose2eePose(self, original_path: str):
+        eePose2eePose_path = original_path.replace("/datasets_abs/", "/datasets/").replace('.hdf5', '_eePose2eePose.hdf5')
+        os.makedirs(os.path.dirname(eePose2eePose_path), exist_ok=True)
+        self._copy2new_h5py_file(original_path, eePose2eePose_path)
+        cprint(f"Converting\n{original_path}\nto{eePose2eePose_path}\n", 'blue')
+        with h5py.File(eePose2eePose_path, 'r+') as f:
+            data = f['data']
+            for i, key in enumerate(data.keys()):
+                # 1. get a numpy copy of the dataset
+                demo_data = data[key]
+                pos_ee = deepcopy(demo_data['obs']['robot0_eef_pos'][...])
+                quat_ee = deepcopy(demo_data['obs']['robot0_eef_quat'][...])
+                open_action = deepcopy(demo_data['actions'][..., -1:])  # open action at t
+
+                # 2. convert to eePose-PosAxis
+                PosQuat_curr = np.concatenate([pos_ee, quat_ee], axis=-1)  # eePose at t
+                PosQuatOpen_curr = np.concatenate((PosQuat_curr, open_action), axis=-1)
+                PosAxis_curr = self._PosQuat2PosAxis(PosQuat_curr)
+
+                PosAxis_new = np.concatenate((PosAxis_curr[1:, :], PosAxis_curr[-1:, :]), axis=0)
+                PosAxisOpen_new = np.concatenate((PosAxis_new, open_action[:, -1:]), axis=-1)
+
+                # replace actions with PosAxisOpen_new, delete all obs then create new obs
+                demo_data['actions'][...] = PosAxisOpen_new
+                for obs_key in list(demo_data['obs'].keys()):
+                    del demo_data['obs'][obs_key]
+                demo_data['obs'].create_dataset('eePose', data=PosQuatOpen_curr)
+        HDF5Inspector.inspect_hdf5(eePose2eePose_path)
+
     def put_together_ABC(self, A_path: str, B_path: str, C_path: str):
 
         A_name = os.path.basename(A_path).split('_abs')[0]
@@ -466,7 +495,8 @@ def main():
     valid_conversion_methods = [
         'traj_eePose', 'traj_JP', 'traj_JP_eeloss',
         'states_JP', 'states_eePose',
-        'JP2eePose_debug', 'JP2eePose'
+        'JP2eePose_debug', 'JP2eePose',
+        'eePose2eePose'
     ]
 
     # 2. 设置 argparse 解析器
@@ -543,9 +573,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # converter = DatasetConvertor()
-    # converter.put_together_ABC(
-    #     A_path='data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5',
-    #     B_path='data/robomimic/datasets/coffee_d2/coffee_d2_abs_JP2eePose.hdf5',
-    #     C_path='data/robomimic/datasets/three_piece_assembly_d2/three_piece_assembly_d2_abs_JP2eePose.hdf5'
-    # )

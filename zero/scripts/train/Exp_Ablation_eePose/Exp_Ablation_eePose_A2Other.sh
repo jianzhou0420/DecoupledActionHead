@@ -55,7 +55,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
         \
-        task_alphabet=A \
+        task_alphabet=${LETTER} \
         train_mode=stage2_rollout \
         n_demo=1000 \
         ckpt_path=${ckpt_path} \

@@ -13,7 +13,7 @@
             "justMyCode": false,
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        { // Train pl_normal
+        { // Convertor
             "name": "Convertor",
             "type": "debugpy",
             "request": "launch",
@@ -27,24 +27,28 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        { // Train pl_normal
-            "name": "Train pl_normal",
+        { // 
+            "name": "DP_T_Normal_Debug",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_normal.py",
-            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
             "args": [
-                "--config-name=DP_traj_eePose",
-                "n_demo=10",
-                "task.env_runner.n_envs=2",
-                "task.env_runner.n_train=1",
-                "task.env_runner.n_test=1",
-                "logging.mode=offline",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
+                "--config-name=DP_transformer",
                 "task_alphabet=A",
+                "train_mode=stage1",
+                "n_demo=1000",
+                "ckpt_path=",
+                "dataloader.num_workers=16",
+                "training.val_every=1000",
+                "run_dir=data/outputs/debug/Exp_DP_T_Normal_debug__A_normal",
+                "run_name=Exp_DP_T_Normal_debug",
+                "logging.mode=offline",
+                "logging.project=DecoupleActionHead_debug",
+                "logging.group=Exp_DP_T_Normal_debug",
+                "logging.name=Exp_DP_T_Normal_debug"
             ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
         },
         { // Train pl_stage1
             "name": "Train pl_stage1",

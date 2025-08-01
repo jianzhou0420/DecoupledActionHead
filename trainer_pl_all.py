@@ -284,6 +284,26 @@ class Trainer_all(pl.LightningModule):
             },
         }
 
+    def configure_optimizers_transformer(self):
+        def get_optimizer(
+            self,
+            transformer_weight_decay: float,
+            obs_encoder_weight_decay: float,
+            learning_rate: float,
+            betas: Tuple[float, float]
+        ) -> torch.optim.Optimizer:
+            optim_groups = self.model.get_optim_groups(
+                weight_decay=transformer_weight_decay)
+            optim_groups.append({
+                "params": self.obs_encoder.parameters(),
+                "weight_decay": obs_encoder_weight_decay
+            })
+            optimizer = torch.optim.AdamW(
+                optim_groups, lr=learning_rate, betas=betas
+            )
+            return optimizer
+        pass
+
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]):
         """
         This hook is called when a checkpoint is saved.

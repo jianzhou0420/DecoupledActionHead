@@ -1,0 +1,10 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CurrentTimeEnv",
+            "type": "shell",
+            "command": "date_part=$(date +'%Y.%m.%d'); time_part=$(date +'%H.%M.%S');"
+        }
+    ]
+}

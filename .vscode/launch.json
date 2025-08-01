@@ -27,13 +27,36 @@
             ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        { // 
+        { // DP_T_Normal_Debug
             "name": "DP_T_Normal_Debug",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/trainer_pl_all.py",
             "args": [
                 "--config-name=DP_transformer",
+                "task_alphabet=A",
+                "train_mode=stage1",
+                "n_demo=1000",
+                "ckpt_path=",
+                "dataloader.num_workers=16",
+                "training.val_every=1000",
+                "run_dir=data/outputs/debug/Exp_DP_T_Normal_debug__A_normal",
+                "run_name=Exp_DP_T_Normal_debug",
+                "logging.mode=offline",
+                "logging.project=DecoupleActionHead_debug",
+                "logging.group=Exp_DP_T_Normal_debug",
+                "logging.name=Exp_DP_T_Normal_debug"
+            ],
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
+        },
+        { // 
+            "name": "DP_C_None2eePose_debug",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_stage1_none2eePose_ablation",
                 "task_alphabet=A",
                 "train_mode=stage1",
                 "n_demo=1000",

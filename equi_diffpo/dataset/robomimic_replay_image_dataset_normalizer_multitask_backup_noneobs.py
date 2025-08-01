@@ -128,16 +128,12 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         rgb_keys = list()
         lowdim_keys = list()
         obs_shape_meta = shape_meta['obs']
-
-        # modified for none obs
-        if obs_shape_meta is not None:
-            for key, attr in obs_shape_meta.items():
-                type = attr.get('type', 'low_dim')
-                if type == 'rgb':
-                    rgb_keys.append(key)
-                elif type == 'low_dim':
-                    lowdim_keys.append(key)
-        # end of modified
+        for key, attr in obs_shape_meta.items():
+            type = attr.get('type', 'low_dim')
+            if type == 'rgb':
+                rgb_keys.append(key)
+            elif type == 'low_dim':
+                lowdim_keys.append(key)
 
         # for key in rgb_keys:
         #     replay_buffer[key].compressor.numthreads=1

@@ -59,17 +59,20 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             'scan': []
         }
         obs_key_shapes = dict()
-        for key, attr in obs_shape_meta.items():
-            shape = attr['shape']
-            obs_key_shapes[key] = list(shape)
+        # modified to support no obs keys
+        if obs_shape_meta is not None:
+            for key, attr in obs_shape_meta.items():
+                shape = attr['shape']
+                obs_key_shapes[key] = list(shape)
 
-            type = attr.get('type', 'low_dim')
-            if type == 'rgb':
-                obs_config['rgb'].append(key)
-            elif type == 'low_dim':
-                obs_config['low_dim'].append(key)
-            else:
-                raise RuntimeError(f"Unsupported obs type: {type}")
+                type = attr.get('type', 'low_dim')
+                if type == 'rgb':
+                    obs_config['rgb'].append(key)
+                elif type == 'low_dim':
+                    obs_config['low_dim'].append(key)
+                else:
+                    raise RuntimeError(f"Unsupported obs type: {type}")
+        # end of parsing modification
 
         # get raw robomimic config
         config = get_robomimic_config(
@@ -307,11 +310,15 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         cond_data = trajectory
         if self.obs_as_global_cond:
             # reshape B, T, ... to B*T
-            this_nobs = dict_apply(nobs,
-                                   lambda x: x[:, :self.n_obs_steps, ...].reshape(-1, *x.shape[2:]))
-            nobs_features = self.obs_encoder(this_nobs)
-            # reshape back to B, Do
-            global_cond = nobs_features.reshape(batch_size, -1)
+            # modified to support n_obs_steps
+            if len(nobs) == 0:
+                global_cond = torch.empty((batch_size, 0), device=nactions.device, dtype=nactions.dtype)
+            else:
+                this_nobs = dict_apply(nobs,
+                                       lambda x: x[:, :self.n_obs_steps, ...].reshape(-1, *x.shape[2:]))
+                nobs_features = self.obs_encoder(this_nobs)
+                # reshape back to B, Do
+                global_cond = nobs_features.reshape(batch_size, -1)
         else:
             # reshape B, T, ... to B*T
             this_nobs = dict_apply(nobs, lambda x: x.reshape(-1, *x.shape[2:]))

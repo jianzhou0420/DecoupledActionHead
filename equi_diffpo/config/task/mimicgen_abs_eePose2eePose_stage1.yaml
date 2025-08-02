@@ -1,7 +1,9 @@
 name: mimicgen_abs_JP2eePose
 
 shape_meta: &shape_meta
-  obs: null
+  obs:
+    eePose:
+      shape: [8]
   action:
     shape: [10]
 

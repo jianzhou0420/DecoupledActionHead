@@ -195,7 +195,7 @@ class Trainer_all(pl.LightningModule):
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path)
             policy_ema = copy.deepcopy(policy)
-        elif task_type == 'stage1':
+        elif task_type == 'stage1' or task_type == 'stage1_pure':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
         elif task_type == 'normal' or task_type == 'normal_rollout':
@@ -482,6 +482,9 @@ def train(cfg: AppConfig):
     if cfg.train_mode == 'stage1':
         callback_list = [checkpoint_callback,
                          ActionMseLossForDiffusion(cfg),
+                         ]
+    elif cfg.train_mode == 'stage1_pure':
+        callback_list = [checkpoint_callback,
                          ]
     elif cfg.train_mode == 'stage2':
         callback_list = [checkpoint_callback,

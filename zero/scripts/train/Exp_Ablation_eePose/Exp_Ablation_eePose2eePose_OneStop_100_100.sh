@@ -38,7 +38,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Ablation_none2eePose_OneStop"
+EXP_NAME="Exp_Ablation_eePose_OneStop_100_100"
 # build your run_dir
 
 # ---
@@ -49,14 +49,14 @@ run_name_stage2="${EXP_NAME}__${INPUT_TASK_LETTERS}_stage2"
 run_dir_stage1="data/outputs/${date_part}/${time_part}_${run_name_stage1}"
 run_dir_stage2="data/outputs/${date_part}/${time_part}_${run_name_stage2}"
 
-ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=049.ckpt"
+ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=499.ckpt"
 
 python trainer_pl_all.py \
-    --config-name=DP_DecoupleActionHead_stage1_none2eePose_ablation \
+    --config-name=DP_DecoupleActionHead_stage1_eePose_ablation \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
-    train_mode=stage1_pure \
-    n_demo=1000 \
+    train_mode=stage1 \
+    n_demo=100 \
     ckpt_path="" \
     \
     dataloader.num_workers=16 \
@@ -73,7 +73,7 @@ python trainer_pl_all.py \
         \
         task_alphabet=$INPUT_TASK_LETTERS \
         train_mode=stage2_rollout \
-        n_demo=1000 \
+        n_demo=100 \
         ckpt_path="$ckpt_path" \
         \
         dataloader.num_workers=16 \

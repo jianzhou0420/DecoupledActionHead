@@ -25,6 +25,7 @@ from pytorch_lightning.loggers import TensorBoardLogger, CSVLogger, WandbLogger
 import pytorch_lightning as pl
 # equidiff package
 from equi_diffpo.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
+from equi_diffpo.policy.diffusion_transformer_hybrid_image_policy import DiffusionTransformerHybridImagePolicy
 from equi_diffpo.dataset.base_dataset import BaseImageDataset
 from equi_diffpo.env_runner.base_image_runner import BaseImageRunner
 
@@ -214,6 +215,10 @@ class Trainer_all(pl.LightningModule):
         self.ema_handler = ema_handler
         self.train_sampling_batch = None
 
+        # debug
+        # for name, param in policy.named_parameters():
+        #     print(name)
+
     def setup(self, stage='fit'):
         if stage == 'fit':
             self.normalizer = self.trainer.datamodule.normalizer
@@ -260,49 +265,73 @@ class Trainer_all(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        cfg = self.cfg
-        num_training_steps = self.trainer.estimated_stepping_batches
+        cfg: DictConfig = self.cfg
 
-        optimizer = hydra.utils.instantiate(cfg.optimizer, params=self.policy.parameters())
-        lr_scheduler = get_scheduler(
-            cfg.training.lr_scheduler,
-            optimizer=optimizer,
-            num_warmup_steps=cfg.training.lr_warmup_steps,
-            num_training_steps=int((
-                num_training_steps)
-                // cfg.training.gradient_accumulate_every),
-            # pytorch assumes stepping LRScheduler every epoch
-            # however huggingface diffusers steps it every batch
-            last_epoch=self.global_step - 1
-        )
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": lr_scheduler,
-                "interval": "step",  # Make sure to step the scheduler every batch/step
-                "frequency": 1,
-            },
-        }
+        using_transformers = cfg.get("using_transformers", False)
+        if not using_transformers:
+            num_training_steps = self.trainer.estimated_stepping_batches
 
-    def configure_optimizers_transformer(self):
-        def get_optimizer(
-            self,
-            transformer_weight_decay: float,
-            obs_encoder_weight_decay: float,
-            learning_rate: float,
-            betas: Tuple[float, float]
-        ) -> torch.optim.Optimizer:
-            optim_groups = self.model.get_optim_groups(
+            optimizer = hydra.utils.instantiate(cfg.optimizer, params=self.policy.parameters())
+            lr_scheduler = get_scheduler(
+                cfg.training.lr_scheduler,
+                optimizer=optimizer,
+                num_warmup_steps=cfg.training.lr_warmup_steps,
+                num_training_steps=int((
+                    num_training_steps)
+                    // cfg.training.gradient_accumulate_every),
+                # pytorch assumes stepping LRScheduler every epoch
+                # however huggingface diffusers steps it every batch
+                last_epoch=self.global_step - 1
+            )
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": {
+                    "scheduler": lr_scheduler,
+                    "interval": "step",  # Make sure to step the scheduler every batch/step
+                    "frequency": 1,
+                },
+            }
+        else:
+            # 1. cfg
+            transformer_weight_decay = cfg.optimizer.transformer_weight_decay
+            obs_encoder_weight_decay = cfg.optimizer.obs_encoder_weight_decay
+            learning_rate = cfg.optimizer.learning_rate
+            betas = cfg.optimizer.betas
+            self.policy: DiffusionTransformerHybridImagePolicy
+
+            # 2. optimizer, the same as the diffusion_transformer_hybrid_image_policy.py
+            optim_groups = self.policy.model.get_optim_groups(
                 weight_decay=transformer_weight_decay)
             optim_groups.append({
-                "params": self.obs_encoder.parameters(),
+                "params": self.policy.obs_encoder.parameters(),
                 "weight_decay": obs_encoder_weight_decay
             })
             optimizer = torch.optim.AdamW(
                 optim_groups, lr=learning_rate, betas=betas
             )
-            return optimizer
-        pass
+            # end of 2. optimizer
+            num_training_steps = self.trainer.estimated_stepping_batches
+
+            # 3.lr_scheduler
+            lr_scheduler = get_scheduler(
+                cfg.training.lr_scheduler,
+                optimizer=optimizer,
+                num_warmup_steps=cfg.training.lr_warmup_steps,
+                num_training_steps=int((
+                    num_training_steps)
+                    // cfg.training.gradient_accumulate_every),
+                # pytorch assumes stepping LRScheduler every epoch
+                # however huggingface diffusers steps it every batch
+                last_epoch=self.global_step - 1
+            )
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": {
+                    "scheduler": lr_scheduler,
+                    "interval": "step",  # Make sure to step the scheduler every batch/step
+                    "frequency": 1,
+                },
+            }
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]):
         """

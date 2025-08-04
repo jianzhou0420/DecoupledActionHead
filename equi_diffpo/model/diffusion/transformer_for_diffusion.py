@@ -154,6 +154,9 @@ class TransformerForDiffusion(ModuleAttrMixin):
         logger.info(
             "number of parameters: %e", sum(p.numel() for p in self.parameters())
         )
+        logger.info(
+            "number of parameters: %e", sum(p.numel() for p in self.encoder.parameters())
+        )
 
     def _init_weights(self, module):
         ignore_types = (nn.Dropout,

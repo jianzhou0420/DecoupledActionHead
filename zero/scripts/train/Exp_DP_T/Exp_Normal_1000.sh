@@ -52,7 +52,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         --config-name=DP_transformer \
         \
         task_alphabet=$LETTER \
-        train_mode=normal \
+        train_mode=normal_rollout \
         n_demo=1000 \
         ckpt_path=${ckpt_path} \
         \

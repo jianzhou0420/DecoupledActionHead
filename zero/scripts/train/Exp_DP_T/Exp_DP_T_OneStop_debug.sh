@@ -49,10 +49,12 @@ run_name_stage2="${EXP_NAME}__${INPUT_TASK_LETTERS}_stage2"
 run_dir_stage1="data/outputs/${date_part}/${time_part}_${run_name_stage1}"
 run_dir_stage2="data/outputs/${date_part}/${time_part}_${run_name_stage2}"
 
-ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=049.ckpt"
+ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=000.ckpt"
 
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_transformer_stage1 \
+    \
+    training.num_epochs=1 \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
@@ -70,6 +72,8 @@ python trainer_pl_all.py \
     logging.name="${run_name_stage1}" &&
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_transformer_stage2 \
+        \
+        training.num_epochs=5 \
         \
         task_alphabet=$INPUT_TASK_LETTERS \
         train_mode=stage2_rollout \

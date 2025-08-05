@@ -54,9 +54,6 @@ ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=049.ckpt"
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_transformer_stage1_eePose \
     \
-    policy.p_drop_emb=0\
-    policy.p_drop_attn=0\
-    \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
     n_demo=1000 \

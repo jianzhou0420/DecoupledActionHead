@@ -46,7 +46,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     run_name="${EXP_NAME}__${LETTER}"
     run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
-    ckpt_path="data/robomimic/Stage1/tmp/Exp_DP_T_OneStop__A_stage1_epoch=\049.ckpt"
+    ckpt_path="data/robomimic/Stage1/tmp/Exp_DP_T_OneStop__A_stage1_epoch\=049.ckpt"
 
     python trainer_pl_all.py \
         --config-name=DP_transformer \

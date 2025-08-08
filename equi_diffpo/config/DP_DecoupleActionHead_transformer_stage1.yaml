@@ -81,7 +81,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 1
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -110,7 +110,7 @@ training:
   # in epochs
   rollout_every: ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: 10000
+  val_every: ${eval:'50000 / ${n_demo}/50'}0
   sample_every: 5
   max_train_steps: null
   max_val_steps: null

@@ -76,7 +76,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 1
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -103,9 +103,9 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every:  ${eval:'50000 / ${n_demo}/50'}
+  rollout_every: ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: 10000
+  val_every: ${eval:'50000 / ${n_demo}/50'}0
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0
@@ -115,10 +115,9 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage2","${task_alphabet}",]
+  tags: ["stage2", "${task_alphabet}"]
   id: null
   group: null
-
 
 hydra:
   job:

@@ -20,16 +20,14 @@ obs_as_global_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
 dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs.hdf5
 
-
 run_name: pretrain_JPee_stage2_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
-
 
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
 
   shape_meta: ${shape_meta}
-  
+
   noise_scheduler:
     _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
     num_train_timesteps: 100
@@ -76,7 +74,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 2
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -127,7 +125,7 @@ checkpoint:
     monitor_key: test_mean_score
     mode: max
     k: 5
-    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+    format_str: "epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt"
   save_last_ckpt: True
   save_last_snapshot: False
 

@@ -27,7 +27,7 @@ policy:
   # oc.select resolver: key, default
   task_name: ${oc.select:task.task_name,lift}
   dataset_type: ${oc.select:task.dataset_type,ph}
-  crop_shape: [76,76]
+  crop_shape: [76, 76]
 
 dataloader:
   batch_size: 64
@@ -38,7 +38,7 @@ dataloader:
 
 val_dataloader:
   batch_size: 64
-  num_workers: 2
+  num_workers: 4
   shuffle: False
   pin_memory: True
   persistent_workers: True
@@ -76,7 +76,7 @@ checkpoint:
     monitor_key: test_mean_score
     mode: max
     k: 5
-    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+    format_str: "epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt"
   save_last_ckpt: True
   save_last_snapshot: False
 

@@ -184,17 +184,139 @@ def load_pretrained_weights(model, ckpt_path):
     return model
 
 
+def load_pretrained_weights_DP_T(model, ckpt_path):
+
+    # --------------------------------------------------------------------------
+    # ✨ 新增步骤：记录初始冻结状态
+    # --------------------------------------------------------------------------
+    initially_frozen_keys = {name for name, param in model.named_parameters() if not param.requires_grad}
+    if initially_frozen_keys:
+        print(f"检测到 {len(initially_frozen_keys)} 个参数在函数调用前已被设置为冻结状态。这些参数将保持冻结。")
+        # for name in initially_frozen_keys:
+        #     print(f"  - 初始冻结: {name}")
+
+    if not ckpt_path:
+        print("未提供权重路径，跳过权重加载过程。")
+        # 即使不加载权重，我们仍然需要冻结CLIP和保持初始冻结状态
+        if hasattr(model, 'clip'):
+            print("正在冻结 CLIP 模块并设置为评估模式...")
+            model.clip.eval()
+            for name, param in model.clip.named_parameters():
+                param.requires_grad = False
+                print(f"🧊 [强制冻结] {name}")
+        return model
+
+    manully_unfrozen_keys = [
+        "model.pos_emb",
+        "model.input_emb.weight",
+        "model.input_emb.bias",
+        "model.encoder.0.weight",
+        "model.encoder.0.bias",
+        "model.encoder.2.weight",
+        "model.encoder.2.bias",
+    ]
+    # --------------------------------------------------------------------------
+    # 第1步：识别出可以安全加载的权重 (逻辑不变)
+    # --------------------------------------------------------------------------
+    print(f"正在从 '{ckpt_path}' 加载权重...")
+    pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
+
+    new_model_dict = model.state_dict()
+    loadable_keys = set()
+    filtered_dict = {}
+
+    print("正在筛选兼容的权重...")
+    for k, v in pretrained_dict.items():
+        if k in new_model_dict and new_model_dict[k].shape == v.shape:
+            filtered_dict[k] = v
+            loadable_keys.add(k)
+    print(f"识别出 {len(loadable_keys)} 个参数可以从 checkpoint 安全加载。")
+
+    # --------------------------------------------------------------------------
+    # 第2步：加载筛选后的权重 (逻辑不变)
+    # --------------------------------------------------------------------------
+    new_model_dict.update(filtered_dict)
+    model.load_state_dict(new_model_dict)
+    print("已成功加载所有兼容的权重。")
+
+    # --------------------------------------------------------------------------
+    # 第3步：强制设置 CLIP 模块为评估模式 (逻辑不变)
+    # --------------------------------------------------------------------------
+    if hasattr(model, 'clip'):
+        print("正在将 CLIP 模块设置为评估模式 (model.clip.eval())...")
+        model.clip.eval()
+    else:
+        print("⚠️  警告: 模型中未找到名为 'clip' 的属性，无法设置为评估模式。")
+
+    # --------------------------------------------------------------------------
+    # 第4步（已修改）：根据加载情况、模块名称和初始状态智能地设置梯度
+    # --------------------------------------------------------------------------
+    print("正在智能地设置参数的梯度计算状态...")
+    trainable_params = 0
+    frozen_params = 0
+
+    for name, param in model.named_parameters():
+        # 检查参数是否在初始时就已冻结
+        is_initially_frozen = name in initially_frozen_keys
+        # 检查参数是否属于CLIP模块
+        is_clip_param = name.startswith('clip.')
+        # 检查参数是否从checkpoint加载
+        is_loaded_from_ckpt = name in loadable_keys
+
+        is_manully_unfrozen = name in manully_unfrozen_keys
+
+        # 智能逻辑：检查偏置对应的权重是否也被加载了
+        if name.endswith('.bias') and not is_clip_param and not is_initially_frozen:
+            weight_name = name.replace('.bias', '.weight')
+            if weight_name not in loadable_keys:
+                is_loaded_from_ckpt = False
+                print(f"ℹ️  注意: 偏置 '{name}' 将保持可训练，因为其对应的权重 '{weight_name}' 未被加载。")
+
+        # 最终冻结决策：只要是初始冻结、CLIP参数或从checkpoint加载的参数，就冻结
+        if (is_initially_frozen or is_clip_param or is_loaded_from_ckpt) and not is_manully_unfrozen:
+            param.requires_grad = False
+            frozen_params += 1
+        else:
+            param.requires_grad = True
+            trainable_params += 1
+
+    # --------------------------------------------------------------------------
+    # 第6步： 可耻的的手动修正
+    # --------------------------------------------------------------------------
+
+    print(f"策略执行完毕：{frozen_params} 个参数被冻结，{trainable_params} 个参数保持可训练。")
+    # --------------------------------------------------------------------------
+    # 第7步：最终验证
+    # --------------------------------------------------------------------------
+    print("\n--- 最终模型梯度状态验证 ---")
+    for name, param in model.named_parameters():
+        status = "🧊 [已冻结]" if not param.requires_grad else "✅ [可训练]"
+        reason = ""
+        if not param.requires_grad:
+            if name in initially_frozen_keys:
+                reason = "(原因: 初始状态为冻结)"
+            elif name.startswith('clip.'):
+                reason = "(原因: CLIP模块)"
+            elif name in loadable_keys:
+                reason = "(原因: 从ckpt加载)"
+        print(f"{status} {name} {reason}")
+    print("---------------------------------")
+
+    return model
+
+
 class Trainer_all(pl.LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg
         task_type = cfg.train_mode
+        using_transformers = cfg.get("using_transformers", False)
 
         if task_type == 'stage2' or task_type == 'stage2_rollout':
             ckpt_path = cfg.ckpt_path
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-            policy = load_pretrained_weights(policy, ckpt_path)
+            policy = load_pretrained_weights(policy, ckpt_path) if not using_transformers else load_pretrained_weights_DP_T(policy, ckpt_path)
             policy_ema = copy.deepcopy(policy)
         elif task_type == 'stage1' or task_type == 'stage1_pure':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)

@@ -54,11 +54,13 @@ ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=000.ckpt"
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_transformer_stage1 \
     \
+    training.checkpoint_every=1 \
     training.num_epochs=1 \
+    logging.mode="offline" \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
-    n_demo=1000 \
+    n_demo=10 \
     ckpt_path="" \
     \
     dataloader.num_workers=16 \
@@ -74,6 +76,7 @@ python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_transformer_stage2 \
         \
         training.num_epochs=5 \
+        logging.mode="offline" \
         \
         task_alphabet=$INPUT_TASK_LETTERS \
         train_mode=stage2_rollout \

@@ -24,7 +24,6 @@ dataset_path: data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose.hdf5
 run_name: ${policy_name}_${name}_${task_name}_${n_demo}
 run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${run_name}
 
-
 policy:
   _target_: equi_diffpo.policy.JianAE_policy.JianAEPolicy
   shape_meta: ${shape_meta}
@@ -90,8 +89,8 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: ${eval:'50000 / ${n_demo} /50'}
-  checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
+  rollout_every: ${eval:'50000 / ${n_demo} / 50'}
+  checkpoint_every: ${eval:'50000 / ${n_demo}/ 50'}
   val_every: 1
   sample_every: 5
   # steps per epoch
@@ -104,7 +103,7 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage1","miniExp",]
+  tags: ["stage1", "miniExp"]
   id: null
   group: null
 

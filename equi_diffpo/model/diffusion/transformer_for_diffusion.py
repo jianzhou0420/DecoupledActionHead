@@ -149,6 +149,9 @@ class TransformerForDiffusion(ModuleAttrMixin):
         self.obs_as_cond = obs_as_cond
         self.encoder_only = encoder_only
 
+        # debug
+        debug = list(self.named_parameters())  # force init of all parameters, so that we can see them in the debugger
+        # /debug
         # init
         self.apply(self._init_weights)
         logger.info(

@@ -122,7 +122,7 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage2", "${task_alphabet}"]
+  tags: ["stage1", "${task_alphabet}"]
   id: null
   group: null
 

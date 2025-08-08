@@ -208,8 +208,8 @@ def load_pretrained_weights_DP_T(model, ckpt_path):
 
     manully_unfrozen_keys = [
         "model.pos_emb",
-        "model.input_emb.weight",
-        "model.input_emb.bias",
+        # "model.input_emb.weight",
+        # "model.input_emb.bias",
         "model.encoder.0.weight",
         "model.encoder.0.bias",
         "model.encoder.2.weight",

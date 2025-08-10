@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from equi_diffpo.model.diffusion.positional_embedding import SinusoidalPosEmb
 from equi_diffpo.model.common.module_attr_mixin import ModuleAttrMixin
-
+from equi_diffpo.model.diffusion.jian_transformer_decoder_film import FilMSelfAttnDecoderLayer, FiLMLayer, FilMTransformerDecoder
 logger = logging.getLogger(__name__)
 
 
@@ -47,67 +47,33 @@ class TransformerForDiffusion(ModuleAttrMixin):
         self.drop = nn.Dropout(p_drop_emb)
 
         # cond encoder
-        self.time_emb = SinusoidalPosEmb(n_emb)
-        self.cond_obs_emb = None
-
-        if obs_as_cond:
-            self.cond_obs_emb = nn.Linear(cond_dim, n_emb)
-
+        self.diffusion_step_encoder = nn.Sequential(
+            SinusoidalPosEmb(n_emb),
+            nn.Linear(n_emb, n_emb * 4),
+            nn.Mish(),
+            nn.Linear(n_emb * 4, n_emb),
+        )
         self.cond_pos_emb = None
+        self.cond_obs_emb = None
         self.encoder = None
         self.decoder = None
         encoder_only = False
         if T_cond > 0:
-            self.cond_pos_emb = nn.Parameter(torch.zeros(1, T_cond, n_emb))
-            if n_cond_layers > 0:
-                encoder_layer = nn.TransformerEncoderLayer(
-                    d_model=n_emb,
-                    nhead=n_head,
-                    dim_feedforward=4 * n_emb,
-                    dropout=p_drop_attn,
-                    activation='gelu',
-                    batch_first=True,
-                    norm_first=True
-                )
-                self.encoder = nn.TransformerEncoder(
-                    encoder_layer=encoder_layer,
-                    num_layers=n_cond_layers
-                )
-            else:
-                self.encoder = nn.Sequential(
-                    nn.Linear(n_emb, 4 * n_emb),
-                    nn.Mish(),
-                    nn.Linear(4 * n_emb, n_emb)
-                )
             # decoder
-            decoder_layer = nn.TransformerDecoderLayer(
+            decoder_layer = FilMSelfAttnDecoderLayer(
                 d_model=n_emb,
                 nhead=n_head,
+                cond_dim=cond_dim * n_obs_steps + n_emb,
+                # enable_film_self_attn=True,
+                enable_film_ffn=True,  # FILM Plugin
                 dim_feedforward=4 * n_emb,
                 dropout=p_drop_attn,
                 activation='gelu',
                 batch_first=True,
                 norm_first=True  # important for stability
             )
-            self.decoder = nn.TransformerDecoder(
+            self.decoder = FilMTransformerDecoder(
                 decoder_layer=decoder_layer,
-                num_layers=n_layer
-            )
-        else:
-            # encoder only BERT
-            encoder_only = True
-
-            encoder_layer = nn.TransformerEncoderLayer(
-                d_model=n_emb,
-                nhead=n_head,
-                dim_feedforward=4 * n_emb,
-                dropout=p_drop_attn,
-                activation='gelu',
-                batch_first=True,
-                norm_first=True
-            )
-            self.encoder = nn.TransformerEncoder(
-                encoder_layer=encoder_layer,
                 num_layers=n_layer
             )
 
@@ -157,15 +123,15 @@ class TransformerForDiffusion(ModuleAttrMixin):
         logger.info(
             "number of parameters: %e", sum(p.numel() for p in self.parameters())
         )
-        logger.info(
-            "number of parameters: %e", sum(p.numel() for p in self.encoder.parameters())
-        )
 
     def _init_weights(self, module):
         ignore_types = (nn.Dropout,
                         SinusoidalPosEmb,
                         nn.TransformerEncoderLayer,
                         nn.TransformerDecoderLayer,
+                        FilMSelfAttnDecoderLayer,  # FILM Plugin
+                        FilMTransformerDecoder,
+                        FiLMLayer,  # FILM Plugin
                         nn.TransformerEncoder,
                         nn.TransformerDecoder,
                         nn.ModuleList,
@@ -283,6 +249,13 @@ class TransformerForDiffusion(ModuleAttrMixin):
         cond: (B,T',cond_dim)
         output: (B,T,input_dim)
         """
+
+        # FiLM Plugin
+        cond = cond.reshape(sample.shape[0], -1)
+        # End of FiLM Plugin
+        # 0. process input
+        input_emb = self.input_emb(sample)
+
         # 1. time
         timesteps = timestep
         if not torch.is_tensor(timesteps):
@@ -292,58 +265,29 @@ class TransformerForDiffusion(ModuleAttrMixin):
             timesteps = timesteps[None].to(sample.device)
         # broadcast to batch dimension in a way that's compatible with ONNX/Core ML
         timesteps = timesteps.expand(sample.shape[0])
-        time_emb = self.time_emb(timesteps).unsqueeze(1)
-        # (B,1,n_emb)
+        time_feature = self.diffusion_step_encoder(timesteps)
 
-        # process input
-        input_emb = self.input_emb(sample)
+        # 2. cond
+        global_feature = torch.cat([
+            time_feature, cond
+        ], axis=-1)
 
-        if self.encoder_only:
-            # BERT
-            token_embeddings = torch.cat([time_emb, input_emb], dim=1)
-            t = token_embeddings.shape[1]
-            position_embeddings = self.pos_emb[
-                :, :t, :
-            ]  # each position maps to a (learnable) vector
-            x = self.drop(token_embeddings + position_embeddings)
-            # (B,T+1,n_emb)
-            x = self.encoder(src=x, mask=self.mask)
-            # (B,T+1,n_emb)
-            x = x[:, 1:, :]
-            # (B,T,n_emb)
-        else:
-            # encoder
-            cond_embeddings = time_emb
-            if self.obs_as_cond:
-                cond_obs_emb = self.cond_obs_emb(cond)
-                # (B,To,n_emb)
-                cond_embeddings = torch.cat([cond_embeddings, cond_obs_emb], dim=1)
-            tc = cond_embeddings.shape[1]
-            position_embeddings = self.cond_pos_emb[
-                :, :tc, :
-            ]  # each position maps to a (learnable) vector
-            x = self.drop(cond_embeddings + position_embeddings)
-            x = self.encoder(x)
-            memory = x
-            # (B,T_cond,n_emb)
+        # 4. decoder
+        token_embeddings = input_emb
+        t = token_embeddings.shape[1]
+        position_embeddings = self.pos_emb[
+            :, :t, :
+        ]  # each position maps to a (learnable) vector
+        x = self.drop(token_embeddings + position_embeddings)
+        # (B,T,n_emb)
+        x = self.decoder(
+            tgt=x,
+            tgt_mask=self.mask,
+            cond=global_feature
+        )
+        # (B,T,n_emb)
 
-            # decoder
-            token_embeddings = input_emb
-            t = token_embeddings.shape[1]
-            position_embeddings = self.pos_emb[
-                :, :t, :
-            ]  # each position maps to a (learnable) vector
-            x = self.drop(token_embeddings + position_embeddings)
-            # (B,T,n_emb)
-            x = self.decoder(
-                tgt=x,
-                memory=memory,
-                tgt_mask=self.mask,
-                memory_mask=self.memory_mask
-            )
-            # (B,T,n_emb)
-
-        # head
+        # 5. head
         x = self.ln_f(x)
         x = self.head(x)
         # (B,T,n_out)

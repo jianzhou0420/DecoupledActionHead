@@ -317,24 +317,22 @@ class Trainer_all(pl.LightningModule):
             ckpt_path = cfg.ckpt_path
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy = load_pretrained_weights(policy, ckpt_path) if not using_transformers else load_pretrained_weights_DP_T(policy, ckpt_path)
-            policy_ema = copy.deepcopy(policy)
         elif task_type == 'stage1' or task_type == 'stage1_pure':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-            policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
         elif task_type == 'normal' or task_type == 'normal_rollout':
             policy: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
-            policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
         else:
             raise ValueError(f"Unsupported task type: {task_type}, check config.train_mode")
 
-        if cfg.training.use_ema:
+        if cfg.training.get("use_ema", False):
+            policy_ema: DiffusionUnetHybridImagePolicy = copy.deepcopy(policy)
             ema_handler: EMAModel = hydra.utils.instantiate(
                 cfg.ema,
                 model=policy_ema,)
+            self.ema_handler = ema_handler
+            self.policy_ema = policy_ema.to(self.device)
 
-        self.policy = policy.to(self.device)
-        self.policy_ema = policy_ema.to(self.device)
-        self.ema_handler = ema_handler
+        self.policy = policy
         self.train_sampling_batch = None
 
         # debug
@@ -345,7 +343,8 @@ class Trainer_all(pl.LightningModule):
         if stage == 'fit':
             self.normalizer = self.trainer.datamodule.normalizer
             self.policy.set_normalizer(self.normalizer)
-            self.policy_ema.set_normalizer(self.normalizer) if self.cfg.training.use_ema else None
+            if self.cfg.training.get("use_ema", False):
+                self.policy_ema.set_normalizer(self.normalizer)
 
         return
 
@@ -377,10 +376,12 @@ class Trainer_all(pl.LightningModule):
         This hook is called after the training step and optimizer update.
         It's the perfect place to update the EMA weights.
         """
-        self.ema_handler.step(self.policy)
+        if self.cfg.training.get("use_ema", False):
+            self.ema_handler.step(self.policy)
 
     def validation_step(self, batch):
-        loss = self.policy_ema.compute_loss(batch)
+
+        loss = self.policy_ema.compute_loss(batch) if self.cfg.training.get("use_ema", False) else self.policy.compute_loss(batch)
         self.logger.experiment.log({
             'train/val_loss': loss.item(),
         }, step=self.global_step)
@@ -390,30 +391,8 @@ class Trainer_all(pl.LightningModule):
         cfg: DictConfig = self.cfg
 
         using_transformers = cfg.get("using_transformers", False)
-        if not using_transformers:
-            num_training_steps = self.trainer.estimated_stepping_batches
-
-            optimizer = hydra.utils.instantiate(cfg.optimizer, params=self.policy.parameters())
-            lr_scheduler = get_scheduler(
-                cfg.training.lr_scheduler,
-                optimizer=optimizer,
-                num_warmup_steps=cfg.training.lr_warmup_steps,
-                num_training_steps=int((
-                    num_training_steps)
-                    // cfg.training.gradient_accumulate_every),
-                # pytorch assumes stepping LRScheduler every epoch
-                # however huggingface diffusers steps it every batch
-                last_epoch=self.global_step - 1
-            )
-            return {
-                "optimizer": optimizer,
-                "lr_scheduler": {
-                    "scheduler": lr_scheduler,
-                    "interval": "step",  # Make sure to step the scheduler every batch/step
-                    "frequency": 1,
-                },
-            }
-        else:
+        using_ACT = cfg.get("using_ACT", False)
+        if using_transformers:
             # 1. cfg
             transformer_weight_decay = cfg.optimizer.transformer_weight_decay
             obs_encoder_weight_decay = cfg.optimizer.obs_encoder_weight_decay
@@ -454,6 +433,33 @@ class Trainer_all(pl.LightningModule):
                     "frequency": 1,
                 },
             }
+
+        if using_ACT:
+            optimizer = self.policy.optimizer
+            return optimizer
+
+        num_training_steps = self.trainer.estimated_stepping_batches
+
+        optimizer = hydra.utils.instantiate(cfg.optimizer, params=self.policy.parameters())
+        lr_scheduler = get_scheduler(
+            cfg.training.lr_scheduler,
+            optimizer=optimizer,
+            num_warmup_steps=cfg.training.lr_warmup_steps,
+            num_training_steps=int((
+                num_training_steps)
+                // cfg.training.gradient_accumulate_every),
+            # pytorch assumes stepping LRScheduler every epoch
+            # however huggingface diffusers steps it every batch
+            last_epoch=self.global_step - 1
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": lr_scheduler,
+                "interval": "step",  # Make sure to step the scheduler every batch/step
+                "frequency": 1,
+            },
+        }
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]):
         """
@@ -583,7 +589,8 @@ class ActionMseLossForDiffusion(pl.Callback):
 
 
 def train(cfg: AppConfig):
-
+    using_transformers = cfg.get("using_transformers", False)
+    using_ACT = cfg.get("using_ACT", False)
     # 0. extra config processing
 
     cfg_env_runner = []
@@ -597,7 +604,8 @@ def train(cfg: AppConfig):
         OmegaConf.resolve(this_env_runner_cfg)
         dataset_path.append(this_dataset_path)
         cfg_env_runner.append(this_env_runner_cfg)
-
+    if using_ACT:
+        cfg.policy.max_timesteps = this_env_runner_cfg.max_steps
     cfg.task.dataset.dataset_path = OmegaConf.create(dataset_path)
 
     OmegaConf.save(cfg, os.path.join(cfg.run_dir, 'config.yaml'))

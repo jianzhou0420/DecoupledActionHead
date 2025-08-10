@@ -1,20 +1,27 @@
 
 
+from torch.nn import ModuleList
+import copy
 from typing import Optional, Any, Union, Callable
-
 import torch
 from torch import Tensor
 from torch.nn import functional as F
 import torch.nn as nn
 from torch.nn.modules import Module
-
 from torch.nn import MultiheadAttention
 from torch.nn import LayerNorm
 from torch.nn import Dropout
 from torch.nn import Linear
-
-
 from einops.layers.torch import Rearrange
+
+
+def _get_activation_fn(activation: str) -> Callable[[Tensor], Tensor]:
+    if activation == "relu":
+        return F.relu
+    elif activation == "gelu":
+        return F.gelu
+
+    raise RuntimeError(f"activation should be relu/gelu, not {activation}")
 
 
 class FiLMLayer(nn.Module):
@@ -28,10 +35,10 @@ class FiLMLayer(nn.Module):
 
     def __init__(self, cond_dim, out_dim: int, enable=True):
         super(FiLMLayer, self).__init__()
+        self.feature_dim = out_dim
         self.cond_encoder = nn.Sequential(
             nn.Mish(),
             nn.Linear(cond_dim, out_dim * 2),  # Predict both scale and bias
-            Rearrange('batch t -> batch t 1'),
         )
         self.enable = enable
 
@@ -50,7 +57,7 @@ class FiLMLayer(nn.Module):
         # Here we use x * gamma + beta, which is the standard affine transform.
         if self.enable:
             embed = self.cond_encoder(cond)
-            embed = embed.reshape(embed.shape[0], 2, self.feature_dim, 1)
+            embed = embed.reshape(embed.shape[0], 2, 1, self.feature_dim)
             gamma = embed[:, 0, ...]
             beta = embed[:, 1, ...]
             return x * gamma + beta
@@ -141,6 +148,7 @@ class FilMSelfAttnDecoderLayer(Module):
         tgt_mask: Optional[Tensor] = None,
         tgt_key_padding_mask: Optional[Tensor] = None,
         tgt_is_causal: bool = False,
+        cond: Optional[Tensor] = None
     ) -> Tensor:
         r"""Pass the inputs (and mask) through the decoder layer.
 
@@ -155,11 +163,11 @@ class FilMSelfAttnDecoderLayer(Module):
 
         x = tgt
         if self.norm_first:
-            x = x + self.film_self_attn(self._sa_block(self.norm1(x), tgt_mask, tgt_key_padding_mask, tgt_is_causal))
-            x = x + self.film_ffn(self._ff_block(self.norm3(x)))
+            x = x + self.film_self_attn(cond, self._sa_block(self.norm1(x), tgt_mask, tgt_key_padding_mask, tgt_is_causal))
+            x = x + self.film_ffn(cond, self._ff_block(self.norm3(x)))
         else:
-            x = self.norm1(x + self.film_self_attn(self._sa_block(x, tgt_mask, tgt_key_padding_mask, tgt_is_causal)))
-            x = self.norm3(x + self.film_ffn(self._ff_block(x)))
+            x = self.norm1(x + self.film_self_attn(cond, self._sa_block(x, tgt_mask, tgt_key_padding_mask, tgt_is_causal)))
+            x = self.norm3(x + self.film_ffn(cond, self._ff_block(x)))
 
         return x
     # self-attention block
@@ -178,3 +186,63 @@ class FilMSelfAttnDecoderLayer(Module):
     def _ff_block(self, x: Tensor) -> Tensor:
         x = self.linear2(self.dropout(self.activation(self.linear1(x))))
         return self.dropout3(x)
+
+
+# --- New FilMTransformerDecoder class ---
+
+
+class FilMTransformerDecoder(Module):
+    """
+    FilMTransformerDecoder is a stack of N FilMSelfAttnDecoderLayer.
+
+    Args:
+        decoder_layer: an instance of the FilMSelfAttnDecoderLayer (required).
+        num_layers: the number of sub-decoder-layers in the decoder (required).
+        norm: the layer normalization component (optional).
+
+    Examples:
+        >>> decoder_layer = FilMSelfAttnDecoderLayer(d_model=512, nhead=8, cond_dim=128)
+        >>> transformer_decoder = FilMTransformerDecoder(decoder_layer, num_layers=6)
+        >>> tgt = torch.rand(10, 32, 512)
+        >>> cond = torch.rand(32, 128)
+        >>> out = transformer_decoder(tgt, cond)
+    """
+
+    def __init__(self, decoder_layer: FilMSelfAttnDecoderLayer, num_layers: int, norm=None):
+        super().__init__()
+        # Ensure the decoder layer is a valid instance.
+        self.layers = _get_clones(decoder_layer, num_layers)
+        self.num_layers = num_layers
+        self.norm = norm
+
+    def forward(
+        self,
+        tgt: Tensor,
+        tgt_mask: Optional[Tensor] = None,
+        tgt_key_padding_mask: Optional[Tensor] = None,
+        tgt_is_causal: bool = False,
+        cond: Optional[Tensor] = None
+    ) -> Tensor:
+        r"""Pass the inputs (and mask) through the decoder.
+        Args:
+            tgt: the sequence to the decoder (required).
+            tgt_mask: the mask for the tgt sequence (optional).
+            tgt_key_padding_mask: the mask for the tgt keys per batch (optional).
+            tgt_is_causal: If specified, applies a causal mask as attention mask.
+            cond: The condition tensor for the FiLM layers in each layer (optional).
+        """
+        output = tgt
+
+        for mod in self.layers:
+            output = mod(output, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_key_padding_mask,
+                         tgt_is_causal=tgt_is_causal, cond=cond)
+
+        if self.norm is not None:
+            output = self.norm(output)
+
+        return output
+
+
+def _get_clones(module, N):
+    # FIXME: copy.deepcopy() is not defined on nn.module
+    return ModuleList([copy.deepcopy(module) for i in range(N)])

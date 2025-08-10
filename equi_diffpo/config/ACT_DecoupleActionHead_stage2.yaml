@@ -4,7 +4,7 @@ defaults:
 
 train_mode: null
 dataset_tail: traj_eePose
-using_transformers: True
+using_ACT: True
 
 # train_meta
 task_alphabet: null
@@ -27,9 +27,7 @@ run_dir: null
 
 policy:
   _target_: equi_diffpo.policy.act_policy.ACTPolicyWrapper
-
   shape_meta: ${shape_meta}
-
   max_timesteps: ${task.env_runner.max_steps}
   temporal_agg: false
   n_envs: ${task.env_runner.n_envs}

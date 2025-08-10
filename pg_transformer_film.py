@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from einops.layers.torch import Rearrange
 # A simple FiLM modulation layer to apply the affine transformation
 
 
@@ -14,11 +14,17 @@ class FiLMLayer(nn.Module):
         feature_dim (int): The dimension of the features to be modulated.
     """
 
-    def __init__(self, feature_dim: int):
+    def __init__(self, cond_dim, out_dim: int):
         super(FiLMLayer, self).__init__()
-        self.feature_dim = feature_dim
+        self.feature_dim = out_dim
 
-    def forward(self, x: torch.Tensor, gamma: torch.Tensor, beta: torch.Tensor) -> torch.Tensor:
+        self.cond_encoder = nn.Sequential(
+            nn.Mish(),
+            nn.Linear(cond_dim, out_dim * 2),  # Predict both scale and bias
+            Rearrange('batch t -> batch t 1'),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
             x (torch.Tensor): The input tensor to be modulated.
@@ -31,6 +37,10 @@ class FiLMLayer(nn.Module):
         # We apply the modulation directly. In the FiLM paper, they often use
         # gamma as a scaling factor, but the term is sometimes simplified.
         # Here we use x * gamma + beta, which is the standard affine transform.
+        embed = self.cond_encoder(x)
+        embed = embed.reshape(embed.shape[0], 2, self.feature_dim, 1)
+        gamma = embed[:, 0, ...]
+        beta = embed[:, 1, ...]
         return x * gamma + beta
 
 
@@ -49,7 +59,7 @@ class FiLMTransformerDecoderLayer(nn.Module):
         activation (str): The activation function for the FFN ("relu" or "gelu").
     """
 
-    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1, activation: str = "relu"):
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1, activation: str = "relu", cond_dim: int = 0):
         super(FiLMTransformerDecoderLayer, self).__init__()
 
         # Standard transformer components
@@ -72,9 +82,9 @@ class FiLMTransformerDecoderLayer(nn.Module):
         # FiLM layers for each modulation point. We create these to handle the
         # affine transformation logic, but the actual gamma and beta parameters
         # are passed to the forward method.
-        self.film_self_attn = FiLMLayer(d_model)
-        self.film_cross_attn = FiLMLayer(d_model)
-        self.film_ffn = FiLMLayer(d_model)
+        self.film_self_attn = FiLMLayer(cond_dim, d_model)
+        self.film_cross_attn = FiLMLayer(cond_dim, d_model)
+        self.film_ffn = FiLMLayer(cond_dim, d_model)
 
     def forward(self, tgt: torch.Tensor, memory: torch.Tensor,
                 tgt_mask: torch.Tensor = None, memory_mask: torch.Tensor = None,

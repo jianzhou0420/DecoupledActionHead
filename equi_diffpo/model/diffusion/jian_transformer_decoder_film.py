@@ -33,7 +33,7 @@ class FiLMLayer(nn.Module):
         feature_dim (int): The dimension of the features to be modulated.
     """
 
-    def __init__(self, cond_dim, out_dim: int, enable=True):
+    def __init__(self, cond_dim, out_dim: int, enable=False):
         super(FiLMLayer, self).__init__()
         self.feature_dim = out_dim
         self.cond_encoder = nn.Sequential(

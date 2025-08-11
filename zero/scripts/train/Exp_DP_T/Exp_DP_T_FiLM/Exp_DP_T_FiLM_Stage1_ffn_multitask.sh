@@ -44,7 +44,7 @@ EXP_NAME="Exp_DP_T_FiLM_Stage1_ffn_multitask"
 # Iterate through each letter and run the corresponding task
 # ---
 
-run_name="${EXP_NAME}__${LETTER}"
+run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 num_tasks=${#INPUT_TASK_LETTERS}
 n_demo_value=$(( num_tasks * 1000 ))

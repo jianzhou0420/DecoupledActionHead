@@ -28,6 +28,29 @@
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
         { // DP_T_Normal_Debug
+            "name": "DP_MLP_Normal_Debug",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trainer_pl_all.py",
+            "args": [
+                "--config-name=DP_DecoupleActionHead_MLP_stage2_film",
+                "task_alphabet=A",
+                "train_mode=normal_rollout",
+                "n_demo=1000",
+                "ckpt_path=",
+                "dataloader.num_workers=1",
+                "training.val_every=1000",
+                "run_dir=data/outputs/debug/Exp_MLP_Normal_debug__A_normal",
+                "run_name=Exp_DP_MLP_Normal_debug",
+                "logging.mode=offline",
+                "logging.project=DecoupleActionHead_debug",
+                "logging.group=Exp_DP_MLP_Normal_debug",
+                "logging.name=Exp_DP_MLP_Normal_debug"
+            ],
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
+        },
+        { // DP_T_Normal_Debug
             "name": "DP_T_Normal_Debug",
             "type": "debugpy",
             "request": "launch",

@@ -29,7 +29,7 @@ run_name: null
 run_dir: null
 
 policy:
-  _target_: equi_diffpo.policy.diffusion_transformer_hybrid_image_policy_film.DiffusionTransformerHybridImagePolicy
+  _target_: equi_diffpo.policy.diffusion_MLP_hybrid_image_policy_film.DiffusionMLPHybridImagePolicy
 
   shape_meta: ${shape_meta}
 

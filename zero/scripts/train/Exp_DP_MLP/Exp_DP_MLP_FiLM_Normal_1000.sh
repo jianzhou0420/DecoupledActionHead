@@ -43,7 +43,7 @@ EXP_NAME="Exp_DP_FILM_MLP_Normal_1000"
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_name="${EXP_NAME}__${LETTER}_self_attn"
+    run_name="${EXP_NAME}__${LETTER}"
     run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
     ckpt_path=""

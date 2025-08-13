@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_DP_T_FiLM_Normal_1000"
+EXP_NAME="Exp_DP_FILM_MLP_Normal_1000"
 
 # build your run_dir
 
@@ -57,14 +57,14 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         ckpt_path=${ckpt_path} \
         \
         dataloader.num_workers=16 \
-        training.val_every=1000 \
+        training.val_every=1 \
         \
         run_dir="$run_dir" \
         run_name="${run_name}" \
         \
-        logging.project="DecoupleActionHead_transformer" \
+        logging.project="DecoupleActionHead_MLP" \
         logging.group="${EXP_NAME}" \
-        logging.name="${run_name}_self_attn" &&
+        logging.name="${run_name}" &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
         rm -rf ${run_dir}
 done

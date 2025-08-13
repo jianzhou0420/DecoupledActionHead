@@ -61,8 +61,8 @@ policy:
   time_as_cond: True # if false, use BERT like encoder only arch, time as input
   obs_as_cond: ${obs_as_cond}
 
-  enable_film_self_attn: True # Enable FiLM for self-attention
-  enable_film_ffn: True # Enable FiLM for feed-forward network
+  # enable_film_self_attn: True # Enable FiLM for self-attention
+  # enable_film_ffn: True # Enable FiLM for feed-forward network
   # scheduler.step params
   # predict_epsilon: True
 

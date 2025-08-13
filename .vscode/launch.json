@@ -36,7 +36,7 @@
                 "--config-name=DP_DecoupleActionHead_MLP_stage2_film",
                 "task_alphabet=A",
                 "train_mode=normal_rollout",
-                "n_demo=1000",
+                "n_demo=1",
                 "ckpt_path=",
                 "dataloader.num_workers=1",
                 "training.val_every=1000",

@@ -58,7 +58,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         n_demo=100 \
         task_alphabet=$LETTER \
         task.env_runner.n_envs=28 \
-        training.val_every=1000 \
+        training.val_every=1 \
         logging.project="DecoupleActionHead_Stage2_Summary" \
         logging.group="${EXP_NAME}" \
         logging.name="${EXP_NAME}__stage2_${LETTER}" \

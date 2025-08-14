@@ -67,7 +67,7 @@ python trainer_pl_all.py \
     ckpt_path="" \
     \
     dataloader.num_workers=16 \
-    training.val_every=1000 \
+    training.val_every=1 \
     \
     run_dir="$run_dir_stage1" \
     run_name="${run_name_stage1}" \
@@ -91,7 +91,7 @@ python trainer_pl_all.py \
         ckpt_path="$ckpt_path" \
         \
         dataloader.num_workers=16 \
-        training.val_every=1000 \
+        training.val_every=1 \
         \
         run_dir="$run_dir_stage2" \
         run_name="${run_name_stage2}" \
@@ -127,7 +127,7 @@ python trainer_pl_all.py \
     ckpt_path="" \
     \
     dataloader.num_workers=16 \
-    training.val_every=1000 \
+    training.val_every=1 \
     \
     run_dir="$run_dir_stage1" \
     run_name="${run_name_stage1}" \
@@ -151,7 +151,7 @@ python trainer_pl_all.py \
         ckpt_path="$ckpt_path" \
         \
         dataloader.num_workers=16 \
-        training.val_every=1000 \
+        training.val_every=1 \
         \
         run_dir="${run_dir_stage2}" \
         run_name="${run_name_stage2}" \

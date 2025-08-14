@@ -61,7 +61,7 @@ python trainer_pl_all_fix_encoder.py \
     ckpt_path=${ckpt_path} \
     \
     dataloader.num_workers=16 \
-    training.val_every=1000 \
+    training.val_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \
@@ -103,7 +103,7 @@ python trainer_pl_all_fix_encoder.py \
     ckpt_path=${ckpt_path} \
     \
     dataloader.num_workers=16 \
-    training.val_every=1000 \
+    training.val_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \
@@ -146,7 +146,7 @@ python trainer_pl_all_fix_encoder.py \
     ckpt_path=${ckpt_path} \
     \
     dataloader.num_workers=16 \
-    training.val_every=1000 \
+    training.val_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \

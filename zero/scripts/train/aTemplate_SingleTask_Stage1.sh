@@ -55,7 +55,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         ckpt_path=${ckpt_path} \
         \
         dataloader.num_workers=16 \
-        training.val_every=1000 \
+        training.val_every=1 \
         training.checkpoint_every=100 \
         \
         run_dir="$run_dir" \

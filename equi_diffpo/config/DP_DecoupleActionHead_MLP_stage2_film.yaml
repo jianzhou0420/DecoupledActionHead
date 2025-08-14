@@ -64,6 +64,7 @@ policy:
   # enable_film_ffn: True # Enable FiLM for feed-forward network
   # scheduler.step params
   # predict_epsilon: True
+  parallel_input_emb: True # Use VectorizedParallelLinear for input embedding
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel

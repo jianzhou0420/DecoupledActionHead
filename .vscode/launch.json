@@ -97,7 +97,7 @@
             "envFile": "${workspaceFolder}/.env",
             "console": "integratedTerminal",
         },
-        { // 
+        { // DP_C_None2eePose_Debug
             "name": "DP_C_None2eePose_debug",
             "type": "debugpy",
             "request": "launch",
@@ -119,85 +119,6 @@
             ],
             "envFile": "${workspaceFolder}/.env",
             "console": "integratedTerminal",
-        },
-        { // Train pl_stage1
-            "name": "Train pl_stage1",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_all.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--config-name=DP_DecoupleActionHead_stage1",
-                "n_demo=10",
-                // "task.env_runner.n_envs=2",
-                // "task.env_runner.n_train=1",
-                // "task.env_runner.n_test=1",
-                "logging.mode=offline",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
-                "task_alphabet=A",
-            ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
-        },
-        { // Train pl_stage1 data_debug
-            "name": "Train pl_stage1 data_debug",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_all.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--config-name=DP_JP2eePose",
-                "n_demo=10",
-                // "task.env_runner.n_envs=2",
-                // "task.env_runner.n_train=1",
-                // "task.env_runner.n_test=1",
-                "logging.mode=online",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
-                "task.dataset.dataset_path=./data/robomimic/datasets/stack_d1/stack_d1_abs_JP2eePose_degbug.hdf5",
-                "task_alphabet=A",
-            ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
-        },
-        { // Train pl_stage2
-            "name": "Train pl_stage2",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_all.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--config-name=DP_DecoupleActionHead_stage2",
-                "task_alphabet=A",
-                "n_demo=1000",
-                "task.env_runner.n_envs=2",
-                "task.env_runner.n_train=1",
-                "task.env_runner.n_test=1",
-                "logging.mode=offline",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
-            ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
-        },
-        { // Train pl_stage2 ABC_D
-            "name": "Train pl_stage2 ABC_D",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/trainer_pl_all.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--config-name=DP_DecoupleActionHead_stage2_ABC_D",
-                "task_alphabet=A",
-                "n_demo=1",
-                "task.env_runner.n_envs=2",
-                "task.env_runner.n_train=1",
-                "task.env_runner.n_test=1",
-                "logging.mode=online",
-                "logging.project='debug'",
-                "dataloader.num_workers=1",
-                "val_dataloader.num_workers=1",
-                "training.num_epochs=50",
-            ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
         },
         { // Train vae_stage1
             "name": "Train vae_stage1",
@@ -368,11 +289,14 @@
             "name": "OnlineEval",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/pg_online_evaluator.py",
-            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/zero/evaluator.py",
+            "args": [
+                "--run_dir",
+                "/media/jian/data/cached_from_sub_machine/runtime/16.48.16_Exp_Normal_1000__A"
+            ],
             "envFile": "${workspaceFolder}/.vscode/.env"
         },
-        {
+        { // TestEnvRunner
             "name": "TestEnvRunner",
             "type": "debugpy",
             "request": "launch",

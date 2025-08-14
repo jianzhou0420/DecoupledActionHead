@@ -165,7 +165,8 @@ class DiffusionMLPHybridImagePolicy(BaseImagePolicy):
             p_drop_emb=p_drop_emb,
             p_drop_attn=p_drop_attn,
             time_as_cond=time_as_cond,
-            obs_as_cond=obs_as_cond
+            obs_as_cond=obs_as_cond,
+            **kwargs,
         )
 
         self.obs_encoder = obs_encoder
@@ -222,7 +223,7 @@ class DiffusionMLPHybridImagePolicy(BaseImagePolicy):
             trajectory = scheduler.step(
                 model_output, t, trajectory,
                 generator=generator,
-                **kwargs
+                # **kwargs
             ).prev_sample
 
         # finally make sure conditioning is enforced

@@ -27,7 +27,7 @@ class FiLMMLPBlock(Module):
         self.dropout1 = nn.Dropout(dropout)
 
         # FiLM layer to modulate the features before the second linear layer
-        self.film = FiLMLayer(cond_dim, dim_feedforward, d_model)
+        self.film = FiLMLayer(cond_dim, dim_feedforward, enable=True)
 
         # Second linear layer
         self.linear2 = nn.Linear(dim_feedforward, d_model)

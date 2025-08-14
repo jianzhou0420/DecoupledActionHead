@@ -1,3 +1,4 @@
+from einops import rearrange
 from typing import Union, Optional, Tuple
 import logging
 import torch
@@ -18,8 +19,36 @@ logger = logging.getLogger(__name__)
 # ---
 
 
+class VectorizedParallelLinear(nn.Module):
+    def __init__(self, num_layers, in_features, out_features):
+        super(VectorizedParallelLinear, self).__init__()
+        self.num_layers = num_layers
+        self.in_features = in_features
+        self.out_features = out_features
+
+        # 定义一个三维权重张量，形状为 (num_layers, in_features, out_features)
+        # 使用 nn.Parameter 确保其可训练
+        self.weight = nn.Parameter(torch.randn(num_layers, in_features, out_features))
+        # 定义一个二维偏置张量，形状为 (num_layers, out_features)
+        self.bias = nn.Parameter(torch.randn(num_layers, out_features))
+
+    def forward(self, x):
+        # 假设输入 x 的形状为 (batch_size, num_layers, in_features)
+
+        # 使用 einsum 表达式进行批次矩阵乘法
+        # 'bni' 表示 (batch_size, num_layers, in_features)
+        # 'nio' 表示 (num_layers, in_features, out_features)
+        # 'bno' 表示结果 (batch_size, num_layers, out_features)
+        output = torch.einsum('bni, nio -> bno', x, self.weight)
+
+        # 批次添加偏置，使用广播机制
+        output = output + self.bias
+
+        return output
+
+
 class FiLMMLPBlock(Module):
-    def __init__(self, d_model: int, dim_feedforward: int, cond_dim: int, dropout: float = 0.0) -> None:
+    def __init__(self, horizon: int, d_model: int, dim_feedforward: int, cond_dim: int, dropout: float = 0.0) -> None:
         super().__init__()
         # First linear layer with GELU activation and dropout
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -53,6 +82,7 @@ class FiLMMLPBlock(Module):
 
         return x
 
+
 # ---
 # The main class, with the Transformer part replaced by a pure MLP stack
 # ---
@@ -71,6 +101,7 @@ class MLPForDiffusion(ModuleAttrMixin):
                  p_drop_attn: float = 0.1,  # This is kept for compatibility but not used
                  time_as_cond: bool = True,
                  obs_as_cond: bool = False,
+                 **kwargs: Optional[dict]  # Additional parameters for future compatibility
                  ) -> None:
         super().__init__()
 
@@ -88,7 +119,16 @@ class MLPForDiffusion(ModuleAttrMixin):
             T_cond += n_obs_steps
 
         # Input embedding stem, identical to the original
-        self.input_emb = nn.Linear(input_dim, n_emb)
+        if kwargs.get('parallel_input_emb', False):
+            self.input_emb = VectorizedParallelLinear(
+                num_layers=horizon,
+                in_features=input_dim,
+                out_features=n_emb
+            )
+        else:
+            raise ValueError("parallel_input_emb must be provided in kwargs for MLPForDiffusion")
+            self.input_emb = nn.Linear(input_dim, n_emb)
+
         self.drop = nn.Dropout(p_drop_emb)
 
         # Cond encoder, identical to the original
@@ -105,6 +145,7 @@ class MLPForDiffusion(ModuleAttrMixin):
         total_cond_dim = n_emb + (cond_dim * n_obs_steps)
         self.mlp_decoder = nn.Sequential(
             *[FiLMMLPBlock(
+                horizon=horizon,
                 d_model=n_emb,
                 dim_feedforward=4 * n_emb,
                 cond_dim=total_cond_dim,
@@ -144,6 +185,7 @@ class MLPForDiffusion(ModuleAttrMixin):
         cond_reshaped = cond.reshape(sample.shape[0], -1)
 
         # 0. process input
+        # sample = rearrange(sample, 'b h d -> b (h d)')
         input_emb = self.input_emb(sample)
 
         # 1. time
@@ -202,7 +244,7 @@ class MLPForDiffusion(ModuleAttrMixin):
         """
         decay = set()
         no_decay = set()
-        whitelist_weight_modules = (torch.nn.Linear,)
+        whitelist_weight_modules = (torch.nn.Linear, VectorizedParallelLinear)
         blacklist_weight_modules = (torch.nn.LayerNorm, torch.nn.Embedding)
 
         for mn, m in self.named_modules():

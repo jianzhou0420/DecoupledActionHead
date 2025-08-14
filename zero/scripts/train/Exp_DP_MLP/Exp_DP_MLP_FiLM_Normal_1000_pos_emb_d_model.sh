@@ -42,6 +42,7 @@ EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_pos_emb_d_model"
 
 d_models=(16 32 64 128 256)
 for d_model in "${d_models[@]}"
+do
     echo "Processing with d_model = $d_model"
     for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}

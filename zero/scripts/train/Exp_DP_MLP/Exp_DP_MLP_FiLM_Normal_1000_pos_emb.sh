@@ -51,7 +51,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_MLP_stage2_film \
         \
-        +parallel_input_emb=True \
+        +policy.parallel_input_emb=True \
         \
         task_alphabet=$LETTER \
         train_mode=normal_rollout \

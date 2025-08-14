@@ -48,6 +48,7 @@ run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 num_tasks=${#INPUT_TASK_LETTERS}
 n_demo_value=$(( num_tasks * 1000 ))
+
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_transformer_stage1_film \
     \
@@ -61,6 +62,8 @@ python trainer_pl_all.py \
     \
     dataloader.num_workers=16 \
     training.val_every=1 \
+    training.num_epochs=50 \
+    training.checkpoint_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \

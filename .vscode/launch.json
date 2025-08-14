@@ -35,6 +35,7 @@
             "args": [
                 "--config-name=DP_DecoupleActionHead_MLP_stage2_film",
                 "task_alphabet=A",
+                "horizon=16",
                 "train_mode=normal_rollout",
                 "n_demo=1",
                 "ckpt_path=",

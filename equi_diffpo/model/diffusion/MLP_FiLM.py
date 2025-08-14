@@ -10,7 +10,7 @@ import torch.nn as nn
 from typing import Tuple, Union, Optional
 from torch.nn.modules import Module
 import logging
-from einops import rearrange
+
 logger = logging.getLogger(__name__)
 
 # ---
@@ -27,7 +27,7 @@ class FiLMMLPBlock(Module):
         self.dropout1 = nn.Dropout(dropout)
 
         # FiLM layer to modulate the features before the second linear layer
-        self.film = FiLMLayer(cond_dim, dim_feedforward, d_model)
+        self.film = FiLMLayer(cond_dim, dim_feedforward, enable=True)
 
         # Second linear layer
         self.linear2 = nn.Linear(dim_feedforward, d_model)
@@ -88,7 +88,7 @@ class MLPForDiffusion(ModuleAttrMixin):
             T_cond += n_obs_steps
 
         # Input embedding stem, identical to the original
-        self.input_emb = nn.Linear(horizon, n_emb)
+        self.input_emb = nn.Linear(input_dim, n_emb)
         self.drop = nn.Dropout(p_drop_emb)
 
         # Cond encoder, identical to the original
@@ -115,7 +115,7 @@ class MLPForDiffusion(ModuleAttrMixin):
 
         # The rest of the head is the same
         self.ln_f = nn.LayerNorm(n_emb)
-        self.head = nn.Linear(n_emb, horizon)
+        self.head = nn.Linear(n_emb, output_dim)
 
         # Store constants
         self.T = T
@@ -144,7 +144,6 @@ class MLPForDiffusion(ModuleAttrMixin):
         cond_reshaped = cond.reshape(sample.shape[0], -1)
 
         # 0. process input
-        sample = rearrange(sample, "b h c -> b c h")  # B, horizon, channel to B, channel, horizon
         input_emb = self.input_emb(sample)
 
         # 1. time
@@ -170,7 +169,6 @@ class MLPForDiffusion(ModuleAttrMixin):
         # 4. head
         x = self.ln_f(x)
         x = self.head(x)
-        x = rearrange(x, "b c h -> b h c")  # B, channel, horizon to B, horizon, channel
 
         return x
 

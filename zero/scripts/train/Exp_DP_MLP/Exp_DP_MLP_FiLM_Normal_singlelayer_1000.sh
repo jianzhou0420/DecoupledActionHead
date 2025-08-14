@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_change_prediction_type"
+EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_SingleLayer"
 
 # build your run_dir
 

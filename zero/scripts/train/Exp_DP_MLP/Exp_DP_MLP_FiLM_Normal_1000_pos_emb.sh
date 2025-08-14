@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_change_prediction_type"
+EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_pos_emb"
 
 # build your run_dir
 
@@ -50,6 +50,8 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_MLP_stage2_film \
+        \
+        +parallel_input_emb=True \
         \
         task_alphabet=$LETTER \
         train_mode=normal_rollout \

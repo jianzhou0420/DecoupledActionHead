@@ -32,7 +32,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_pos_emb_d_model"
+EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_d_model_film2_d_model"
 
 # build your run_dir
 
@@ -40,13 +40,13 @@ EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_pos_emb_d_model"
 # Iterate through each letter and run the corresponding task
 # ---
 
-d_models=(16 32 64 128 256)
+d_models=(256 128 64 32 16)
 for d_model in "${d_models[@]}"
 do
     echo "Processing with d_model = $d_model"
     for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
-
+        EXP_NAME="${EXP_NAME}__${d_model}"
         run_name="${EXP_NAME}__${LETTER}"
         run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 

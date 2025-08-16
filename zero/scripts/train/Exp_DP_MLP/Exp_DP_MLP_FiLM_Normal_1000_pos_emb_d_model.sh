@@ -40,7 +40,7 @@ EXP_NAME="Exp_DP_FILM_MLP_Normal_1000_d_model_film2_d_model"
 # Iterate through each letter and run the corresponding task
 # ---
 
-d_models=(256 128 64 32 16)
+d_models=(512)
 for d_model in "${d_models[@]}"
 do
     echo "Processing with d_model = $d_model"

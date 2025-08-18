@@ -46,13 +46,15 @@ EXP_NAME="Exp_Multitask_test"
 
 run_name="${EXP_NAME}__${LETTER}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+num_tasks=${#INPUT_TASK_LETTERS}
+n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
     --config-name=DP_DecoupleActionHead_stage1 \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
-    n_demo=1000 \
+    n_demo=$n_demo_value \
     ckpt_path=$ckpt_path \
     \
     dataloader.num_workers=16 \

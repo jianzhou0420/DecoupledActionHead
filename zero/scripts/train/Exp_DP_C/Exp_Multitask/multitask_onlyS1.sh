@@ -10,6 +10,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+
 # ---
 # Define the mapping of single letters to descriptive task names
 # ---
@@ -32,7 +33,12 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
+shift
+EXTRA_ARGS="$@"  # capture all remaining args
+
+
 echo "Received task letters: $INPUT_TASK_LETTERS"
+echo "Extra arguments: $EXTRA_ARGS"
 echo "---"
 
 date_part=$(date +'%Y.%m.%d')
@@ -65,6 +71,7 @@ python trainer_pl_all.py \
     \
     logging.project="DecoupleActionHead_transformer" \
     logging.group="${EXP_NAME}" \
-    logging.name="${run_name}" &&
+    logging.name="${run_name}"  \
+    $EXTRA_ARGS && 
     rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
     rm -rf ${run_dir}

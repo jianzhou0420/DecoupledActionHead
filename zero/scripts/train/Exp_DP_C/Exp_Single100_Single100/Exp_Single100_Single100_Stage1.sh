@@ -1,6 +1,5 @@
-# ---
-# Check for provided task names
-# ---
+#!/bin/bash
+
 if [ -z "$1" ]; then
     echo "Usage: $0 <task_letters>"
     echo "Example: $0 ABCDEFG"
@@ -30,29 +29,49 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
-echo "Received task letters: $INPUT_TASK_LETTERS"
-echo "---"
+shift
+EXTRA_ARGS="$@"  # capture all remaining args
+
+date_part=$(date +'%Y.%m.%d')
+time_part=$(date +'%H.%M.%S')
+
+EXP_NAME="Exp_Single100_Single100_Stage1"
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
-    DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
+    DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
     if [ -z "$DESCRIPTIVE_TASK_NAME" ]; then
         echo "Warning: No descriptive name found for task letter '$LETTER'. Skipping."
         continue # Skip to the next iteration if no mapping is found
     fi
 
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+    ckpt_path=""
+
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage1 \
-        n_demo=100 \
-        task_alphabet=${LETTER} \
+        \
+        task_alphabet=$LETTER \
         train_mode=stage1 \
-        logging.project="DecoupleActionHead_Stage1_Summary" \
-        logging.group="Exp_Single100_Single100" \
-        logging.name="Exp_Single100_Single100__stage1_${LETTER}" \
+        n_demo=100 \
+        ckpt_path=${ckpt_path} \
+        \
         dataloader.num_workers=16 \
-        training.checkpoint_every=100
+        training.val_every=1 \
+        \
+        run_name="${run_name}" \
+        run_dir="$run_dir" \
+        \
+        logging.project="DecoupleActionHead_Stage1_Summary" \
+        logging.group="${EXP_NAME}" \
+        logging.name="${run_name}" \
+        $EXTRA_ARGS && 
+        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
+        rm -rf ${run_dir}
 
 done
+

@@ -29,44 +29,50 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
-echo "Received task letters: $INPUT_TASK_LETTERS"
-echo "---"
+shift
+EXTRA_ARGS="$@"  # capture all remaining args
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
 
-EXP_NAME="Exp_Single100_Single100"
+EXP_NAME="Exp_Single100_Single100_Stage2"
 TRAIN_MODE="stage2_rollout"
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
 for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
+
     DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
-
-    run_dir="data/outputs/${date_part}/${time_part}_${EXP_NAME}__stage2_${LETTER}"
-
-    ckpt_path="data/robomimic/Stage1/Single100/stage1_${LETTER}_100_epoch\=499.ckpt"
-
     if [ -z "$DESCRIPTIVE_TASK_NAME" ]; then
         echo "Warning: No descriptive name found for task letter '$LETTER'. Skipping."
         continue # Skip to the next iteration if no mapping is found
     fi
 
+    run_name="${EXP_NAME}__${LETTER}"
+    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+    ckpt_path="data/robomimic/Stage1/Exp_Single100_16_16/stage1_${LETTER}_100_epoch\=499.ckpt"
+
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2 \
-        n_demo=100 \
+        \
         task_alphabet=$LETTER \
-        task.env_runner.n_envs=28 \
+        train_mode=stage2_rollout \
+        n_demo=100 \
+        ckpt_path=${ckpt_path} \
+        \
+        dataloader.num_workers=16 \
         training.val_every=1 \
+        \
+        run_name="${run_name}" \
+        run_dir="$run_dir" \
+        \
         logging.project="DecoupleActionHead_Stage2_Summary" \
         logging.group="${EXP_NAME}" \
-        logging.name="${EXP_NAME}__stage2_${LETTER}" \
-        ckpt_path="$ckpt_path" \
-        train_mode=stage2_rollout \
-        dataloader.num_workers=16 \
-        training.checkpoint_every=1000
+        logging.name="${run_name}" \
+        $EXTRA_ARGS && 
+        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
+        rm -rf ${run_dir}
 
 done
 
-echo "All specified tasks completed!"

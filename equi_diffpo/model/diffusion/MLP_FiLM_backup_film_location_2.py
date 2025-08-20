@@ -56,7 +56,7 @@ class FiLMMLPBlock(Module):
         self.dropout1 = nn.Dropout(dropout)
 
         # FiLM layer to modulate the features before the second linear layer
-        self.film = FiLMLayer(cond_dim, dim_feedforward, enable=True)
+        self.film = FiLMLayer(cond_dim, d_model, enable=True)
 
         # Second linear layer
         self.linear2 = nn.Linear(dim_feedforward, d_model)
@@ -73,11 +73,12 @@ class FiLMMLPBlock(Module):
         x = self.dropout1(x)
 
         # Apply FiLM modulation using the condition
-        x = self.film(cond, x)
 
         # Pass through the second linear layer and add the residual
         x = self.linear2(x)
         x = self.dropout2(x)
+        x = self.film(cond, x)
+
         x = self.norm(x + residual)
 
         return x

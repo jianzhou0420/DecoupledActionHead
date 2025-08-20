@@ -8,7 +8,7 @@ from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 
 from equi_diffpo.model.common.normalizer import LinearNormalizer
 from equi_diffpo.policy.base_image_policy import BaseImagePolicy
-from equi_diffpo.model.diffusion.conditional_unet1d import ConditionalUnet1D
+from equi_diffpo.model.diffusion.conditional_unet1d_states_2 import ConditionalUnet1D
 from equi_diffpo.model.diffusion.mask_generator import LowdimMaskGenerator
 from equi_diffpo.common.robomimic_config_util import get_robomimic_config
 from robomimic.algo import algo_factory

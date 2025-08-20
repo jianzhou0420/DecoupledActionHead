@@ -33,6 +33,19 @@ class FiLM(nn.Module):
             nn.Linear(cond_dim, cond_channels),
             Rearrange('batch t -> batch t 1'),
         )
+        hidden_dim = 128
+        self.cond_encoder = nn.Sequential(
+            nn.Linear(cond_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, cond_channels),
+            Rearrange('batch t -> batch t 1'),  # Reshape for broadcasting
+        )
 
     def forward(self, x, cond):
         """

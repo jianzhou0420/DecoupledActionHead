@@ -212,7 +212,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
             elif key.endswith('eePose'):
                 this_normalizer = get_identity_normalizer_from_stat(stat)
             elif key.endswith('states'):
-                this_normalizer = get_range_normalizer_from_stat(stat)
+                this_normalizer = get_identity_normalizer_from_stat(stat)
             else:
                 raise RuntimeError('unsupported normalizer key: ' + key)
             normalizer[key] = this_normalizer

@@ -12,6 +12,90 @@ from equi_diffpo.model.diffusion.positional_embedding import SinusoidalPosEmb
 logger = logging.getLogger(__name__)
 
 
+class FiLM(nn.Module):
+    """
+    FiLM (Feature-wise Linear Modulation) block.
+    Applies a per-channel affine transformation (scale and bias) to the input.
+    https://arxiv.org/abs/1709.07871
+    """
+
+    def __init__(self, in_channels, cond_dim, predict_scale=False):
+        super().__init__()
+        self.in_channels = in_channels
+        self.predict_scale = predict_scale
+
+        cond_channels = in_channels
+        if predict_scale:
+            cond_channels = in_channels * 2
+
+        self.cond_encoder = nn.Sequential(
+            nn.Mish(),
+            nn.Linear(cond_dim, cond_channels),
+            Rearrange('batch t -> batch t 1'),
+        )
+
+    def forward(self, x, cond):
+        """
+        Args:
+            x (torch.Tensor): Input tensor of shape [batch_size, in_channels, horizon].
+            cond (torch.Tensor): Conditional input of shape [batch_size, cond_dim].
+
+        Returns:
+            torch.Tensor: Modulated tensor of the same shape as x.
+        """
+        embed = self.cond_encoder(cond)
+
+        if self.predict_scale:
+            embed = embed.reshape(embed.shape[0], 2, self.in_channels, 1)
+            scale = embed[:, 0, ...]
+            bias = embed[:, 1, ...]
+            out = scale * x + bias
+        else:
+            out = x + embed
+
+        return out
+
+
+class ConditionalResidualBlock1D(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 cond_dim,
+                 kernel_size=3,
+                 n_groups=8,
+                 cond_predict_scale=False):
+        super().__init__()
+
+        self.blocks = nn.ModuleList([
+            Conv1dBlock(in_channels, out_channels, kernel_size, n_groups=n_groups),
+            Conv1dBlock(out_channels, out_channels, kernel_size, n_groups=n_groups),
+        ])
+
+        # Instantiate the independent FiLM block
+        self.film = FiLM(out_channels, cond_dim, predict_scale=cond_predict_scale)
+
+        # make sure dimensions compatible
+        self.residual_conv = nn.Conv1d(in_channels, out_channels, 1) \
+            if in_channels != out_channels else nn.Identity()
+
+    def forward(self, x, cond):
+        '''
+            x : [ batch_size x in_channels x horizon ]
+            cond : [ batch_size x cond_dim]
+
+            returns:
+            out : [ batch_size x out_channels x horizon ]
+        '''
+        out = self.blocks[0](x)
+
+        # Apply the FiLM modulation
+        out = self.film(out, cond)
+
+        out = self.blocks[1](out)
+        out = out + self.residual_conv(x)
+        return out
+
+
 class ConditionalResidualBlock1D(nn.Module):
     def __init__(self,
                  in_channels,

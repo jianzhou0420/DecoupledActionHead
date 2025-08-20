@@ -238,6 +238,10 @@ class ConditionalUnet1D(nn.Module):
         global_cond: (B,global_cond_dim)
         output: (B,T,input_dim)
         """
+        # states insert
+        global_cond = self.state_encoder(global_cond)
+        # states insert
+
         sample = einops.rearrange(sample, 'b h t -> b t h')
 
         # 1. time

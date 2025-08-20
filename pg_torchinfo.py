@@ -64,5 +64,5 @@ def torchinfo_DP_MLP():
     summary(model, input_data=[sample_input, timestep_input, cond_input])
 
 
-# torchinfo_DP_C()
-torchinfo_DP_MLP()
+torchinfo_DP_C()
+# torchinfo_DP_MLP()

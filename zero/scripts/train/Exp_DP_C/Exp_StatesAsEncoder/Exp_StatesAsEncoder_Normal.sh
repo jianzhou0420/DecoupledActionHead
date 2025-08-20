@@ -49,7 +49,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     ckpt_path=""
 
-    python trainer_pl_all_fix_encoder.py \
+    python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_stage2_states \
         \
         task_alphabet=$LETTER \
@@ -63,7 +63,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         run_dir="$run_dir" \
         run_name="${run_name}" \
         \
-        logging.project="DecoupleActionHead_Normal_Headless" \
+        logging.project="DecoupleActionHead_test" \
         logging.group="${EXP_NAME}" \
         logging.name="${run_name}" &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

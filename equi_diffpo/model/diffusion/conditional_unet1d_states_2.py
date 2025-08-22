@@ -33,7 +33,7 @@ class FiLM(nn.Module):
             nn.Linear(cond_dim, cond_channels),
             Rearrange('batch t -> batch t 1'),
         )
-        hidden_dim = 128
+        hidden_dim = 512
         self.cond_encoder = nn.Sequential(
             nn.Linear(cond_dim, hidden_dim),
             nn.Mish(),

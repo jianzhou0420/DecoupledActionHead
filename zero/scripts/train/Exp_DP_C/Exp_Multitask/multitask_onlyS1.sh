@@ -69,7 +69,7 @@ python trainer_pl_all.py \
     run_dir="$run_dir" \
     run_name="${run_name}" \
     \
-    logging.project="DecoupleActionHead_transformer" \
+    logging.project="DecoupleActionHead_Stage1_Summary" \
     logging.group="${EXP_NAME}" \
     logging.name="${run_name}"  \
     $EXTRA_ARGS && 

@@ -10,10 +10,10 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-
 # ---
 # Define the mapping of single letters to descriptive task names
 # ---
+
 declare -A TASK_MAP
 TASK_MAP["A"]="stack_d1"
 TASK_MAP["B"]="square_d2"
@@ -35,31 +35,28 @@ TASK_MAP["L"]="coffee_preparation_d1"
 INPUT_TASK_LETTERS="$1"
 shift
 EXTRA_ARGS="$@"  # capture all remaining args
-
-
 echo "Received task letters: $INPUT_TASK_LETTERS"
-echo "Extra arguments: $EXTRA_ARGS"
 echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Multitask_OnlyS1"
+EXP_NAME="Exp_DP_C_Multitask_Normal"
 # build your run_dir
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
-
 run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+ckpt_path=""
 num_tasks=${#INPUT_TASK_LETTERS}
 n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
-    --config-name=DP_DecoupleActionHead_stage1 \
+    --config-name=DP_DecoupleActionHead_stage2 \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
-    train_mode=stage1 \
+    train_mode=normal_rollout \
     n_demo=$n_demo_value \
     ckpt_path=$ckpt_path \
     \

@@ -10,10 +10,10 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+
 # ---
 # Define the mapping of single letters to descriptive task names
 # ---
-
 declare -A TASK_MAP
 TASK_MAP["A"]="stack_d1"
 TASK_MAP["B"]="square_d2"
@@ -33,35 +33,45 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
+shift
+EXTRA_ARGS="$@"  # capture all remaining args
+
+
 echo "Received task letters: $INPUT_TASK_LETTERS"
+echo "Extra arguments: $EXTRA_ARGS"
 echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_Multitask_Normal"
+EXP_NAME="Exp_DP_C_Multitask_OnlyS1"
 # build your run_dir
 
 # ---
 # Iterate through each letter and run the corresponding task
 # ---
+
 run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
-ckpt_path=${run_dir}/checkpoints/last.ckpt
+num_tasks=${#INPUT_TASK_LETTERS}
+n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
-    --config-name=DP_DecoupleActionHead_normal \
-    n_demo=1000 \
+    --config-name=DP_DecoupleActionHead_stage1 \
+    \
     task_alphabet=$INPUT_TASK_LETTERS \
+    train_mode=stage1 \
+    n_demo=$n_demo_value \
+    ckpt_path=$ckpt_path \
+    \
     dataloader.num_workers=16 \
     training.val_every=1 \
-    logging.project="DecoupleActionHead_Stage2_Summary" \
-    logging.group="${EXP_NAME}" \
-    logging.name="${run_name}_normal" \
-    train_mode=normal \
+    \
     run_dir="$run_dir" \
-    run_name="${run_name}_normal" &&
+    run_name="${run_name}" \
+    \
+    logging.project="DecoupleActionHead_Stage1_Summary" \
+    logging.group="${EXP_NAME}" \
+    logging.name="${run_name}"  \
+    $EXTRA_ARGS && 
     rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
-    rsync -avP ${run_dir}/ jian@10.12.65.130:/data/eval_candidates/${time_part}_${run_name}/ &&
-    rm -rf ${run_dir} &&
-    ssh jian@10.12.65.19 "touch /media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ready.flag" &&
-    ssh jian@10.12.65.130 "touch /data/eval_candidates/${time_part}_${run_name}/ready.flag"
+    rm -rf ${run_dir}

@@ -2,7 +2,7 @@ from equi_diffpo.model.common.normalizer import LinearNormalizer, SingleFieldLin
 import pickle
 
 
-with open('/media/jian/ssd4t/DP/first/equi_diffpo/constant/ABCDEFGHIJKL_normalizer.pkl', 'rb') as f:
+with open('equi_diffpo/constant/normalizer_ABCDEFGH.pkl', 'rb') as f:
     normalizer = pickle.load(f)
 
 print(normalizer)

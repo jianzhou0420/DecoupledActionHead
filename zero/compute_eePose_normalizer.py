@@ -20,7 +20,7 @@ from equi_diffpo.common.normalize_util import (
 from equi_diffpo.dataset.robomimic_replay_image_dataset import _convert_actions
 
 
-def main(task_codes=None):
+def main(task_codes=None, position_only=True):
     """
     Processes specified Robomimic datasets and generates a normalizer.
 
@@ -154,13 +154,17 @@ def main(task_codes=None):
             print(f"{dataset:<20} | {str(formatted_mean):<30} | {str(formatted_std):<30} | {stats['num_actions']:<15}")
 
         # --- Create and save the normalizer ---
-        # Extract statistics from the position data of all actions
-        stat = array_to_stats(all_action[:, :3])
-        # Create the normalizer object
+
+        stat = array_to_stats(all_action[:, :3]) if position_only else array_to_stats(all_action)
         this_normalizer = robomimic_abs_action_only_normalizer_from_stat(stat)
 
         # Save the normalizer object to a pickle file
-        with open(f'normalizer_{task_codes}.pkl', 'wb') as f:
+        if position_only:
+            save_name = f'normalizer_Pos_{task_codes}.pkl'
+        else:
+            save_name = f'normalizer_Action_{task_codes}.pkl'
+
+        with open(save_name, 'wb') as f:
             pickle.dump(this_normalizer, f)
 
         # Print the generated normalizer object
@@ -172,8 +176,9 @@ if __name__ == "__main__":
     # --- Command-line argument parser ---
     parser = argparse.ArgumentParser(description="Compute end-effector pose normalizer for specific or all tasks.")
     parser.add_argument("--task", type=str, default='A', help="A string of task codes to process (e.g., 'ABC')")
+    parser.add_argument("--p", action='store_true', help="If set, only normalize position data.")
     args = parser.parse_args()
 
     # Call the main function with the provided task codes
     # tasks = natsorted(args.task) if args.task else None
-    main(task_codes=args.task)
+    main(task_codes=args.task, position_only=args.p)

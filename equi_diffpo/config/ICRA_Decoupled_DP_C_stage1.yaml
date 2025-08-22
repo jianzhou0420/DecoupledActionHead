@@ -4,24 +4,23 @@ defaults:
 
 train_mode: null
 dataset_tail: JP2eePose
-using_transformers: True
 
 # train_meta
 task_alphabet: null
 shape_meta: ${task.shape_meta}
 train_tasks_meta: ${get_train_tasks_meta:${task_alphabet}}
 
-horizon: 10
-n_obs_steps: 10
-n_action_steps: 8
-n_latency_steps: 0
+# env_runner
+horizon: 16
+n_obs_steps: 16
+n_action_steps: 16
+n_latency_steps: -15
 dataset_obs_steps: ${n_obs_steps}
+obs_as_global_cond: True
 
-past_action_visible: False
-obs_as_cond: True
+# dataset
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
 dataset_path: null
-
 n_demo: 200
 ckpt_path: null
 # logging
@@ -29,10 +28,8 @@ run_name: null
 run_dir: null
 
 policy:
-  _target_: equi_diffpo.policy.diffusion_transformer_hybrid_image_policy_film.DiffusionTransformerHybridImagePolicy
-
+  _target_: equi_diffpo.policy.ICRA_Decoupled_DP_C.DiffusionUnetHybridImagePolicy
   shape_meta: ${shape_meta}
-
   noise_scheduler:
     _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
     num_train_timesteps: 100
@@ -47,22 +44,18 @@ policy:
   n_action_steps: ${eval:'${n_action_steps}+${n_latency_steps}'}
   n_obs_steps: ${n_obs_steps}
   num_inference_steps: 100
+  obs_as_global_cond: ${obs_as_global_cond}
   crop_shape: [76, 76]
+  # crop_shape: null
+  diffusion_step_embed_dim: 128
+  down_dims: [512, 1024, 2048]
+  kernel_size: 5
+  n_groups: 8
+  cond_predict_scale: True
   obs_encoder_group_norm: True
   eval_fixed_crop: True
+  rot_aug: False
 
-  n_layer: 8
-  n_cond_layers: 0 # >0: use transformer encoder for cond, otherwise use MLP
-  n_head: 4
-  n_emb: 256
-  p_drop_emb: 0.0
-  p_drop_attn: 0.3
-  causal_attn: True
-  time_as_cond: True # if false, use BERT like encoder only arch, time as input
-  obs_as_cond: ${obs_as_cond}
-
-  # enable_film_self_attn: True # Enable FiLM for self-attention
-  # enable_film_ffn: True # Enable FiLM for feed-forward network
   # scheduler.step params
   # predict_epsilon: True
 
@@ -89,10 +82,11 @@ val_dataloader:
   persistent_workers: True
 
 optimizer:
-  transformer_weight_decay: 1.0e-3
-  obs_encoder_weight_decay: 1.0e-6
-  learning_rate: 1.0e-4
-  betas: [0.9, 0.95]
+  _target_: torch.optim.AdamW
+  lr: 1.0e-4
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
 
 training:
   # device: "cuda:0"
@@ -101,8 +95,7 @@ training:
   resume: False
   # optimization
   lr_scheduler: cosine
-  # Transformer needs LR warmup
-  lr_warmup_steps: 1000
+  lr_warmup_steps: 500
   num_epochs: ${eval:'50000 / ${n_demo}'}
   gradient_accumulate_every: 1
   # EMA destroys performance when used with BatchNorm
@@ -114,8 +107,6 @@ training:
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
   val_every: ${eval:'50000 / ${n_demo}/50'}0
   sample_every: 5
-  max_train_steps: null
-  max_val_steps: null
   # misc
   tqdm_interval_sec: 1.0
 

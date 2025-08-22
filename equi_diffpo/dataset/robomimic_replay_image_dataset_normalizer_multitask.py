@@ -190,7 +190,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         normalizer = LinearNormalizer()
 
         # action
-        with open("equi_diffpo/constant/ABCDEFGHIJKL_normalizer.pkl", "rb") as f:
+        with open("equi_diffpo/constant/normalizer_ABCDEFGH.pkl", "rb") as f:
             this_normalizer = pickle.load(f)
             print("Using precomputed normalizer for actions.")
 

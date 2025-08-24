@@ -70,7 +70,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         \
         logging.project="ICRA_Decoupled_Final_Experiments" \
         logging.group="${EXP_NAME}_${SEED}" \
-        logging.name="${run_name}" \
+        logging.name="${run_name}_${SEED}" \
         $EXTRA_ARGS && 
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
         rm -rf ${run_dir}

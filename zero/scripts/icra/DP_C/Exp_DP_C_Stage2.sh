@@ -26,6 +26,7 @@ TASK_MAP["L"]="coffee_preparation_d1"
 INPUT_TASK_LETTERS="$1"
 SEED="$2"
 shift
+shift
 EXTRA_ARGS="$@"  # capture all remaining args
 
 echo "Received task letters: $INPUT_TASK_LETTERS"

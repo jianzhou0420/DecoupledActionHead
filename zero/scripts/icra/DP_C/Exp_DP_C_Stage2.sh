@@ -58,7 +58,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         seed=${SEED} \
         \
         task_alphabet=$LETTER \
-        train_mode=stage1 \
+        train_mode=stage2 \
         n_demo=100 \
         ckpt_path=${ckpt_path} \
         \

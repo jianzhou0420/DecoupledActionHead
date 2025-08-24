@@ -2,9 +2,9 @@ defaults:
   - _self_
   - task: mimicgen_abs_eePose2eePose_stage1
 
+seed: 42
 train_mode: null
 dataset_tail: eePose2eePose
-
 # train_meta
 task_alphabet: null
 shape_meta: ${task.shape_meta}
@@ -90,7 +90,7 @@ optimizer:
 
 training:
   # device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: False
   # optimization

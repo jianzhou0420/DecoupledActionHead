@@ -41,5 +41,5 @@ dataset:
   rotation_rep: "rotation_6d"
   use_legacy_normalizer: False
   use_cache: 1
-  seed: 42
+  seed: ${seed}
   val_ratio: 0.02

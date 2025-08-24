@@ -9,10 +9,9 @@ dataset_path: data/robomimic/datasets/${task_name}/${task_name}_abs_JP_x0loss.hd
 policy:
   _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy_x0loss.DiffusionUnetHybridImagePolicyX0loss
 
-
 training:
   device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: True
   # optimization
@@ -34,4 +33,3 @@ training:
   max_val_steps: null
   # misc
   tqdm_interval_sec: 1.0
-

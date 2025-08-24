@@ -1,15 +1,13 @@
 name: mimicgen_abs
 
-shape_meta: &shape_meta
-  # acceptable types: rgb, low_dim
+shape_meta: &shape_meta # acceptable types: rgb, low_dim
   obs:
     states:
       shape: [45]
-  action: 
+  action:
     shape: [10]
 
-shape_meta_env: &shape_meta_env
-  # acceptable types: rgb, low_dim
+shape_meta_env: &shape_meta_env # acceptable types: rgb, low_dim
   obs:
     agentview_image:
       shape: [3, 84, 84]
@@ -18,9 +16,8 @@ shape_meta_env: &shape_meta_env
     states:
       shape: [45]
 
-  action: 
+  action:
     shape: [10]
-
 
 abs_action: &abs_action True
 
@@ -37,7 +34,7 @@ env_runner:
   max_steps: null
   n_obs_steps: ${n_obs_steps}
   n_action_steps: ${n_action_steps}
-  render_obs_key: 'agentview_image'
+  render_obs_key: "agentview_image"
   fps: 10
   crf: 22
   past_action: False
@@ -55,8 +52,8 @@ dataset:
   pad_after: ${eval:'${n_action_steps}-1'}
   n_obs_steps: ${dataset_obs_steps}
   abs_action: *abs_action
-  rotation_rep: 'rotation_6d'
+  rotation_rep: "rotation_6d"
   use_legacy_normalizer: False
   use_cache: 1
-  seed: 42
+  seed: ${seed}
   val_ratio: 0.02

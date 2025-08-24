@@ -1,7 +1,6 @@
 name: mimicgen_abs_JP
 
-shape_meta: &shape_meta
-  # acceptable types: rgb, low_dim
+shape_meta: &shape_meta # acceptable types: rgb, low_dim
   obs:
     agentview_image:
       shape: [3, 84, 84]
@@ -14,12 +13,8 @@ shape_meta: &shape_meta
     robot0_gripper_qpos:
       shape: [2]
       # type default: low_dim
-  action: 
+  action:
     shape: [8]
-
-
-
-
 
 abs_action: &abs_action True
 
@@ -36,7 +31,7 @@ env_runner:
   max_steps: ${get_max_steps:${task_name}}
   n_obs_steps: ${n_obs_steps}
   n_action_steps: ${n_action_steps}
-  render_obs_key: 'agentview_image'
+  render_obs_key: "agentview_image"
   fps: 10
   crf: 22
   past_action: ${past_action_visible}
@@ -57,5 +52,5 @@ dataset:
   abs_action: *abs_action
   use_legacy_normalizer: False
   use_cache: 1
-  seed: 42
+  seed: ${seed}
   val_ratio: 0.02

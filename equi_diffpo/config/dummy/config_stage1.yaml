@@ -89,7 +89,7 @@ optimizer:
   eps: 1.0e-08
   weight_decay: 1.0e-06
 training:
-  seed: 0
+  seed: ${seed}
   debug: false
   resume: false
   lr_scheduler: cosine
@@ -171,5 +171,5 @@ task:
     rotation_rep: rotation_6d
     use_legacy_normalizer: false
     use_cache: 1
-    seed: 42
+    seed: ${seed}
     val_ratio: 0.02

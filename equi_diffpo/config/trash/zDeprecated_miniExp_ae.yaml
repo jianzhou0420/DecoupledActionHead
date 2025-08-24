@@ -27,7 +27,6 @@ policy_name: ae
 policy:
   _target_: miniExp.policy.ae_policy.AEPolicy
   shape_meta: ${shape_meta}
-  
 
 ema:
   _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
@@ -60,7 +59,7 @@ optimizer:
 
 training:
   device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: False
   # optimization
@@ -87,7 +86,7 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage1","miniExp",]
+  tags: ["stage1", "miniExp"]
   id: null
   group: null
 

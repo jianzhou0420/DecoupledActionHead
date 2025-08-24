@@ -13,11 +13,12 @@ import os
 import os
 from typing import Type, Dict, Any
 import copy
-
+import random
+import numpy as np
 # framework package
 
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -56,7 +57,7 @@ os.environ['HYDRA_FULL_ERROR'] = "1"
 torch.set_float32_matmul_precision('medium')
 
 # ---------------------------------------------------------------
-# region 1. Trainer
+# region 0. Tools
 
 
 def load_pretrained_weights(model, ckpt_path):
@@ -305,6 +306,52 @@ def load_pretrained_weights_DP_T(model, ckpt_path):
     return model
 
 
+def set_all_seeds(seed: int = 42) -> None:
+    """
+    Sets the random seed for reproducibility across all key libraries.
+
+    Args:
+        seed (int): The integer value to use as the random seed.
+    """
+    # 1. Set seed for Python's built-in random module
+    random.seed(seed)
+
+    # 2. Set seed for NumPy
+    np.random.seed(seed)
+
+    # 3. Set seed for PyTorch on CPU
+    torch.manual_seed(seed)
+
+    # 4. Set seeds for PyTorch on GPU(s)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # For multi-GPU setups
+
+    # 5. Set a fixed value for the hash seed
+    os.environ['PYTHONHASHSEED'] = str(seed)
+
+    # 6. Make PyTorch operations deterministic
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    print(f"Global random seed set to {seed} for reproducibility.")
+
+
+def seed_worker(worker_id: int) -> None:
+    """
+    Sets the random seed for each worker process to ensure reproducibility
+    of data loading and augmentation.
+    """
+    # The worker seed is derived from the main process's random state
+    worker_seed = torch.initial_seed() % 2**32
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+    print(f"Worker {worker_id} has been seeded with {worker_seed}")
+
+# ---------------------------------------------------------------
+# region 1. Trainer
+
+
 class Trainer_all(pl.LightningModule):
     def __init__(self, cfg):
         super().__init__()
@@ -483,15 +530,22 @@ class Trainer_all(pl.LightningModule):
 # ---------------------------------------------------------------
 # region 2. DataModule
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self, cfg: AppConfig):
+    def __init__(self, cfg: Any):
         super().__init__()
         self.cfg = cfg
+        # We'll store the generator to ensure deterministic shuffling
+        self.train_generator = None
+        self.val_generator = None
 
     def setup(self, stage: str):
         if stage == 'fit':
-            cfg = self.cfg
-            dataset: BaseImageDataset
-            dataset = hydra.utils.instantiate(cfg.task.dataset)
+            # Create the PyTorch Generator objects here based on the seed
+            seed = self.cfg.training.seed
+            self.train_generator = torch.Generator().manual_seed(seed)
+            self.val_generator = torch.Generator().manual_seed(seed)
+
+            # NOTE: Assuming these instantiate the datasets correctly
+            dataset = hydra.utils.instantiate(self.cfg.task.dataset)
             val_dataset = dataset.get_validation_dataset()
 
             assert isinstance(dataset, BaseImageDataset)
@@ -502,14 +556,24 @@ class MyDataModule(pl.LightningDataModule):
             self.val_dataset = val_dataset
 
     def train_dataloader(self):
-        train_dataloader = DataLoader(self.dataset, **self.cfg.dataloader)
+        # Pass the worker_init_fn and the generator to the DataLoader
+        train_dataloader = DataLoader(
+            self.dataset,
+            **self.cfg.dataloader,
+            worker_init_fn=seed_worker,
+            generator=self.train_generator
+        )
         return train_dataloader
 
     def val_dataloader(self):
-        val_dataloader = DataLoader(self.val_dataset, **self.cfg.val_dataloader)
+        # Pass the worker_init_fn and the generator to the DataLoader
+        val_dataloader = DataLoader(
+            self.val_dataset,
+            **self.cfg.val_dataloader,
+            worker_init_fn=seed_worker,
+            generator=self.val_generator
+        )
         return val_dataloader
-
-
 # endregion
 # ---------------------------------------------------------------
 
@@ -549,8 +613,6 @@ class RolloutCallback(pl.Callback):
         # cprint(f"Rollout completed at epoch {trainer.current_epoch}, step {trainer.global_step}.", "green", attrs=['bold'])
         # cprint(f"Rollout log: {runner_log}", "blue", attrs=['bold'])
 
-# region ActionMseLossForDiffusion
-
 
 class ActionMseLossForDiffusion(pl.Callback):
     """
@@ -589,6 +651,8 @@ class ActionMseLossForDiffusion(pl.Callback):
 
 
 def train(cfg: AppConfig):
+    set_all_seeds(cfg.training.seed)
+
     using_transformers = cfg.get("using_transformers", False)
     using_ACT = cfg.get("using_ACT", False)
     # 0. extra config processing

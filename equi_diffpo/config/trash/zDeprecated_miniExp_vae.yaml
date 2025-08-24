@@ -57,7 +57,7 @@ optimizer:
 
 training:
   device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: False
   # optimization
@@ -84,7 +84,7 @@ logging:
   resume: False
   mode: online
   name: ${run_name}
-  tags: ["stage1","miniExp",]
+  tags: ["stage1", "miniExp"]
   id: null
   group: null
 

@@ -45,7 +45,7 @@ val_dataloader:
 
 training:
   device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: True
   num_epochs: ${eval:'50000 / ${n_demo}'}

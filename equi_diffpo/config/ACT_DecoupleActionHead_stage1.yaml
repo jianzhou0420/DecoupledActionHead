@@ -2,6 +2,7 @@ defaults:
   - _self_
   - task: mimicgen_abs_JP2eePose_stage1
 
+seed: 42
 train_mode: null
 dataset_tail: JP2eePose
 # train_meta
@@ -50,7 +51,7 @@ val_dataloader:
 
 training:
   device: "cuda:0"
-  seed: 0
+  seed: ${seed}
   debug: False
   resume: True
   num_epochs: ${eval:'50000 / ${n_demo}'}

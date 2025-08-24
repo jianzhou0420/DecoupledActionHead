@@ -24,6 +24,7 @@ TASK_MAP["K"]="pick_place_d0"
 TASK_MAP["L"]="coffee_preparation_d1"
 
 INPUT_TASK_LETTERS="$1"
+SEED="$2"
 shift
 EXTRA_ARGS="$@"  # capture all remaining args
 
@@ -53,6 +54,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
 
     python trainer_pl_all.py \
         --config-name=ICRA_Decoupled_DP_C_stage2 \
+        seed=${SEED} \
         \
         task_alphabet=$LETTER \
         train_mode=stage1 \
@@ -66,7 +68,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         run_name="${run_name}" \
         \
         logging.project="ICRA_Decoupled_Final_Experiments" \
-        logging.group="${EXP_NAME}" \
+        logging.group="${EXP_NAME}_${SEED}" \
         logging.name="${run_name}" \
         $EXTRA_ARGS && 
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

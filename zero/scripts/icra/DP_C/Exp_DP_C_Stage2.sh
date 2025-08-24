@@ -37,7 +37,7 @@ echo "Args override: $EXTRA_ARGS"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_C_Stage2"
+EXP_NAME="ICRA_DP_C_Stage2_seed${SEED}"
 
 # build your run_dir
 
@@ -58,7 +58,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         seed=${SEED} \
         \
         task_alphabet=$LETTER \
-        train_mode=stage2 \
+        train_mode=stage2_rollout \
         n_demo=100 \
         ckpt_path=${ckpt_path} \
         \
@@ -69,8 +69,8 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         run_name="${run_name}" \
         \
         logging.project="ICRA_Decoupled_Final_Experiments" \
-        logging.group="${EXP_NAME}_${SEED}" \
-        logging.name="${run_name}_${SEED}" \
+        logging.group="${EXP_NAME}" \
+        logging.name="${run_name}" \
         $EXTRA_ARGS && 
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
         rm -rf ${run_dir}

@@ -68,7 +68,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         replay_buffer = None
         if use_cache:
             if cache_type == 'zip':
-                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + '.zarr.zip'
+                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + f'{seed}' + '.zarr.zip'
                 if not os.path.exists(cache_zarr_path):
                     # cache does not exists
                     try:
@@ -96,7 +96,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                     print('Loaded!')
 
             elif cache_type == 'directory':
-                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + '.zarr'
+                cache_zarr_path = zarr_path + dataset_name + f'.{n_demo}' + f'{seed}' + '.zarr'
                 if not os.path.exists(cache_zarr_path):
                     try:
                         print('Cache does not exist. Creating!')

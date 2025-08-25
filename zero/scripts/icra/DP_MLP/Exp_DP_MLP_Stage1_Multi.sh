@@ -33,6 +33,8 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
+SEED="$2"
+shift
 shift
 EXTRA_ARGS="$@"  # capture all remaining args
 
@@ -43,7 +45,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_MLP_Stage1_Multi"
+EXP_NAME="ICRA_DP_C_Stage1_Multi_seed${SEED}"
 # build your run_dir
 
 # ---
@@ -57,6 +59,7 @@ n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
     --config-name=ICRA_Decoupled_DP_C_stage1 \
+    seed=${SEED} \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
@@ -65,13 +68,14 @@ python trainer_pl_all.py \
     \
     dataloader.num_workers=16 \
     training.val_every=1 \
+    training.checkpoint_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \
     \
     logging.project="ICRA_Decoupled_Final_Experiments" \
-    logging.group="${EXP_NAME}" \
-    logging.name="${run_name}"  \
+    logging.group="${EXP_NAME} \
+    logging.name="${run_name}" \
     $EXTRA_ARGS && 
     rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
     rm -rf ${run_dir}

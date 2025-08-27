@@ -24,6 +24,8 @@ TASK_MAP["K"]="pick_place_d0"
 TASK_MAP["L"]="coffee_preparation_d1"
 
 INPUT_TASK_LETTERS="$1"
+SEED="$2"
+shift
 shift
 EXTRA_ARGS="$@"  # capture all remaining args
 
@@ -35,7 +37,7 @@ echo "Args override: $EXTRA_ARGS"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_C_Normal"
+EXP_NAME="ICRA_DP_T_Normal_seed${SEED}"
 
 # build your run_dir
 
@@ -52,7 +54,8 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     ckpt_path=""
 
     python trainer_pl_all.py \
-        --config-name=ICRA_Decoupled_DP_C_stage2 \
+        --config-name=ICRA_Decoupled_DP_T_stage2 \
+        seed=${SEED} \
         \
         task_alphabet=$LETTER \
         train_mode=normal_rollout \
@@ -61,6 +64,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         \
         dataloader.num_workers=16 \
         training.val_every=1 \
+        training.checkpoint_every=10\
         \
         run_dir="$run_dir" \
         run_name="${run_name}" \

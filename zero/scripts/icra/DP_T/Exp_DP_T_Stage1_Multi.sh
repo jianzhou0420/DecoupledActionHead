@@ -45,7 +45,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_C_Stage1_Multi_seed${SEED}"
+EXP_NAME="ICRA_DP_T_Stage1_Multi_seed${SEED}"
 # build your run_dir
 
 # ---
@@ -58,7 +58,7 @@ num_tasks=${#INPUT_TASK_LETTERS}
 n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
-    --config-name=ICRA_Decoupled_DP_C_stage1 \
+    --config-name=ICRA_Decoupled_DP_T_stage1 \
     seed=${SEED} \
     \
     task_alphabet=$INPUT_TASK_LETTERS \

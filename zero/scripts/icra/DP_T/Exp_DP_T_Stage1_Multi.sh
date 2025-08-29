@@ -69,7 +69,7 @@ python trainer_pl_all.py \
     dataloader.num_workers=32 \
     dataloader.batch_size=256 \
     training.val_every=1 \
-    training.checkpoint_every=10 \
+    training.checkpoint_every=1 \
     \
     run_dir="$run_dir" \
     run_name="${run_name}" \

@@ -64,7 +64,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         \
         dataloader.num_workers=16 \
         training.val_every=1 \
-        training.checkpoint_every=10\
+        training.checkpoint_every=1\
         \
         run_dir="$run_dir" \
         run_name="${run_name}" \

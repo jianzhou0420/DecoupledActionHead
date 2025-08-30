@@ -67,6 +67,7 @@ python trainer_pl_all.py \
     ckpt_path=$ckpt_path \
     \
     dataloader.num_workers=32 \
+    val_dataloader.num_workers=8 \
     dataloader.batch_size=256 \
     training.val_every=1 \
     training.checkpoint_every=1 \

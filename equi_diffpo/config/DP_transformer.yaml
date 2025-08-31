@@ -111,7 +111,7 @@ training:
   # in epochs
   rollout_every: ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: ${eval:'50000 / ${n_demo}/50'}0
+  val_every: ${eval:'50000 / ${n_demo}/50'}
   sample_every: 5
   max_train_steps: null
   max_val_steps: null

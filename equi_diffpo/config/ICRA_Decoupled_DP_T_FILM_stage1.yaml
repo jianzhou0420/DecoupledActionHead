@@ -62,7 +62,7 @@ policy:
   time_as_cond: True # if false, use BERT like encoder only arch, time as input
   obs_as_cond: ${obs_as_cond}
 
-  enable_film_self_attn: True # Enable FiLM for self-attention
+  enable_film_self_attn: False # Enable FiLM for self-attention
   enable_film_ffn: True # Enable FiLM for feed-forward network
   # scheduler.step params
   # predict_epsilon: True
@@ -113,7 +113,7 @@ training:
   # in epochs
   rollout_every: ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: ${eval:'50000 / ${n_demo}/50'}0
+  val_every: ${eval:'50000 / ${n_demo}/50'}
   sample_every: 5
   max_train_steps: null
   max_val_steps: null

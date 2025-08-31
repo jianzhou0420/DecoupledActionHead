@@ -92,7 +92,7 @@ training:
   # in epochs
   rollout_every: ${eval:'50000 / ${n_demo}/50'}
   checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: ${eval:'50000 / ${n_demo}/50'}0
+  val_every: ${eval:'50000 / ${n_demo}/50'}
   sample_every: 5
   # misc
   tqdm_interval_sec: 1.0

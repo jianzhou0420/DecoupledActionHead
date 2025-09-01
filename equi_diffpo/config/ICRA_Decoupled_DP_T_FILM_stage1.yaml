@@ -30,7 +30,7 @@ run_name: null
 run_dir: null
 
 policy:
-  _target_: equi_diffpo.policy.ICRA_DP_T_FILM.DiffusionTransformerHybridImagePolicy
+  _target_: equi_diffpo.policy.ICRA_Decoupled_DP_T_FILM.DiffusionTransformerHybridImagePolicy
 
   shape_meta: ${shape_meta}
 

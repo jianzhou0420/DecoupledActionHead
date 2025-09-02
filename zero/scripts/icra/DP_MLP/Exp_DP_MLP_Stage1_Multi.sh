@@ -45,7 +45,7 @@ echo "---"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_C_Stage1_Multi_seed${SEED}"
+EXP_NAME="ICRA_DP_MLP_Stage1_Multi_seed${SEED}"
 # build your run_dir
 
 # ---
@@ -58,7 +58,7 @@ num_tasks=${#INPUT_TASK_LETTERS}
 n_demo_value=$(( num_tasks * 1000 ))
 
 python trainer_pl_all.py \
-    --config-name=ICRA_Decoupled_DP_C_stage1 \
+    --config-name=ICRA_Decoupled_DP_MLP_stage1 \
     seed=${SEED} \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
@@ -66,7 +66,9 @@ python trainer_pl_all.py \
     n_demo=$n_demo_value \
     ckpt_path=$ckpt_path \
     \
-    dataloader.num_workers=16 \
+    dataloader.num_workers=32 \
+    val_dataloader.num_workers=8 \
+    dataloader.batch_size=256 \
     training.val_every=1 \
     training.checkpoint_every=1 \
     \
@@ -74,7 +76,7 @@ python trainer_pl_all.py \
     run_name="${run_name}" \
     \
     logging.project="ICRA_Decoupled_Final_Experiments" \
-    logging.group="${EXP_NAME} \
+    logging.group="${EXP_NAME}" \
     logging.name="${run_name}" \
     $EXTRA_ARGS && 
     rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

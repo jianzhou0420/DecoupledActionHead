@@ -37,7 +37,7 @@ echo "Args override: $EXTRA_ARGS"
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="ICRA_DP_C_Stage1_Single_seed${SEED}"
+EXP_NAME="ICRA_DP_MLP_Stage1_Single_seed${SEED}"
 
 # build your run_dir
 
@@ -54,7 +54,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     ckpt_path=""
 
     python trainer_pl_all.py \
-        --config-name=ICRA_Decoupled_DP_C_stage1 \
+        --config-name=ICRA_Decoupled_DP_MLP_stage1 \
         seed=${SEED} \
         \
         task_alphabet=$LETTER \
@@ -63,7 +63,9 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
         ckpt_path=${ckpt_path} \
         \
         dataloader.num_workers=16 \
+        val_dataloader.num_workers=8 \
         training.val_every=1 \
+        training.checkpoint_every=1\
         \
         run_dir="$run_dir" \
         run_name="${run_name}" \

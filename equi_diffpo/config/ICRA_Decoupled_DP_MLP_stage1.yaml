@@ -61,6 +61,7 @@ policy:
   causal_attn: True
   time_as_cond: True # if false, use BERT like encoder only arch, time as input
   obs_as_cond: ${obs_as_cond}
+  parallel_input_emb: True
   # enable_film_self_attn: True # Enable FiLM for self-attention
   # enable_film_ffn: True # Enable FiLM for feed-forward network
   # scheduler.step params
@@ -102,7 +103,7 @@ training:
   # optimization
   lr_scheduler: cosine
   # Transformer needs LR warmup
-  lr_warmup_steps: 1000
+  lr_warmup_steps: 500
   num_epochs: ${eval:'50000 / ${n_demo}'}
   gradient_accumulate_every: 1
   # EMA destroys performance when used with BatchNorm

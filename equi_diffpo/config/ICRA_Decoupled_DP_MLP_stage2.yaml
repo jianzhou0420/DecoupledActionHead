@@ -5,14 +5,13 @@ defaults:
 seed: 42
 train_mode: null
 dataset_tail: traj_eePose
-using_transformers: True
 
 # train_meta
 task_alphabet: null
 shape_meta: ${task.shape_meta}
 train_tasks_meta: ${get_train_tasks_meta:${task_alphabet}}
 
-horizon: 10
+horizon: 16
 n_obs_steps: 2
 n_action_steps: 8
 n_latency_steps: 0
@@ -22,7 +21,6 @@ past_action_visible: False
 obs_as_cond: True
 dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
 dataset_path: null
-
 n_demo: 200
 ckpt_path: null
 # logging
@@ -90,10 +88,11 @@ val_dataloader:
   persistent_workers: True
 
 optimizer:
-  transformer_weight_decay: 1.0e-3
-  obs_encoder_weight_decay: 1.0e-6
-  learning_rate: 1.0e-4
-  betas: [0.9, 0.95]
+  _target_: torch.optim.AdamW
+  lr: 1.0e-4
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
 
 training:
   # device: "cuda:0"
@@ -102,7 +101,6 @@ training:
   resume: False
   # optimization
   lr_scheduler: cosine
-
   lr_warmup_steps: 500
   num_epochs: ${eval:'50000 / ${n_demo}'}
   gradient_accumulate_every: 1
@@ -111,12 +109,10 @@ training:
   use_ema: True
   # training loop control
   # in epochs
-  rollout_every: ${eval:'50000 / ${n_demo}/50'}
-  checkpoint_every: ${eval:'50000 / ${n_demo}/50'}
-  val_every: ${eval:'50000 / ${n_demo}/50'}
+  rollout_every: ${eval:'50000 / ${n_demo}/ 50'}
+  checkpoint_every: ${eval:'50000 / ${n_demo}/ 50'}
+  val_every: ${eval:'50000 / ${n_demo}/ 50'}
   sample_every: 5
-  max_train_steps: null
-  max_val_steps: null
   # misc
   tqdm_interval_sec: 1.0
 

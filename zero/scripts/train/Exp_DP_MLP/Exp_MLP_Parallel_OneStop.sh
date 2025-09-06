@@ -33,12 +33,15 @@ TASK_MAP["L"]="coffee_preparation_d1"
 # Get the input task letters
 # ---
 INPUT_TASK_LETTERS="$1"
-echo "Received task letters: $INPUT_TASK_LETTERS"
-echo "---"
+SEED="$2"
+shift
+shift
+EXTRA_ARGS="$@"  # capture all remaining args
+
 
 date_part=$(date +'%Y.%m.%d')
 time_part=$(date +'%H.%M.%S')
-EXP_NAME="Exp_ACT_OneStop"
+EXP_NAME="Exp_MLP_OneStop"
 # build your run_dir
 
 # ---
@@ -52,28 +55,29 @@ run_dir_stage2="data/outputs/${date_part}/${time_part}_${run_name_stage2}"
 ckpt_path="${run_dir_stage1}/checkpoints/${run_name_stage1}_epoch\=049.ckpt"
 
 python trainer_pl_all.py \
-    --config-name=ACT_DecoupleActionHead_stage1 \
-    \
-    +policy.parallel_input_emb=True \
+    --config-name=ICRA_Decoupled_DP_MLP_Stage1 \
+    seed=${SEED} \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage1 \
     n_demo=1000 \
     ckpt_path="" \
     \
-    dataloader.num_workers=16 \
+    dataloader.num_workers=32 \
+    val_dataloader.num_workers=8 \
+    dataloader.batch_size=256 \
     training.val_every=1 \
+    training.checkpoint_every=1 \
     \
     run_dir="$run_dir_stage1" \
     run_name="${run_name_stage1}" \
     \
-    logging.project="DecoupleActionHead_transformer" \
+    logging.project="DecoupleActionHead_MLP_new" \
     logging.group="${EXP_NAME}" \
     logging.name="${run_name_stage1}" &&
     python trainer_pl_all.py \
         --config-name=DP_DecoupleActionHead_MLP_stage2_film \
-        \
-        +policy.parallel_input_emb=True \
+        seed=${SEED} \
         \
         task_alphabet=$INPUT_TASK_LETTERS \
         train_mode=state2_rollout \
@@ -81,12 +85,14 @@ python trainer_pl_all.py \
         ckpt_path=${ckpt_path} \
         \
         dataloader.num_workers=16 \
+        val_dataloader.num_workers=8 \
         training.val_every=1 \
+        training.checkpoint_every=10 \
         \
         run_dir="$run_dir" \
         run_name="${run_name}" \
         \
-        logging.project="DecoupleActionHead_MLP" \
+        logging.project="DecoupleActionHead_MLP_new" \
         logging.group="${EXP_NAME}" \
         logging.name="${run_name}" &&
         rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&

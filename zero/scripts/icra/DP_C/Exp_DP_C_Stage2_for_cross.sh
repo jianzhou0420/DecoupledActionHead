@@ -51,7 +51,7 @@ for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
     run_name="${EXP_NAME}__${LETTER}"
     run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
-    ckpt_path="data/robomimic/Stage1/ICRA_DP_C_Stage1_Multi__ACG_epoch\=009.ckpt"
+    ckpt_path="data/robomimic/Stage1/ICRA_DP_C_Stage1_Multi_seed42__ACG_epoch\=009.ckpt"
 
     python trainer_pl_all.py \
         --config-name=ICRA_Decoupled_DP_C_stage2 \

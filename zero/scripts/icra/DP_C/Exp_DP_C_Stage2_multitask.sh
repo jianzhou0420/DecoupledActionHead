@@ -59,6 +59,7 @@ python trainer_pl_all.py \
     \
     task_alphabet=$INPUT_TASK_LETTERS \
     train_mode=stage2 \
+    n_demo=1000 \
     ckpt_path=${ckpt_path} \
     \
     dataloader.num_workers=16 \

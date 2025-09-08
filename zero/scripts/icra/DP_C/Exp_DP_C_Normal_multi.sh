@@ -45,36 +45,33 @@ EXP_NAME="ICRA_DP_C_Normal_seed${SEED}"
 # Iterate through each letter and run the corresponding task
 # ---
 
-for LETTER in $(echo "$INPUT_TASK_LETTERS" | sed -e 's/\(.\)/\1 /g'); do
-    DESCRIPTIVE_TASK_NAME=${TASK_MAP["$LETTER"]}
 
-    run_name="${EXP_NAME}__${LETTER}"
-    run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
+run_name="${EXP_NAME}__${LETTER}"
+run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
-    ckpt_path=""
+ckpt_path=""
 
-    python trainer_pl_all.py \
-        --config-name=ICRA_Decoupled_DP_C_stage2 \
-        seed=${SEED} \
-        \
-        task_alphabet=$LETTER \
-        train_mode=normal \
-        ckpt_path=${ckpt_path} \
-        \
-        dataloader.num_workers=16 \
-        val_dataloader.num_workers=8 \
-        training.val_every=1 \
-        training.checkpoint_every=10\
-        \
-        run_dir="$run_dir" \
-        run_name="${run_name}" \
-        \
-        logging.project="ICRA_Decoupled_Final_Experiments" \
-        logging.group="${EXP_NAME}" \
-        logging.name="${run_name}" \
-        $EXTRA_ARGS && 
-        rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
-        rm -rf ${run_dir}
-done
+python trainer_pl_all.py \
+    --config-name=ICRA_Decoupled_DP_C_stage2 \
+    seed=${SEED} \
+    \
+    task_alphabet=$INPUT_TASK_LETTERS \
+    train_mode=normal \
+    ckpt_path=${ckpt_path} \
+    \
+    dataloader.num_workers=16 \
+    val_dataloader.num_workers=8 \
+    training.val_every=1 \
+    training.checkpoint_every=10\
+    \
+    run_dir="$run_dir" \
+    run_name="${run_name}" \
+    \
+    logging.project="ICRA_Decoupled_Final_Experiments" \
+    logging.group="${EXP_NAME}" \
+    logging.name="${run_name}" \
+    $EXTRA_ARGS && 
+    rsync -avP ${run_dir}/ jian@10.12.65.19:/media/jian/data/cached_from_sub_machine/runtime/${time_part}_${run_name}/ &&
+    rm -rf ${run_dir}
 
 

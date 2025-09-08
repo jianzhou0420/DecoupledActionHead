@@ -59,6 +59,8 @@ python trainer_pl_all.py \
     train_mode=normal \
     ckpt_path=${ckpt_path} \
     \
+    n_demo=1000 \
+    \
     dataloader.num_workers=16 \
     val_dataloader.num_workers=8 \
     training.val_every=1 \

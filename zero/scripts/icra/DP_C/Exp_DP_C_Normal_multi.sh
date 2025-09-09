@@ -46,7 +46,7 @@ EXP_NAME="ICRA_DP_C_Normal_seed${SEED}"
 # ---
 
 
-run_name="${EXP_NAME}__${LETTER}"
+run_name="${EXP_NAME}__${INPUT_TASK_LETTERS}"
 run_dir="data/outputs/${date_part}/${time_part}_${run_name}"
 
 ckpt_path=""

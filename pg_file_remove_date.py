@@ -64,7 +64,7 @@ def remove_date_from_folder_names(root_dir, dry_run=True):
 
 if __name__ == "__main__":
     # 在这里指定你的文件夹路径
-    root_folder = '/media/jian/data/ICRA_Archive/ICRA_DP_T_FILM'
+    root_folder = '/media/jian/data/ICRA_Archive/ICRA_Z_Multitask'
 
     if not os.path.isdir(root_folder):
         print(f"错误：指定的目录 '{root_folder}' 不存在。")

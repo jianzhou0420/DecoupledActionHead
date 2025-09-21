@@ -30,7 +30,7 @@ def torchinfo_DP_C():
     print('shape of timestep_input:', timestep_input.shape)
     summary(model, input_data={'sample': sample_input,
                                'timestep': timestep_input,
-                               'global_cond': cond_input},)
+                               'global_cond': cond_input}, depth=5)
 
 
 def torchinfo_DP_MLP():
@@ -65,4 +65,4 @@ def torchinfo_DP_MLP():
 
 
 torchinfo_DP_C()
-# torchinfo_DP_MLP()
+torchinfo_DP_MLP()

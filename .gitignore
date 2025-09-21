@@ -30,3 +30,9 @@ dist/
 wandb
 
 diffusion_policy_stack_d1
+
+# Other outputs
+*.pdf
+*.png
+*.csv
+

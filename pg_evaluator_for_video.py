@@ -67,7 +67,8 @@ def evaluate_run(seed: int = 42,
                  n_train: int = 6,
                  n_test: int = 50,
                  wandb_mode: str = "offline",
-                 skip=0):
+                 skip=0,
+                 last_ckpt_only=False):
     seed_everything(seed)
 
     cfg, checkpoint_all, task_alphabet_list, task_name_list = resolve_output_dir(run_dir)
@@ -123,6 +124,9 @@ def evaluate_run(seed: int = 42,
             group=cfg.run_name,
         )
 
+        if last_ckpt_only:
+            checkpoint_all = [checkpoint_all[-1]]
+
         for ckpt in checkpoint_all:
             policy: BaseImagePolicy = hydra.utils.instantiate(cfg.policy)
             policy.load_state_dict(
@@ -149,11 +153,39 @@ def evaluate_run(seed: int = 42,
     cprint("WandB run finished.", "green")
 
 
+def evaluate_runs(seed: int = 42,
+                  runs_dir: str = "/media/jian/ssd4t/ICRA_Video",
+                  results_dir: str = "data/outputs/eval_results",
+                  n_envs: int = 28,
+                  n_test_vis: int = 6,
+                  n_train_vis: int = 3,
+                  n_train: int = 6,
+                  n_test: int = 50,
+                  wandb_mode: str = "offline",
+                  skip=0,
+                  last_ckpt_only=False):
+    runs_dir_list = natsorted([os.path.join(runs_dir, run) for run in os.listdir(runs_dir)])
+
+    for run_dir in runs_dir_list:
+        evaluate_run(seed=seed,
+                     run_dir=run_dir,
+                     results_dir=results_dir,
+                     n_envs=n_envs,
+                     n_test_vis=n_test_vis,
+                     n_train_vis=n_train_vis,
+                     n_train=n_train,
+                     n_test=n_test,
+                     wandb_mode=wandb_mode,
+                     skip=skip,
+                     last_ckpt_only=last_ckpt_only
+                     )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate a policy on Robomimic tasks.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
     parser.add_argument("--results_dir", type=str, default="data/outputs/eval_results",)
-    parser.add_argument("--run_dir", type=str, default="/media/jian/data/cached_from_sub_machine/runtime/17.21.08_ICRA_DP_T_Normal_seed42__G",)
+    parser.add_argument("--run_dir", type=str, default="/media/jian/ssd4t/ICRA_Video",)
     parser.add_argument("--n_envs", type=int, default=28, help="Number of environments to evaluate.")
     parser.add_argument("--n_test_vis", type=int, default=6, help="Number of test environments to visualize.")
     parser.add_argument("--n_train_vis", type=int, default=3, help="Number of training environments to visualize.")
@@ -161,16 +193,18 @@ if __name__ == "__main__":
     parser.add_argument("--n_test", type=int, default=50, help="Number of test episodes to run.")
     parser.add_argument("--wandb_mode", type=str, default="offline", help="WandB mode for logging.")
     parser.add_argument("--skip", type=int, default=0, help="Number of tasks to skip during evaluation.")
+    parser.add_argument("--last_ckpt_only", action='store_true', help="Whether to evaluate only the last checkpoint.")
     args = parser.parse_args()
 
-    evaluate_run(seed=args.seed,
-                 run_dir=args.run_dir,
-                 results_dir=args.results_dir,
-                 n_envs=args.n_envs,
-                 n_test_vis=args.n_test_vis,
-                 n_train_vis=args.n_train_vis,
-                 n_train=args.n_train,
-                 n_test=args.n_test,
-                 wandb_mode=args.wandb_mode,
-                 skip=args.skip
-                 )
+    evaluate_runs(seed=args.seed,
+                  runs_dir=args.run_dir,
+                  results_dir=args.results_dir,
+                  n_envs=args.n_envs,
+                  n_test_vis=args.n_test_vis,
+                  n_train_vis=args.n_train_vis,
+                  n_train=args.n_train,
+                  n_test=args.n_test,
+                  wandb_mode=args.wandb_mode,
+                  skip=args.skip,
+                  last_ckpt_only=args.last_ckpt_only
+                  )

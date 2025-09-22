@@ -361,9 +361,16 @@
             "program": "${workspaceFolder}/zero/evaluator.py",
             "args": [
                 "--run_dir",
-                "/media/jian/data/cached_from_sub_machine/runtime/16.48.16_Exp_Normal_1000__A"
+                "/media/jian/data/cached_from_sub_machine/runtime/17.21.08_ICRA_DP_T_Normal_seed42__G",
+                "--n_envs",
+                "2",
+                "--n_test_vis",
+                "1",
+                "--n_train_vis",
+                "1"
             ],
-            "envFile": "${workspaceFolder}/.vscode/.env"
+            "envFile": "${workspaceFolder}/.vscode/.env",
+            "justMyCode": false,
         },
         { // TestEnvRunner
             "name": "TestEnvRunner",

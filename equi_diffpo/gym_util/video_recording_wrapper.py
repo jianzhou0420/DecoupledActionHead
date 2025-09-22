@@ -201,8 +201,14 @@ class VideoRecordingWrapper(gym.Wrapper):
             if not self.video_recoder.is_ready():
                 self.video_recoder.start(self.file_path)
 
-            frame = self.env.render(
-                mode=self.mode, **self.render_kwargs)
+            # debug
+            frame = self.env.env.env.sim.render(
+                width=256, height=256, camera_name='agentview')
+            print(type(frame), frame.shape)
+            # /debug
+
+            # frame = self.env.render(
+            #     mode=self.mode, **self.render_kwargs)
             assert frame.dtype == np.uint8
             self.video_recoder.write_frame(frame)
         return result

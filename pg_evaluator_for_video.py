@@ -112,7 +112,7 @@ def evaluate_run(seed: int = 42,
             n_test=n_test,
         )
         # --- WandB Initialization ---
-        wandb_project_name = "Eval"
+        wandb_project_name = "Eval_Video"
         wandb_run_name = f"{cfg.run_name}_{task_alphabet_list[i]}"
 
         wandb.init(

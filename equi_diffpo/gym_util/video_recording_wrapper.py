@@ -204,7 +204,8 @@ class VideoRecordingWrapper(gym.Wrapper):
             # debug
             frame = self.env.env.env.sim.render(
                 width=256, height=256, camera_name='agentview')
-            print(type(frame), frame.shape)
+            frame = np.flip(frame, (0, 1))       # 在两个轴上同时翻转
+
             # /debug
 
             # frame = self.env.render(

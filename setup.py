@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='equi_diffpo',
+    name='jiandecouple',
     packages=find_packages(),
-    include_dirs=['jiandeouple', 'zero', 'miniExp'],
+    include_dirs=['jiandeouple', 'zero'],
 )

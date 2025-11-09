@@ -8,7 +8,4 @@
     PosEulerOpen            : [Position (3), Euler Angles (3), Open (1)]
     PosQuatOpen             : [Position (3), Quaternion (4), Open (1)]
     PosAxisOpen             : [Position (3), Axis-Angle (3), Open (1)]
-
-
-
 """

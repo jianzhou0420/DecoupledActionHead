@@ -14,7 +14,7 @@ we convert it to three versions:
 import h5py
 import numpy as np
 from copy import deepcopy
-from codebase.z_utils.Rotation import PosQuat2HT, HT2PosAxis, PosEuler2HT, inv, axis2quat
+from jiandecouple.z_utils.JianRotation import PosQuat2HT, HT2PosAxis, PosEuler2HT, inv, axis2quat
 from termcolor import cprint
 import json
 from tqdm import tqdm

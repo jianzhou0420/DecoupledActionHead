@@ -1,3 +1,8 @@
+'''
+Validator for Robomimic datasets.
+Generate videos of dataset rollouts to verify correctness.
+'''
+
 import os
 from tqdm import tqdm
 import time
@@ -16,7 +21,7 @@ import json
 import mimicgen
 from robosuite.controllers import ALL_CONTROLLERS
 from copy import deepcopy, copy
-from codebase.z_utils.Rotation import *
+from jiandecouple.z_utils.JianRotation import *
 from jiandecouple.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
 from jiandecouple.gym_util.multistep_wrapper import MultiStepWrapper
 import wandb.sdk.data_types.video as wv

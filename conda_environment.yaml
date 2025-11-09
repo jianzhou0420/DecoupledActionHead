@@ -53,6 +53,7 @@ dependencies:
   - huggingface_hub=0.25.2
   - natsort
   - lightning
+  - torchinfo
 
   - pip:
       - open3d

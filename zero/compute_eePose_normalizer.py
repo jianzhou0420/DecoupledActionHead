@@ -6,7 +6,7 @@ import h5py
 import torch
 import argparse
 from natsort import natsorted
-from codebase.z_utils.Rotation_torch import matrix_to_rotation_6d, euler2mat
+from jiandecouple.z_utils.JianRotationTorch import matrix_to_rotation_6d, euler2mat
 from jiandecouple.model.common.rotation_transformer import RotationTransformer
 from jiandecouple.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 from jiandecouple.common.normalize_util import (

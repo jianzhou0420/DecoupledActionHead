@@ -3,7 +3,7 @@ import numpy as np
 from typing import Optional, Callable, Generator
 import numpy as np
 import av
-from equi_diffpo.common.timestamp_accumulator import get_accumulate_timestamp_idxs
+from jiandecouple.common.timestamp_accumulator import get_accumulate_timestamp_idxs
 
 
 def read_video(
@@ -201,8 +201,15 @@ class VideoRecordingWrapper(gym.Wrapper):
             if not self.video_recoder.is_ready():
                 self.video_recoder.start(self.file_path)
 
-            frame = self.env.render(
-                mode=self.mode, **self.render_kwargs)
+            # debug
+            frame = self.env.env.env.sim.render(
+                width=256, height=256, camera_name='agentview')
+            frame = np.flip(frame, (0, 1))       # 在两个轴上同时翻转
+
+            # /debug
+
+            # frame = self.env.render(
+            #     mode=self.mode, **self.render_kwargs)
             assert frame.dtype == np.uint8
             self.video_recoder.write_frame(frame)
         return result

@@ -4,10 +4,10 @@ import h5py
 import zarr
 import numpy as np
 from tqdm import tqdm
-from equi_diffpo.common.replay_buffer import ReplayBuffer
+from jiandecouple.common.replay_buffer import ReplayBuffer
 # Use the user-provided import and register codecs
 # register_codecs() # Call this if your custom codec library requires it.
-from equi_diffpo.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
+from jiandecouple.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
 # Assume ReplayBuffer and _convert_actions are defined elsewhere
 # For demonstration purposes, let's create dummy versions.
 register_codecs()  # Register custom codecs if necessary

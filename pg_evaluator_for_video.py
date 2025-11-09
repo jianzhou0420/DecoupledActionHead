@@ -8,8 +8,8 @@ from termcolor import cprint
 
 from natsort import natsorted
 from omegaconf import OmegaConf
-from equi_diffpo.env_runner.robomimic_image_runner_tmp import RobomimicImageRunner
-from equi_diffpo.policy.base_image_policy import BaseImagePolicy
+from jiandecouple.env_runner.robomimic_image_runner_tmp import RobomimicImageRunner
+from jiandecouple.policy.base_image_policy import BaseImagePolicy
 import torch
 import wandb
 import mimicgen

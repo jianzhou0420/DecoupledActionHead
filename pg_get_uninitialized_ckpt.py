@@ -3,7 +3,7 @@ from omegaconf import OmegaConf
 import yaml
 import torch
 import hydra
-from equi_diffpo.policy.base_image_policy import BaseImagePolicy
+from jiandecouple.policy.base_image_policy import BaseImagePolicy
 import os
 
 

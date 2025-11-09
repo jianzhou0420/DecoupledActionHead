@@ -6,7 +6,7 @@ from termcolor import cprint
 import robomimic.utils.obs_utils as ObsUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.file_utils as FileUtils
-from equi_diffpo.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
+from jiandecouple.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
 import collections
 import numpy as np
 from copy import deepcopy
@@ -17,8 +17,8 @@ import mimicgen
 from robosuite.controllers import ALL_CONTROLLERS
 from copy import deepcopy, copy
 from codebase.z_utils.Rotation import *
-from equi_diffpo.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
-from equi_diffpo.gym_util.multistep_wrapper import MultiStepWrapper
+from jiandecouple.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
+from jiandecouple.gym_util.multistep_wrapper import MultiStepWrapper
 import wandb.sdk.data_types.video as wv
 np.set_printoptions(precision=4, suppress=True)
 

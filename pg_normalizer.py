@@ -1,4 +1,4 @@
-from equi_diffpo.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
+from jiandecouple.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 import pickle
 
 

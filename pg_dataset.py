@@ -16,14 +16,14 @@ from threadpoolctl import threadpool_limits
 import concurrent.futures
 import multiprocessing
 from omegaconf import OmegaConf
-from equi_diffpo.common.pytorch_util import dict_apply
-from equi_diffpo.dataset.base_dataset import BaseImageDataset, LinearNormalizer
-from equi_diffpo.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
-from equi_diffpo.model.common.rotation_transformer import RotationTransformer
-from equi_diffpo.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
-from equi_diffpo.common.replay_buffer import ReplayBuffer
-from equi_diffpo.common.sampler import SequenceSampler, get_val_mask
-from equi_diffpo.common.normalize_util import (
+from jiandecouple.common.pytorch_util import dict_apply
+from jiandecouple.dataset.base_dataset import BaseImageDataset, LinearNormalizer
+from jiandecouple.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
+from jiandecouple.model.common.rotation_transformer import RotationTransformer
+from jiandecouple.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
+from jiandecouple.common.replay_buffer import ReplayBuffer
+from jiandecouple.common.sampler import SequenceSampler, get_val_mask
+from jiandecouple.common.normalize_util import (
     robomimic_abs_action_only_normalizer_from_stat,
     robomimic_abs_action_only_dual_arm_normalizer_from_stat,
     get_range_normalizer_from_stat,
@@ -31,7 +31,7 @@ from equi_diffpo.common.normalize_util import (
     get_identity_normalizer_from_stat,
     array_to_stats
 )
-from equi_diffpo.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
+from jiandecouple.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
 register_codecs()
 
 

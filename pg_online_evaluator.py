@@ -6,13 +6,13 @@ from termcolor import cprint
 import robomimic.utils.obs_utils as ObsUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.file_utils as FileUtils
-from equi_diffpo.env_runner.base_image_runner import BaseImageRunner
-from equi_diffpo.common.pytorch_util import dict_apply
-from equi_diffpo.policy.base_image_policy import BaseImagePolicy
-from equi_diffpo.model.common.rotation_transformer import RotationTransformer
-from equi_diffpo.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
-from equi_diffpo.gym_util.sync_vector_env import SyncVectorEnv
-from equi_diffpo.gym_util.async_vector_env import AsyncVectorEnv
+from jiandecouple.env_runner.base_image_runner import BaseImageRunner
+from jiandecouple.common.pytorch_util import dict_apply
+from jiandecouple.policy.base_image_policy import BaseImagePolicy
+from jiandecouple.model.common.rotation_transformer import RotationTransformer
+from jiandecouple.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
+from jiandecouple.gym_util.sync_vector_env import SyncVectorEnv
+from jiandecouple.gym_util.async_vector_env import AsyncVectorEnv
 import dill
 import collections
 import numpy as np
@@ -26,8 +26,8 @@ import mimicgen
 from robosuite.controllers import ALL_CONTROLLERS
 from copy import deepcopy, copy
 from codebase.z_utils.Rotation import *
-from equi_diffpo.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
-from equi_diffpo.gym_util.multistep_wrapper import MultiStepWrapper
+from jiandecouple.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
+from jiandecouple.gym_util.multistep_wrapper import MultiStepWrapper
 import wandb.sdk.data_types.video as wv
 np.set_printoptions(precision=4, suppress=True)
 

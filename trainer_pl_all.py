@@ -25,19 +25,19 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger, CSVLogger, WandbLogger
 import pytorch_lightning as pl
 # equidiff package
-from equi_diffpo.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
-from equi_diffpo.policy.diffusion_transformer_hybrid_image_policy import DiffusionTransformerHybridImagePolicy
-from equi_diffpo.dataset.base_dataset import BaseImageDataset
-from equi_diffpo.env_runner.base_image_runner import BaseImageRunner
+from jiandecouple.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
+from jiandecouple.policy.diffusion_transformer_hybrid_image_policy import DiffusionTransformerHybridImagePolicy
+from jiandecouple.dataset.base_dataset import BaseImageDataset
+from jiandecouple.env_runner.base_image_runner import BaseImageRunner
 
-from equi_diffpo.common.pytorch_util import dict_apply, optimizer_to
-from equi_diffpo.model.diffusion.ema_model import EMAModel
-from equi_diffpo.model.common.lr_scheduler import get_scheduler
+from jiandecouple.common.pytorch_util import dict_apply, optimizer_to
+from jiandecouple.model.diffusion.ema_model import EMAModel
+from jiandecouple.model.common.lr_scheduler import get_scheduler
 # Hydra specific imports
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-from equi_diffpo.config.config_hint import AppConfig
+from jiandecouple.config.config_hint import AppConfig
 
 import pathlib
 from omegaconf import OmegaConf

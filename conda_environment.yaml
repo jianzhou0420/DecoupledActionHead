@@ -55,7 +55,7 @@ dependencies:
   - lightning
 
   - pip:
-    - open3d
-    - pygame
-    - imagecodecs==2022.9.26
-    - wandb==0.17.0
+      - open3d
+      - pygame
+      - imagecodecs==2022.9.26
+      - wandb==0.17.0

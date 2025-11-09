@@ -9,7 +9,7 @@ import h5py
 import os
 import torch
 from natsort import natsorted
-from equi_diffpo.dataset.robomimic_replay_image_dataset import _convert_actions
+from jiandecouple.dataset.robomimic_replay_image_dataset import _convert_actions
 
 np.set_printoptions(precision=4, suppress=True)  # 设置 NumPy 打印选项，保留三位小数并禁止科学计数法
 

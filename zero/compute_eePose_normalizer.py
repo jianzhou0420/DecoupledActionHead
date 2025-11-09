@@ -7,9 +7,9 @@ import torch
 import argparse
 from natsort import natsorted
 from codebase.z_utils.Rotation_torch import matrix_to_rotation_6d, euler2mat
-from equi_diffpo.model.common.rotation_transformer import RotationTransformer
-from equi_diffpo.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
-from equi_diffpo.common.normalize_util import (
+from jiandecouple.model.common.rotation_transformer import RotationTransformer
+from jiandecouple.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
+from jiandecouple.common.normalize_util import (
     robomimic_abs_action_only_normalizer_from_stat,
     robomimic_abs_action_only_dual_arm_normalizer_from_stat,
     get_range_normalizer_from_stat,
@@ -17,7 +17,7 @@ from equi_diffpo.common.normalize_util import (
     get_identity_normalizer_from_stat,
     array_to_stats
 )
-from equi_diffpo.dataset.robomimic_replay_image_dataset import _convert_actions
+from jiandecouple.dataset.robomimic_replay_image_dataset import _convert_actions
 
 
 def main(task_codes=None, position_only=True):

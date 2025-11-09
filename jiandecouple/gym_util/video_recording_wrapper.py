@@ -3,7 +3,7 @@ import numpy as np
 from typing import Optional, Callable, Generator
 import numpy as np
 import av
-from equi_diffpo.common.timestamp_accumulator import get_accumulate_timestamp_idxs
+from jiandecouple.common.timestamp_accumulator import get_accumulate_timestamp_idxs
 
 
 def read_video(

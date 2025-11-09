@@ -207,7 +207,7 @@ class FrankaEmikaPanda_torch(nn.Module):
 
 if __name__ == "__main__":
     def test():
-        from zero.expForwardKinematics.ReconLoss.FrankaPandaFK import FrankaEmikaPanda
+        from scripts.expForwardKinematics.ReconLoss.FrankaPandaFK import FrankaEmikaPanda
 
         franka_np = FrankaEmikaPanda()
         franka_torch = FrankaEmikaPanda_torch()

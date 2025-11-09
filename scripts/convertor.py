@@ -321,10 +321,10 @@ class DatasetConvertor:
                 length = demo_data['actions'].shape[0]
 
                 arr_eePose = np.arange(length).reshape(-1, 1)  # shape (108, 1)
-                arr_eePose = np.tile(arr_eePose, (1, 7))          # shape (108, 7)，每列是行索引
+                arr_eePose = np.tile(arr_eePose, (1, 7))          # shape (108, 7)
 
                 arr_JPOpen = np.arange(length).reshape(-1, 1)  # shape (108, 1)
-                arr_JPOpen = np.tile(arr_JPOpen, (1, 8))          # shape (108, 8)，每列是行索引
+                arr_JPOpen = np.tile(arr_JPOpen, (1, 8))          # shape (108, 8)
                 demo_data['actions'][...] = arr_eePose
                 for obs_key in list(demo_data['obs'].keys()):
                     del demo_data['obs'][obs_key]
@@ -418,16 +418,16 @@ class DatasetConvertor:
 
     @staticmethod
     def _copy2new_h5py_file(src_path, dst_path):
-        # 2. 在尝试写入前，检查目标文件是否存在
+        # Check if dst_path exists
         if os.path.exists(dst_path):
-            # 如果文件已存在，立即引发 FileExistsError 错误
-            raise FileExistsError(f"目标文件已存在，无法覆盖: {dst_path}")
+            # If the file already exists, raise a FileExistsError
+            raise FileExistsError(f"Target file already exists, cannot overwrite: {dst_path}")
 
-        # 如果文件不存在，则执行原始的复制逻辑
+        # If the file does not exist, proceed with the original copy logic
         with h5py.File(src_path, 'r') as src, h5py.File(dst_path, 'w') as dst:
             for name in src:
                 src.copy(name, dst, name)
-        cprint(f"成功将 {src_path} 复制到 {dst_path}", 'green')
+        cprint(f"Successfully copied {src_path} to {dst_path}", 'green')
 
     def _controller_type_to_JP(self, path: str):
         with h5py.File(path, 'r+') as f:
@@ -476,7 +476,7 @@ class DatasetConvertor:
 
 
 def main():
-    # 1. 定义任务和转换方法
+    # 1. Define tasks and conversion methods
     tasks = {
         "A": "stack_d1",
         "B": "square_d2",
@@ -499,16 +499,16 @@ def main():
         'eePose2eePose'
     ]
 
-    # 2. 设置 argparse 解析器
+    # 2. Set up argument parser
     parser = argparse.ArgumentParser(
-        description="数据集转换工具：对一个或多个任务执行一个或多个转换操作，并生成总结报告。",
+        description="Dataset conversion tool: Perform one or more conversion operations on one or more tasks and generate a summary report.",
         formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument('-t', '--task', type=str, required=True, metavar='ALIASES', help="指定任务别名组合字符串 (例如: 'ADL')。")
-    parser.add_argument('-c', '--convert_type', type=str, required=True, nargs='+', choices=valid_conversion_methods, metavar='METHOD', help="指定一个或多个转换方法名，用空格隔开。")
+    parser.add_argument('-t', '--task', type=str, required=True, metavar='ALIASES', help="Specify the task alias combination string (e.g., 'ADL').")
+    parser.add_argument('-c', '--convert_type', type=str, required=True, nargs='+', choices=valid_conversion_methods, metavar='METHOD', help="Specify one or more conversion method names, separated by spaces.")
     args = parser.parse_args()
 
-    # 3. 初始化计数器
+    # 3. Initialize counters
     task_aliases = args.task.upper()
     methods_to_run = args.convert_type
     total_operations = len(task_aliases) * len(methods_to_run)
@@ -517,57 +517,57 @@ def main():
     error_count = 0
     unknown_task_count = 0
 
-    print(f"✅ 计划执行: {len(methods_to_run)} 种转换操作")
-    print(f"✅ 应用于: {len(task_aliases)} 个任务")
-    print(f"✅ 总操作数: {total_operations}\n")
+    print(f"✅ Plan to: {len(methods_to_run)} conversion operations")
+    print(f"✅ Applied to: {len(task_aliases)} tasks")
+    print(f"✅ Total operations: {total_operations}\n")
 
     convertor = DatasetConvertor()
 
-    # 4. 执行嵌套循环并更新计数器
+    # 4. Execute nested loops and update counters
     for alias in task_aliases:
         if alias not in tasks:
-            cprint(f"⚠️  警告: 未知的任务别名 '{alias}'，将跳过其所有转换。\n", 'red')
+            cprint(f"⚠️  Warning: Unknown task alias '{alias}', skipping all conversions.\n", 'red')
             unknown_task_count += 1
-            error_count += len(methods_to_run)  # 该任务的所有操作都计为错误
+            error_count += len(methods_to_run)  # Count all operations for this task as errors
             continue
 
         task_name = tasks[alias]
-        # 准备演示用的源文件
+        # Prepare source file for demonstration
         src_dir = f'data/robomimic/datasets_abs/{task_name}'
         os.makedirs(src_dir, exist_ok=True)
         file_path = os.path.join(src_dir, f'{task_name}_abs.hdf5')
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"源文件不存在: {file_path}")
+            raise FileNotFoundError(f"Source file does not exist: {file_path}")
 
-        print(f"--- [处理任务: {alias} ({task_name})] ---")
+        print(f"--- [Processing task: {alias} ({task_name})] ---")
 
         for method_name in methods_to_run:
             try:
                 method_to_call = getattr(convertor, method_name)
-                cprint(f"  -> 正在执行: '{method_name}'...", 'cyan')
+                cprint(f"  -> Executing: '{method_name}'...", 'cyan')
                 method_to_call(file_path)
-                cprint(f"  ✅ 成功完成: '{method_name}'", 'green')
+                cprint(f"  ✅ Successfully completed: '{method_name}'", 'green')
                 success_count += 1
             except FileExistsError:
-                cprint(f"  -> 已存在，跳过: '{method_name}'", 'yellow')
+                cprint(f"  -> Already exists, skipping: '{method_name}'", 'yellow')
                 skipped_count += 1
             except Exception as e:
-                cprint(f"  ❌ 执行 '{method_name}' 时发生未知错误: {e}", 'red')
+                cprint(f"  ❌ An unknown error occurred while executing '{method_name}': {e}", 'red')
                 error_count += 1
 
-        print(f"--- [任务 {alias} 处理完毕] ---\n")
+        print(f"--- [Processing task: {alias} completed] ---\n")
 
-    # 5. 打印最终的总结报告
+    # 5. Print final summary report
     print("=" * 50)
-    print("📊 处理完成，生成总结报告：")
+    print("📊 Processing complete, generating summary report:")
     print("=" * 50)
-    cprint(f"  - 成功转换: {success_count}", 'green')
-    cprint(f"  - 已存在而跳过: {skipped_count}", 'yellow')
-    cprint(f"  - 发生错误 (包括未知任务): {error_count}", 'red')
+    cprint(f"  - Successfully converted: {success_count}", 'green')
+    cprint(f"  - Already exists, skipped: {skipped_count}", 'yellow')
+    cprint(f"  - Errors occurred (including unknown tasks): {error_count}", 'red')
     print("----------------------------------------")
-    print(f"  - 总计划操作数: {total_operations}")
+    print(f"  - Total planned operations: {total_operations}")
     if unknown_task_count > 0:
-        cprint(f"  - 其中包含 {unknown_task_count} 个未知任务别名。", 'magenta')
+        cprint(f"  - Including {unknown_task_count} unknown task aliases.", 'magenta')
     print("=" * 50)
 
 

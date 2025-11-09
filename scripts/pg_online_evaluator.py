@@ -24,7 +24,7 @@ from copy import deepcopy
 import h5py
 from robosuite.controllers import load_controller_config
 from robosuite.utils.input_utils import *
-from zero.config.default import get_config
+from scripts.config.default import get_config
 import json
 import mimicgen
 from robosuite.controllers import ALL_CONTROLLERS

@@ -15,6 +15,7 @@ from typing import Type, Dict, Any
 import copy
 import random
 import numpy as np
+from natsort import natsorted
 
 # framework package
 import torch
@@ -42,8 +43,9 @@ from jiandecouple.config.config_hint import AppConfig
 from omegaconf import OmegaConf
 import hydra
 import sys
+
+# extra imports
 import mimicgen  # essential package, do not delete. Blame to complex dependency "robosuite->robomimic->mimicgen"
-from natsort import natsorted
 
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1)
@@ -61,100 +63,100 @@ torch.set_float32_matmul_precision('medium')
 
 def load_pretrained_weights(model, ckpt_path):
     """
-    加载预训练权重，并根据策略冻结参数。
+    Load pretrained weights and freeze parameters according to the policy.
 
-    此函数执行以下操作：
-    1. 记录模型中初始状态就为冻结的参数。
-    2. 从指定的 `ckpt_path` 加载权重。
-    3. 将权重加载到模型中匹配的层。
-    4. 强制冻结模型中所有的 'clip' 子模块参数，并将其设置为评估模式。
-    5. 冻结所有其他从检查点成功加载的参数。
-    6. 确保初始状态为冻结的参数保持冻结。
-    7. 保持模型中其余参数（如新的分类头）为可训练状态。
+    This function performs the following steps:
+    1. Record parameters that were already frozen before the function call.
+    2. Load weights from the given `ckpt_path`.
+    3. Load matched weights into the model.
+    4. Force-freeze all parameters in the 'clip' submodule and set it to eval mode.
+    5. Freeze all other parameters that were successfully loaded from the checkpoint.
+    6. Ensure parameters that were initially frozen remain frozen.
+    7. Keep the remaining parameters (e.g., new classification heads) trainable.
 
     Args:
-        model (nn.Module): 需要加载权重和设置梯度的模型。
-        ckpt_path (str): 预训练权重文件（.pth）的路径。
+        model (nn.Module): The model to load weights into and set gradients for.
+        ckpt_path (str): Path to the pretrained weight file (.pth).
 
     Returns:
-        nn.Module: 处理完成后的模型。
+        nn.Module: The processed model.
     """
     # --------------------------------------------------------------------------
-    # ✨ 新增步骤：记录初始冻结状态
+    # 0. record initially frozen parameters
     # --------------------------------------------------------------------------
     initially_frozen_keys = {name for name, param in model.named_parameters() if not param.requires_grad}
     if initially_frozen_keys:
-        print(f"检测到 {len(initially_frozen_keys)} 个参数在函数调用前已被设置为冻结状态。这些参数将保持冻结。")
+        print(f"Detected {len(initially_frozen_keys)} parameters that were frozen before calling this function. They will remain frozen.")
         # for name in initially_frozen_keys:
-        #     print(f"  - 初始冻结: {name}")
+        #     print(f"  - initially frozen: {name}")
 
     if not ckpt_path:
-        print("未提供权重路径，跳过权重加载过程。")
-        # 即使不加载权重，我们仍然需要冻结CLIP和保持初始冻结状态
+        print("No checkpoint path provided, skipping weight loading.")
+        # Even if we don't load weights, we still need to freeze CLIP and keep the initial frozen state
         if hasattr(model, 'clip'):
-            print("正在冻结 CLIP 模块并设置为评估模式...")
+            print("Freezing CLIP module and setting it to eval mode...")
             model.clip.eval()
             for name, param in model.clip.named_parameters():
                 param.requires_grad = False
-                print(f"🧊 [强制冻结] {name}")
+                print(f"🧊 [force to freeze] {name}")
         return model
 
     # --------------------------------------------------------------------------
-    # 第1步：识别出可以安全加载的权重 (逻辑不变)
+    # 1. Identify loadable weights
     # --------------------------------------------------------------------------
-    print(f"正在从 '{ckpt_path}' 加载权重...")
+    print(f"Loading weights from '{ckpt_path}'...")
     pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
 
     new_model_dict = model.state_dict()
     loadable_keys = set()
     filtered_dict = {}
 
-    print("正在筛选兼容的权重...")
+    print("Filtering compatible weights...")
     for k, v in pretrained_dict.items():
         if k in new_model_dict and new_model_dict[k].shape == v.shape:
             filtered_dict[k] = v
             loadable_keys.add(k)
-    print(f"识别出 {len(loadable_keys)} 个参数可以从 checkpoint 安全加载。")
+    print(f"Identified {len(loadable_keys)} parameters that can be safely loaded from checkpoint.")
 
     # --------------------------------------------------------------------------
-    # 第2步：加载筛选后的权重 (逻辑不变)
+    # Step 2: Load filtered weights
     # --------------------------------------------------------------------------
     new_model_dict.update(filtered_dict)
     model.load_state_dict(new_model_dict)
-    print("已成功加载所有兼容的权重。")
+    print("Successfully loaded all compatible weights.")
 
     # --------------------------------------------------------------------------
-    # 第3步：强制设置 CLIP 模块为评估模式 (逻辑不变)
+    # 3. Force-set CLIP module to eval mode
     # --------------------------------------------------------------------------
     if hasattr(model, 'clip'):
-        print("正在将 CLIP 模块设置为评估模式 (model.clip.eval())...")
+        print("Setting CLIP module to eval mode (model.clip.eval())...")
         model.clip.eval()
     else:
-        print("⚠️  警告: 模型中未找到名为 'clip' 的属性，无法设置为评估模式。")
+        print("⚠️  Warning: 'clip' attribute not found in model, unable to set to eval mode.")
 
     # --------------------------------------------------------------------------
-    # 第4步（已修改）：根据加载情况、模块名称和初始状态智能地设置梯度
+    # 4. Smartly set gradient status based on loading status, module name, and initial state
     # --------------------------------------------------------------------------
-    print("正在智能地设置参数的梯度计算状态...")
+    print("Smartly setting gradient status for parameters...")
     trainable_params = 0
     frozen_params = 0
 
     for name, param in model.named_parameters():
-        # 检查参数是否在初始时就已冻结
+        # Check if the parameter was initially frozen
         is_initially_frozen = name in initially_frozen_keys
-        # 检查参数是否属于CLIP模块
+        # Check if the parameter belongs to the CLIP module
         is_clip_param = name.startswith('clip.')
-        # 检查参数是否从checkpoint加载
+        # Check if the parameter was loaded from the checkpoint
         is_loaded_from_ckpt = name in loadable_keys
 
-        # 智能逻辑：检查偏置对应的权重是否也被加载了
+        # Smart logic: check if bias's corresponding weight was also loaded
         if name.endswith('.bias') and not is_clip_param and not is_initially_frozen:
             weight_name = name.replace('.bias', '.weight')
             if weight_name not in loadable_keys:
                 is_loaded_from_ckpt = False
-                print(f"ℹ️  注意: 偏置 '{name}' 将保持可训练，因为其对应的权重 '{weight_name}' 未被加载。")
+                print(f"ℹ️  Note: Bias '{name}' will remain trainable as its corresponding weight '{weight_name}' was not loaded.")
 
-        # 最终冻结决策：只要是初始冻结、CLIP参数或从checkpoint加载的参数，就冻结
+        # Final freezing decision: freeze if initially frozen, CLIP param, or loaded from checkpoint
         if is_initially_frozen or is_clip_param or is_loaded_from_ckpt:
             param.requires_grad = False
             frozen_params += 1
@@ -162,22 +164,22 @@ def load_pretrained_weights(model, ckpt_path):
             param.requires_grad = True
             trainable_params += 1
 
-    print(f"策略执行完毕：{frozen_params} 个参数被冻结，{trainable_params} 个参数保持可训练。")
+    print(f"Strategy executed: {frozen_params} parameters frozen, {trainable_params} parameters remain trainable.")
 
     # --------------------------------------------------------------------------
-    # 第5步：最终验证 (已修改)
+    # 5. Final verification (modified)
     # --------------------------------------------------------------------------
-    print("\n--- 最终模型梯度状态验证 ---")
+    print("\n--- Final model gradient status verification ---")
     for name, param in model.named_parameters():
-        status = "🧊 [已冻结]" if not param.requires_grad else "✅ [可训练]"
+        status = "🧊 [Frozen]" if not param.requires_grad else "✅ [Trainable]"
         reason = ""
         if not param.requires_grad:
             if name in initially_frozen_keys:
-                reason = "(原因: 初始状态为冻结)"
+                reason = "(Reason: Initially Frozen)"
             elif name.startswith('clip.'):
-                reason = "(原因: CLIP模块)"
+                reason = "(Reason: CLIP Module)"
             elif name in loadable_keys:
-                reason = "(原因: 从ckpt加载)"
+                reason = "(Reason: Loaded from ckpt)"
         print(f"{status} {name} {reason}")
     print("---------------------------------")
 
@@ -187,23 +189,23 @@ def load_pretrained_weights(model, ckpt_path):
 def load_pretrained_weights_DP_T(model, ckpt_path):
 
     # --------------------------------------------------------------------------
-    # ✨ 新增步骤：记录初始冻结状态
+    # ✨ 0. record initially frozen parameters
     # --------------------------------------------------------------------------
     initially_frozen_keys = {name for name, param in model.named_parameters() if not param.requires_grad}
     if initially_frozen_keys:
-        print(f"检测到 {len(initially_frozen_keys)} 个参数在函数调用前已被设置为冻结状态。这些参数将保持冻结。")
+        print(f"Detected {len(initially_frozen_keys)} parameters were set to frozen state before function call. These parameters will remain frozen.")
         # for name in initially_frozen_keys:
         #     print(f"  - 初始冻结: {name}")
 
     if not ckpt_path:
-        print("未提供权重路径，跳过权重加载过程。")
-        # 即使不加载权重，我们仍然需要冻结CLIP和保持初始冻结状态
+        print("No checkpoint path provided, skipping weight loading.")
+        # Even if not loading weights, we still need to freeze CLIP and maintain initial frozen state
         if hasattr(model, 'clip'):
-            print("正在冻结 CLIP 模块并设置为评估模式...")
+            print("Freezing CLIP module and setting to eval mode...")
             model.clip.eval()
             for name, param in model.clip.named_parameters():
                 param.requires_grad = False
-                print(f"🧊 [强制冻结] {name}")
+                print(f"🧊 [Force Freeze] {name}")
         return model
 
     manully_unfrozen_keys = [
@@ -216,63 +218,63 @@ def load_pretrained_weights_DP_T(model, ckpt_path):
         "model.encoder.2.bias",
     ]
     # --------------------------------------------------------------------------
-    # 第1步：识别出可以安全加载的权重 (逻辑不变)
+    # Step 1: Identify loadable weights
     # --------------------------------------------------------------------------
-    print(f"正在从 '{ckpt_path}' 加载权重...")
+    print(f"Loading weights from '{ckpt_path}'...")
     pretrained_dict = torch.load(ckpt_path, map_location='cpu')['state_dict']
 
     new_model_dict = model.state_dict()
     loadable_keys = set()
     filtered_dict = {}
 
-    print("正在筛选兼容的权重...")
+    print("Filtering compatible weights...")
     for k, v in pretrained_dict.items():
         if k in new_model_dict and new_model_dict[k].shape == v.shape:
             filtered_dict[k] = v
             loadable_keys.add(k)
-    print(f"识别出 {len(loadable_keys)} 个参数可以从 checkpoint 安全加载。")
+    print(f"Identified {len(loadable_keys)} parameters that can be safely loaded from checkpoint.")
 
     # --------------------------------------------------------------------------
-    # 第2步：加载筛选后的权重 (逻辑不变)
+    # Step 2: Load filtered weights
     # --------------------------------------------------------------------------
     new_model_dict.update(filtered_dict)
     model.load_state_dict(new_model_dict)
-    print("已成功加载所有兼容的权重。")
+    print("Successfully loaded all compatible weights.")
 
     # --------------------------------------------------------------------------
-    # 第3步：强制设置 CLIP 模块为评估模式 (逻辑不变)
+    # Step 3: Force-set CLIP module to eval mode
     # --------------------------------------------------------------------------
     if hasattr(model, 'clip'):
-        print("正在将 CLIP 模块设置为评估模式 (model.clip.eval())...")
+        print("Freezing CLIP module and setting to eval mode...")
         model.clip.eval()
     else:
-        print("⚠️  警告: 模型中未找到名为 'clip' 的属性，无法设置为评估模式。")
+        print("⚠️  Warning: 'clip' attribute not found in model, unable to set to eval mode.")
 
     # --------------------------------------------------------------------------
-    # 第4步（已修改）：根据加载情况、模块名称和初始状态智能地设置梯度
+    # Step 4 (Modified): Smartly set gradient status based on loading, module name, and initial state
     # --------------------------------------------------------------------------
-    print("正在智能地设置参数的梯度计算状态...")
+    print("Smartly setting parameter gradient status...")
     trainable_params = 0
     frozen_params = 0
 
     for name, param in model.named_parameters():
-        # 检查参数是否在初始时就已冻结
+        # Check if the parameter was initially frozen
         is_initially_frozen = name in initially_frozen_keys
-        # 检查参数是否属于CLIP模块
+        # Check if the parameter belongs to the CLIP module
         is_clip_param = name.startswith('clip.')
-        # 检查参数是否从checkpoint加载
+        # Check if the parameter was loaded from checkpoint
         is_loaded_from_ckpt = name in loadable_keys
 
         is_manully_unfrozen = name in manully_unfrozen_keys
 
-        # 智能逻辑：检查偏置对应的权重是否也被加载了
+        # Smart logic: Check if the bias's corresponding weight was also loaded
         if name.endswith('.bias') and not is_clip_param and not is_initially_frozen:
             weight_name = name.replace('.bias', '.weight')
             if weight_name not in loadable_keys:
                 is_loaded_from_ckpt = False
-                print(f"ℹ️  注意: 偏置 '{name}' 将保持可训练，因为其对应的权重 '{weight_name}' 未被加载。")
+                print(f"ℹ️  Note: Bias '{name}' will remain trainable as its corresponding weight '{weight_name}' was not loaded.")
 
-        # 最终冻结决策：只要是初始冻结、CLIP参数或从checkpoint加载的参数，就冻结
+        # Final freeze decision: Freeze if initially frozen, CLIP param, or loaded from checkpoint
         if (is_initially_frozen or is_clip_param or is_loaded_from_ckpt) and not is_manully_unfrozen:
             param.requires_grad = False
             frozen_params += 1
@@ -281,24 +283,24 @@ def load_pretrained_weights_DP_T(model, ckpt_path):
             trainable_params += 1
 
     # --------------------------------------------------------------------------
-    # 第6步： 可耻的的手动修正
+    # Step 6: Shameful manual overrides
     # --------------------------------------------------------------------------
 
-    print(f"策略执行完毕：{frozen_params} 个参数被冻结，{trainable_params} 个参数保持可训练。")
+    print(f"Strategy execution complete: {frozen_params} parameters frozen, {trainable_params} parameters remain trainable.")
     # --------------------------------------------------------------------------
-    # 第7步：最终验证
+    # Step 7: Final validation
     # --------------------------------------------------------------------------
-    print("\n--- 最终模型梯度状态验证 ---")
+    print("\n--- Final model gradient status validation ---")
     for name, param in model.named_parameters():
-        status = "🧊 [已冻结]" if not param.requires_grad else "✅ [可训练]"
+        status = "🧊 [Frozen]" if not param.requires_grad else "✅ [Trainable]"
         reason = ""
         if not param.requires_grad:
             if name in initially_frozen_keys:
-                reason = "(原因: 初始状态为冻结)"
+                reason = "(Reason: Initially Frozen)"
             elif name.startswith('clip.'):
-                reason = "(原因: CLIP模块)"
+                reason = "(Reason: CLIP Module)"
             elif name in loadable_keys:
-                reason = "(原因: 从ckpt加载)"
+                reason = "(Reason: Loaded from ckpt)"
         print(f"{status} {name} {reason}")
     print("---------------------------------")
 
@@ -730,7 +732,6 @@ def train(cfg: AppConfig):
                          ]
         callback_list.extend(rollout_callback_list)
     else:
-
         raise ValueError(f"Unsupported task type: {cfg.train_mode}, check config.name")
 
     trainer = pl.Trainer(callbacks=callback_list,

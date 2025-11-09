@@ -762,7 +762,7 @@ def train(cfg: AppConfig):
 @hydra.main(
     version_base=None,
     config_path=str(pathlib.Path(__file__).parent.joinpath(
-        'equi_diffpo', 'config'))
+        'jiandecouple', 'config'))
 )
 def main(cfg: OmegaConf):
     # resolve immediately so all the ${now:} resolvers

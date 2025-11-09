@@ -190,7 +190,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         normalizer = LinearNormalizer()
 
         # action
-        with open("equi_diffpo/constant/normalizer_Action_ABCDEFGH.pkl", "rb") as f:
+        with open("jiandecouple/constant/normalizer_Action_ABCDEFGH.pkl", "rb") as f:
             this_normalizer = pickle.load(f)
             print("Using precomputed normalizer for actions.")
 
@@ -201,7 +201,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
             stat = array_to_stats(self.replay_buffer[key])
 
             if key.endswith('pos') and not key.endswith('qpos'):
-                with open("equi_diffpo/constant/normalizer_Pos_ABCDEFGH.pkl", "rb") as f:
+                with open("jiandecouple/constant/normalizer_Pos_ABCDEFGH.pkl", "rb") as f:
                     this_normalizer = pickle.load(f)
                     print("Using precomputed normalizer for positions.")
             elif key.endswith('quat'):

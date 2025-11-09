@@ -18,7 +18,7 @@ from jiandecouple.model.common.rotation_transformer import RotationTransformer
 from jiandecouple.policy.base_image_policy import BaseImagePolicy
 from jiandecouple.common.pytorch_util import dict_apply
 from jiandecouple.env_runner.base_image_runner import BaseImageRunner
-from jiandecouple.env.robomimic.robomimic_image_wrapper_tmp import RobomimicImageWrapper
+from jiandecouple.env.robomimic.robomimic_image_wrapper_states import RobomimicImageWrapper
 import robomimic.utils.file_utils as FileUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.obs_utils as ObsUtils

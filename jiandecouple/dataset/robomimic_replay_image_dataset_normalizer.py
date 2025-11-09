@@ -167,7 +167,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
         normalizer = LinearNormalizer()
 
         # action
-        with open("equi_diffpo/constant/ABCDEFGHIJKL_normalizer.pkl", "rb") as f:
+        with open("jiandecouple/constant/ABCDEFGHIJKL_normalizer.pkl", "rb") as f:
             this_normalizer = pickle.load(f)
             print("Using precomputed normalizer for actions.")
 
@@ -183,7 +183,7 @@ class RobomimicReplayImageDataset(BaseImageDataset):
                 # quaternion is in [-1,1] already
                 this_normalizer = get_identity_normalizer_from_stat(stat)
             elif key.endswith('qpos'):
-                with open("/media/jian/ssd4t/DP/first/equi_diffpo/constant/ABCDEFGHIJKL_pos_normalizer.pkl", "rb") as f:
+                with open("/media/jian/ssd4t/DP/first/jiandecouple/constant/ABCDEFGHIJKL_pos_normalizer.pkl", "rb") as f:
                     this_normalizer = pickle.load(f)
             elif key.endswith('JPOpen'):
                 this_normalizer = get_range_normalizer_from_stat(stat)

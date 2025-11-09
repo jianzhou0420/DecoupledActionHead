@@ -6,40 +6,40 @@ import collections
 import pathlib
 import tqdm
 import h5py
-import dill
 import math
+import dill
 import wandb.sdk.data_types.video as wv
-from jiandecouple.gym_util.async_vector_env import AsyncVectorEnv
-# from jiandecouple.gym_util.sync_vector_env import SyncVectorEnv
-from jiandecouple.gym_util.multistep_wrapper import MultiStepWrapper
-from jiandecouple.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
-from jiandecouple.model.common.rotation_transformer import RotationTransformer
+from equi_diffpo.gym_util.async_vector_env import AsyncVectorEnv
+from equi_diffpo.gym_util.sync_vector_env import SyncVectorEnv
+from equi_diffpo.gym_util.multistep_wrapper import MultiStepWrapper
+from equi_diffpo.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
+from equi_diffpo.model.common.rotation_transformer import RotationTransformer
 
-from jiandecouple.policy.base_lowdim_policy import BaseLowdimPolicy
-from jiandecouple.common.pytorch_util import dict_apply
-from jiandecouple.env_runner.base_lowdim_runner import BaseLowdimRunner
-from jiandecouple.env.robomimic.robomimic_lowdim_wrapper import RobomimicLowdimWrapper
+from equi_diffpo.policy.base_image_policy import BaseImagePolicy
+from equi_diffpo.common.pytorch_util import dict_apply
+from equi_diffpo.env_runner.base_image_runner import BaseImageRunner
+from equi_diffpo.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
 import robomimic.utils.file_utils as FileUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.obs_utils as ObsUtils
 
 
-def create_env(env_meta, obs_keys, enable_render=True):
-    ObsUtils.initialize_obs_modality_mapping_from_dict(
-        {'low_dim': obs_keys})
+def create_env(env_meta, shape_meta, enable_render=True):
+    modality_mapping = collections.defaultdict(list)
+    for key, attr in shape_meta['obs'].items():
+        modality_mapping[attr.get('type', 'low_dim')].append(key)
+    ObsUtils.initialize_obs_modality_mapping_from_dict(modality_mapping)
+
     env = EnvUtils.create_env_from_metadata(
         env_meta=env_meta,
         render=False,
-        # only way to not show collision geometry
-        # is to enable render_offscreen
-        # which uses a lot of RAM.
         render_offscreen=enable_render,
         use_image_obs=enable_render,
     )
     return env
 
 
-class RobomimicLowdimRunner(BaseLowdimRunner):
+class RobomimicImageRunner(BaseImageRunner):
     """
     Robomimic envs already enforces number of steps.
     """
@@ -47,7 +47,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
     def __init__(self,
                  output_dir,
                  dataset_path,
-                 obs_keys,
+                 shape_meta: dict,
                  n_train=10,
                  n_train_vis=3,
                  train_start_idx=0,
@@ -57,9 +57,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
                  max_steps=400,
                  n_obs_steps=2,
                  n_action_steps=8,
-                 n_latency_steps=0,
-                 render_hw=(256, 256),
-                 render_camera_name='agentview',
+                 render_obs_key='agentview_image',
                  fps=10,
                  crf=22,
                  past_action=False,
@@ -67,34 +65,10 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
                  tqdm_interval_sec=5.0,
                  n_envs=None
                  ):
-        """
-        Assuming:
-        n_obs_steps=2
-        n_latency_steps=3
-        n_action_steps=4
-        o: obs
-        i: inference
-        a: action
-        Batch t:
-        |o|o| | | | | | |
-        | |i|i|i| | | | |
-        | | | | |a|a|a|a|
-        Batch t+1
-        | | | | |o|o| | | | | | |
-        | | | | | |i|i|i| | | | |
-        | | | | | | | | |a|a|a|a|
-        """
-
         super().__init__(output_dir)
 
         if n_envs is None:
             n_envs = n_train + n_test
-
-        # handle latency step
-        # to mimic latency, we request n_latency_steps additional steps
-        # of past observations, and the discard the last n_latency_steps
-        env_n_obs_steps = n_obs_steps + n_latency_steps
-        env_n_action_steps = n_action_steps
 
         # assert n_obs_steps <= n_action_steps
         dataset_path = os.path.expanduser(dataset_path)
@@ -104,6 +78,9 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
         # read from dataset
         env_meta = FileUtils.get_env_metadata_from_dataset(
             dataset_path)
+        # disable object state observation
+        env_meta['env_kwargs']['use_object_obs'] = False
+
         rotation_transformer = None
         if abs_action:
             env_meta['env_kwargs']['controller_configs']['control_delta'] = False
@@ -112,7 +89,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
         def env_fn():
             robomimic_env = create_env(
                 env_meta=env_meta,
-                obs_keys=obs_keys
+                shape_meta=shape_meta
             )
             # Robosuite's hard reset causes excessive memory consumption.
             # Disabled to run more envs.
@@ -120,12 +97,11 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
             robomimic_env.env.hard_reset = False
             return MultiStepWrapper(
                 VideoRecordingWrapper(
-                    RobomimicLowdimWrapper(
+                    RobomimicImageWrapper(
                         env=robomimic_env,
-                        obs_keys=obs_keys,
+                        shape_meta=shape_meta,
                         init_state=None,
-                        render_hw=render_hw,
-                        render_camera_name=render_camera_name
+                        render_obs_key=render_obs_key
                     ),
                     video_recoder=VideoRecorder.create_h264(
                         fps=fps,
@@ -150,17 +126,16 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
         def dummy_env_fn():
             robomimic_env = create_env(
                 env_meta=env_meta,
-                obs_keys=obs_keys,
+                shape_meta=shape_meta,
                 enable_render=False
             )
             return MultiStepWrapper(
                 VideoRecordingWrapper(
-                    RobomimicLowdimWrapper(
+                    RobomimicImageWrapper(
                         env=robomimic_env,
-                        obs_keys=obs_keys,
+                        shape_meta=shape_meta,
                         init_state=None,
-                        render_hw=render_hw,
-                        render_camera_name=render_camera_name
+                        render_obs_key=render_obs_key
                     ),
                     video_recoder=VideoRecorder.create_h264(
                         fps=fps,
@@ -205,7 +180,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
                         env.env.file_path = filename
 
                     # switch to init_state reset
-                    assert isinstance(env.env.env, RobomimicLowdimWrapper)
+                    assert isinstance(env.env.env, RobomimicImageWrapper)
                     env.env.env.init_state = init_state
 
                 env_seeds.append(train_idx)
@@ -232,7 +207,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
                     env.env.file_path = filename
 
                 # switch to seed reset
-                assert isinstance(env.env.env, RobomimicLowdimWrapper)
+                assert isinstance(env.env.env, RobomimicImageWrapper)
                 env.env.env.init_state = None
                 env.seed(seed)
 
@@ -241,7 +216,6 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
             env_init_fn_dills.append(dill.dumps(init_fn))
 
         env = AsyncVectorEnv(env_fns, dummy_env_fn=dummy_env_fn)
-        # env = SyncVectorEnv(env_fns)
 
         self.env_meta = env_meta
         self.env = env
@@ -253,16 +227,16 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
         self.crf = crf
         self.n_obs_steps = n_obs_steps
         self.n_action_steps = n_action_steps
-        self.n_latency_steps = n_latency_steps
-        self.env_n_obs_steps = env_n_obs_steps
-        self.env_n_action_steps = env_n_action_steps
         self.past_action = past_action
         self.max_steps = max_steps
         self.rotation_transformer = rotation_transformer
         self.abs_action = abs_action
         self.tqdm_interval_sec = tqdm_interval_sec
+        self.max_rewards = {}
+        for prefix in self.env_prefixs:
+            self.max_rewards[prefix] = 0
 
-    def run(self, policy: BaseLowdimPolicy):
+    def run(self, policy: BaseImagePolicy):
         device = policy.device
         dtype = policy.dtype
         env = self.env
@@ -299,16 +273,13 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
             policy.reset()
 
             env_name = self.env_meta['env_name']
-            pbar = tqdm.tqdm(total=self.max_steps, desc=f"Eval {env_name}Lowdim {chunk_idx+1}/{n_chunks}",
+            pbar = tqdm.tqdm(total=self.max_steps, desc=f"Eval {env_name}Image {chunk_idx+1}/{n_chunks}",
                              leave=False, mininterval=self.tqdm_interval_sec)
 
             done = False
             while not done:
                 # create obs dict
-                np_obs_dict = {
-                    # handle n_latency_steps by discarding the last n_latency_steps
-                    'obs': obs[:, :self.n_obs_steps].astype(np.float32)
-                }
+                np_obs_dict = dict(obs)
                 if self.past_action and (past_action is not None):
                     # TODO: not tested
                     np_obs_dict['past_action'] = past_action[
@@ -327,9 +298,7 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
                 np_action_dict = dict_apply(action_dict,
                                             lambda x: x.detach().to('cpu').numpy())
 
-                # handle latency_steps, we discard the first n_latency_steps actions
-                # to simulate latency
-                action = np_action_dict['action'][:, self.n_latency_steps:]
+                action = np_action_dict['action']
                 if not np.all(np.isfinite(action)):
                     print(action)
                     raise RuntimeError("Nan or Inf action")
@@ -350,6 +319,8 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
             # collect data for this round
             all_video_paths[this_global_slice] = env.render()[this_local_slice]
             all_rewards[this_global_slice] = env.call('get_attr', 'reward')[this_local_slice]
+        # clear out video buffer
+        _ = env.reset()
 
         # log
         max_rewards = collections.defaultdict(list)
@@ -380,6 +351,8 @@ class RobomimicLowdimRunner(BaseLowdimRunner):
             name = prefix + 'mean_score'
             value = np.mean(value)
             log_data[name] = value
+            self.max_rewards[prefix] = max(self.max_rewards[prefix], value)
+            log_data[prefix + 'max_score'] = self.max_rewards[prefix]
 
         return log_data
 

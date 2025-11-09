@@ -22,7 +22,7 @@ shape_meta_env: &shape_meta_env # acceptable types: rgb, low_dim
 abs_action: &abs_action True
 
 env_runner:
-  _target_: equi_diffpo.env_runner.robomimic_image_runner_tmp.RobomimicImageRunner
+  _target_: jiandecouple.env_runner.robomimic_image_runner_states.RobomimicImageRunner
   dataset_path: null
   shape_meta: *shape_meta_env
   n_train: 6

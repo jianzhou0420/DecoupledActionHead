@@ -15,7 +15,7 @@ ShapeDict = Dict[str, Dict[str, Any]]
 
 @dataclass
 class EnvRunnerConfig:
-    _target_: str = "equi_diffpo.env_runner.robomimic_image_runner.RobomimicImageRunner"
+    _target_: str = "jiandecouple.env_runner.robomimic_image_runner.RobomimicImageRunner"
     dataset_path: str = "???"  # To be defined by interpolation
     shape_meta: ShapeDict = field(default_factory=dict)
     n_train: int = 6
@@ -79,7 +79,7 @@ class NoiseSchedulerConfig:
 
 @dataclass
 class PolicyConfig:
-    _target_: str = "equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy"
+    _target_: str = "jiandecouple.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy"
     shape_meta: ShapeDict = field(default_factory=dict)
     noise_scheduler: NoiseSchedulerConfig = field(default_factory=NoiseSchedulerConfig)
     horizon: Any = "???"  # Interpolated
@@ -100,7 +100,7 @@ class PolicyConfig:
 
 @dataclass
 class EMAConfig:
-    _target_: str = "equi_diffpo.model.diffusion.ema_model.EMAModel"
+    _target_: str = "jiandecouple.model.diffusion.ema_model.EMAModel"
     update_after_step: int = 0
     inv_gamma: float = 1.0
     power: float = 0.75
@@ -213,7 +213,7 @@ class AppConfig(DictConfig):
 
     # Primary Configs
     name: str = "diff_c"
-    _target_: str = "equi_diffpo.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace"
+    _target_: str = "jiandecouple.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace"
     shape_meta: ShapeDict = field(default_factory=dict)
     exp_name: str = "default"
     task_name: str = "stack_d1"
@@ -225,7 +225,7 @@ class AppConfig(DictConfig):
     dataset_obs_steps: int = "${n_obs_steps}"
     past_action_visible: bool = False
     obs_as_global_cond: bool = True
-    dataset: str = "equi_diffpo.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset"
+    dataset: str = "jiandecouple.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset"
     dataset_path: str = "data/robomimic/datasets/${task_name}/${task_name}_abs.hdf5"
 
     # Nested Sections

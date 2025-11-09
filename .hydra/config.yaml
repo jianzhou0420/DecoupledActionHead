@@ -9,14 +9,14 @@ n_action_steps: 16
 n_latency_steps: -15
 dataset_obs_steps: ${n_obs_steps}
 obs_as_global_cond: true
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+dataset: jiandecouple.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
 dataset_path: null
 n_demo: 1000
 ckpt_path: ""
 run_name: ""
 run_dir: ""
 policy:
-  _target_: equi_diffpo.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
+  _target_: jiandecouple.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
   shape_meta: ${shape_meta}
   noise_scheduler:
     _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
@@ -47,7 +47,7 @@ policy:
   eval_fixed_crop: true
   rot_aug: false
 ema:
-  _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
+  _target_: jiandecouple.model.diffusion.ema_model.EMAModel
   update_after_step: 0
   inv_gamma: 1.0
   power: 0.75
@@ -109,7 +109,7 @@ task:
         - 10
   abs_action: true
   env_runner:
-    _target_: equi_diffpo.env_runner.robomimic_image_runner.RobomimicImageRunner
+    _target_: jiandecouple.env_runner.robomimic_image_runner.RobomimicImageRunner
     dataset_path: null
     shape_meta:
       obs:

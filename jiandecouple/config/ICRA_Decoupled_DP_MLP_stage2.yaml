@@ -19,7 +19,7 @@ dataset_obs_steps: ${n_obs_steps}
 
 past_action_visible: False
 obs_as_cond: True
-dataset: equi_diffpo.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
+dataset: jiandecouple.dataset.robomimic_replay_image_dataset_normalizer_multitask.RobomimicReplayImageDataset
 dataset_path: null
 n_demo: 200
 ckpt_path: null
@@ -28,7 +28,7 @@ run_name: null
 run_dir: null
 
 policy:
-  _target_: equi_diffpo.policy.ICRA_Decoupled_DP_MLP.DiffusionMLPHybridImagePolicy
+  _target_: jiandecouple.policy.ICRA_Decoupled_DP_MLP.DiffusionMLPHybridImagePolicy
 
   shape_meta: ${shape_meta}
 
@@ -66,7 +66,7 @@ policy:
   # predict_epsilon: True
 
 ema:
-  _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
+  _target_: jiandecouple.model.diffusion.ema_model.EMAModel
   update_after_step: 0
   inv_gamma: 1.0
   power: 0.75

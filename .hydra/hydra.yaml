@@ -145,7 +145,7 @@ hydra:
       - path: hydra.conf
         schema: pkg
         provider: hydra
-      - path: /media/jian/ssd4t/workspace_DP/first/equi_diffpo/config
+      - path: /media/jian/ssd4t/workspace_DP/first/jiandecouple/config
         schema: file
         provider: main
       - path: ""

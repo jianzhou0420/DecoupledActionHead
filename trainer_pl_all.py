@@ -195,7 +195,7 @@ def load_pretrained_weights_DP_T(model, ckpt_path):
     if initially_frozen_keys:
         print(f"Detected {len(initially_frozen_keys)} parameters were set to frozen state before function call. These parameters will remain frozen.")
         # for name in initially_frozen_keys:
-        #     print(f"  - 初始冻结: {name}")
+        #     print(f"  - initial frozen: {name}")
 
     if not ckpt_path:
         print("No checkpoint path provided, skipping weight loading.")
@@ -401,9 +401,9 @@ class Trainer_all(pl.LightningModule):
         # print("\n--- 最终模型梯度状态验证 ---")
         # for name, param in model.named_parameters():
         #     if param.requires_grad:
-        #         print(f"✅ [可训练] {name}")
+        #         print(f"✅ [Trainable] {name}")
         #     else:
-        #         print(f"🧊 [已冻结] {name}")
+        #         print(f"🧊 [Frozen] {name}")
         # print("---------------------------------")
 
         if self.train_sampling_batch is None:

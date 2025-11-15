@@ -40,5 +40,5 @@ python -c "import mimicgen; print(mimicgen.__file__)"
 cd ../..
 
 pip install -e .
-
+conda activate jiandecouple
 echo "--- ✅ All packages installed successfully! ---"

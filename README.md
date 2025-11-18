@@ -85,3 +85,21 @@ Our experimental setup builds upon [EquiDiff](https://github.com/pointW/equidiff
 
 **Datasets & Simulator**  
 Our dataset construction leverages [MimicGen](https://mimicgen.github.io/), as well as the underlying [robomimic](https://github.com/ARISE-Initiative/robomimic) and [robosuite](https://github.com/ARISE-Initiative/robosuite)
+
+
+
+## Cite
+We hope this paper inspires your thinking and sparks new ideas.
+```
+@misc{zhou2025decoupledactionheadconfining,
+  title         = {Decoupled Action Head: Confining Task Knowledge to Conditioning Layers},
+  author        = {Jian Zhou and Sihao Lin and Shuai Fu and Qi Wu},
+  year          = {2025},
+  eprint        = {2511.12101},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url           = {https://arxiv.org/abs/2511.12101}
+}
+```
+
+
